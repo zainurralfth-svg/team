@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'menu.dart'; // Pastikan file ini ada dan class-nya bernama MenuPage
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  // Variabel untuk buka-tutup password
+  bool _passwordVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,12 +70,12 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
 
-              // 4. Konten Form (tanpa teks di gambar)
+              // 4. Konten Form
               Padding(
                 padding: const EdgeInsets.only(top: 290), 
                 child: Column(
                   children: [
-                    // Tulisan REGISTER (hitam)
+                    // Tulisan REGISTER
                     const Text(
                       'REGISTER',
                       style: TextStyle(
@@ -77,7 +87,7 @@ class LoginPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     
-                    // Subtitle (hitam)
+                    // Subtitle
                     const Text(
                       'Register Untuk Membuat Akun',
                       style: TextStyle(
@@ -115,7 +125,7 @@ class LoginPage extends StatelessWidget {
                             
                             const SizedBox(height: 20),
                             
-                            // Tombol Register
+                            // Tombol Register / Login
                             SizedBox(
                               width: double.infinity,
                               height: 55,
@@ -127,7 +137,8 @@ class LoginPage extends StatelessWidget {
                                   shadowColor: Colors.black.withOpacity(0.3),
                                 ),
                                 onPressed: () {
-                                  Navigator.push(
+                                  // Langsung nyambung ke MenuPage
+                                  Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(builder: (context) => MenuPage()),
                                   );
@@ -177,7 +188,7 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  // Helper untuk Input Field
+  // Helper untuk Input Field (sudah diperbaiki untuk State password)
   Widget _buildInputField(String label, String hint, IconData icon, {bool isPassword = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
@@ -206,16 +217,28 @@ class LoginPage extends StatelessWidget {
               ],
             ),
             child: TextField(
-              obscureText: isPassword,
+              // Jika ini password, ikuti state _passwordVisible
+              obscureText: isPassword ? !_passwordVisible : false,
               decoration: InputDecoration(
                 prefixIcon: Icon(icon, color: const Color(0xFFC9792B), size: 20),
                 suffixIcon: isPassword 
-                  ? const Icon(Icons.visibility_off, color: Colors.grey, size: 20)
+                  ? GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      },
+                      child: Icon(
+                        _passwordVisible ? Icons.visibility : Icons.visibility_off, 
+                        color: Colors.grey, 
+                        size: 20,
+                      ),
+                    )
                   : null,
                 hintText: hint,
                 hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 14),
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
               ),
               style: const TextStyle(color: Colors.black, fontSize: 14),
             ),

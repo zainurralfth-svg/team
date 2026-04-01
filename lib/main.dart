@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'tampilanawal.dart';
+import 'masuk.dart';
 import 'login.dart';
 import 'menu.dart';
 import 'keranjang.dart';
@@ -17,8 +18,10 @@ class PuddingkuApp extends StatelessWidget {
       title: 'Puddingku Smart System',
       initialRoute: '/',
       routes: {
+        // Hilangkan kata kunci 'const' di sini agar tidak error
         '/': (context) => TampilanAwal(),
-        '/login': (context) => LoginPage(),
+        '/masuk': (context) => MasukPage(), 
+        '/login': (context) => LoginPage(), 
         '/menu': (context) => MenuPage(),
         '/keranjang': (context) => KeranjangPage(),
         '/konfirmasi': (context) => KonfirmasiPage(),

@@ -26,7 +26,7 @@ class TampilanAwal extends StatelessWidget {
             ),
           ),
 
-          // ===== ELEMEN DEKORATIF (GAMBAR 1-4) SESUAI GAMBAR PERTAMA =====
+          // ===== ELEMEN DEKORATIF (GAMBAR 1-4) =====
           
           // GAMBAR 1 - pojok kiri atas (agak besar)
           Positioned(
@@ -184,7 +184,8 @@ class TampilanAwal extends StatelessWidget {
                     // TOMBOL GET STARTED
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/login');
+                        // Mengarahkan ke halaman masuk (watermark)
+                        Navigator.pushNamed(context, '/masuk');
                       },
                       child: Container(
                         width: screenWidth * 0.75,
@@ -220,7 +221,7 @@ class TampilanAwal extends StatelessWidget {
             ),
           ),
         ],
-      ),
+      ), 
     );
   }
 }
