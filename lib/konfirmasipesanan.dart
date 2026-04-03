@@ -4,101 +4,57 @@ class KonfirmasiPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFE5B9), Color(0xFFD27F30)],
-          ),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                width: 440,
-                height: 956,
-                clipBehavior: Clip.antiAlias,
-                decoration: ShapeDecoration(
-                  color: const Color(0xFFFFE5B9),
-                  shape: RoundedRectangleBorder(side: BorderSide(width: 1)),
-                  shadows: [
-                    BoxShadow(
-                      color: Color(0x3F000000),
-                      blurRadius: 4,
-                      offset: Offset(0, 4),
-                      spreadRadius: 0,
-                    )
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    // Background decorative elements
-                    Positioned(
-                      left: 426.08,
-                      top: 646,
-                      child: Opacity(
-                        opacity: 0.30,
-                        child: Container(
-                          transform: Matrix4.identity()..translate(0.0, 0.0)..rotateZ(3.13),
-                          width: 414.02,
-                          height: 414.02,
+      // Warna dasar untuk seluruh halaman
+      backgroundColor: const Color(0xFFF2D7A6), // Background Krem/Beige
+      
+      // SafeArea berfungsi agar desain kita tidak tertabrak "poni" kamera HP atau status bar di atas layar
+      body: SafeArea(
+        // Column utama ini membagi layar menjadi 3 susunan dari atas ke bawah:
+        // 1. Header (Atas)
+        // 2. Isi Konten (Tengah - Bisa di scroll)
+        // 3. Bottom Nav Bar (Bawah)
+        child: Column(
+          children: [
+            // ==========================================
+            // 1. HEADER (APP BAR CUSTOM)
+            // ==========================================
+            // Kita tidak pakai AppBar bawaan Flutter, tapi bikin sendiri pakai Container
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              decoration: const BoxDecoration(
+                color: Color(0xFFD27F30), // Warna Oranye
+              ),
+              // Row digunakan untuk menyusun elemen menyamping (kiri ke kanan)
+              child: Row(
+                children: [
+                  // --- Tombol Kembali ---
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context), // Perintah untuk kembali ke halaman sebelumnya
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                           decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: NetworkImage("https://placehold.co/414x414"),
-                              fit: BoxFit.cover,
-                            ),
+                            border: Border.all(color: Colors.black, width: 1.5), // Garis pinggir hitam
+                            borderRadius: BorderRadius.circular(20),
                           ),
+                          child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
                         ),
-                      ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Kembali',
+                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        )
+                      ],
                     ),
-                    
-                    // Header
-                    Positioned(
-                      left: 0,
-                      top: 0,
-                      child: Container(
-                        width: 440,
-                        height: 80,
-                        decoration: BoxDecoration(color: const Color(0xFFD27F30)),
-                      ),
-                    ),
-                    
-                    // Tombol Kembali
-                    Positioned(
-                      left: 20,
-                      top: 25,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              '←',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    // Judul Konfirmasi Pesanan
-                    Positioned(
-                      left: 110,
-                      top: 30,
+                  ),
+                  
+                  // --- Judul Header ---
+                  // Expanded digunakan agar teks ini mengambil seluruh SISA ruang kosong di tengah
+                  // sehingga otomatis posisinya akan selalu berada di tengah layar.
+                  const Expanded(
+                    child: Center(
                       child: Text(
                         'Konfirmasi Pesanan',
                         style: TextStyle(
@@ -109,479 +65,316 @@ class KonfirmasiPage extends StatelessWidget {
                         ),
                       ),
                     ),
+                  ),
+                  // SizedBox kosong ini berfungsi sebagai "penyeimbang" berat tombol kembali di sisi kiri, 
+                  // supaya judul benar-benar berada di poros tengah.
+                  const SizedBox(width: 40), 
+                ],
+              ),
+            ),
+
+            // ==========================================
+            // 2. ISI KONTEN (BISA DI-SCROLL)
+            // ==========================================
+            // Expanded di sini SANGAT PENTING! 
+            // Dia menyuruh area scroll ini untuk mengisi seluruh ruang di antara Header dan Footer.
+            Expanded(
+              // SingleChildScrollView membuat konten di dalamnya bisa digeser (di-scroll) ke atas/bawah
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start, // Agar semua teks rata kiri
+                  children: [
                     
-                    // Ringkasan Pemesanan
-                    Positioned(
-                      left: 30,
-                      top: 100,
-                      child: Text(
-                        'Ringkasan Pemesanan',
-                        style: TextStyle(
-                          color: const Color(0xFF270C0C),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                    // --- BAGIAN A: RINGKASAN PEMESANAN ---
+                    Row(
+                      children: [
+                        const Icon(Icons.receipt_long, color: Color(0xFF270C0C)),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Ringkasan Pemesanan',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF270C0C)),
                         ),
-                      ),
+                      ],
                     ),
+                    const SizedBox(height: 10),
                     
-                    // Card Ringkasan
-                    Positioned(
-                      left: 30,
-                      top: 130,
-                      child: Container(
-                        width: 380,
-                        height: 180,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 5,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
+                    // Kotak Putih untuk Ringkasan
+                    Container(
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          // Memberi efek bayangan halus di bawah kotak
+                          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 3)),
+                        ],
                       ),
-                    ),
-                    
-                    // Item 1 dengan gambar burn.jpeg
-                    Positioned(
-                      left: 45,
-                      top: 145,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/burn.jpeg'),
-                            fit: BoxFit.cover,
+                      child: Column(
+                        children: [
+                          // Memanggil fungsi _buildItemRingkasan (didefinisikan di paling bawah)
+                          // untuk menampilkan produk tanpa harus menulis kode desainnya berulang kali.
+                          _buildItemRingkasan('Brownie Burnt Cheesecake', 'x2', 'Rp 36.000', 'assets/images/burn.jpeg'),
+                          const SizedBox(height: 15),
+                          _buildItemRingkasan('Death By Cokelat', 'x1', 'Rp 18.000', 'assets/images/death.jpeg'),
+                          
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            // Divider adalah widget bawaan Flutter untuk membuat garis lurus pemisah
+                            child: Divider(color: Colors.black, thickness: 1.5), 
                           ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 110,
-                      top: 145,
-                      child: Text(
-                        'Brownie Burnt Cheesecake',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 110,
-                      top: 165,
-                      child: Text(
-                        'x2',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 320,
-                      top: 155,
-                      child: Text(
-                        'Rp 36.000',
-                        style: TextStyle(
-                          color: const Color(0xFFD27F30),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    
-                    // Item 2 dengan gambar death.jpeg
-                    Positioned(
-                      left: 45,
-                      top: 200,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/death.jpeg'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 110,
-                      top: 210,
-                      child: Text(
-                        'Death By Cokelat',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 110,
-                      top: 230,
-                      child: Text(
-                        'x1',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 320,
-                      top: 220,
-                      child: Text(
-                        'Rp 18.000',
-                        style: TextStyle(
-                          color: const Color(0xFFD27F30),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    
-                    // Garis pembatas
-                    Positioned(
-                      left: 30,
-                      top: 270,
-                      child: Container(
-                        width: 380,
-                        height: 1,
-                        color: Colors.grey.withOpacity(0.3),
-                      ),
-                    ),
-                    
-                    // Total
-                    Positioned(
-                      left: 30,
-                      top: 280,
-                      child: Text(
-                        'Total',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 320,
-                      top: 280,
-                      child: Text(
-                        'Rp 54.000',
-                        style: TextStyle(
-                          color: const Color(0xFFD27F30),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    
-                    // Data Diri
-                    Positioned(
-                      left: 30,
-                      top: 330,
-                      child: Text(
-                        'Data Diri',
-                        style: TextStyle(
-                          color: const Color(0xFF270C0C),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    
-                    // Card Data Diri - NAMA LENGKAP
-                    Positioned(
-                      left: 30,
-                      top: 360,
-                      child: Container(
-                        width: 380,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 5,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    // Label NAMA LENGKAP
-                    Positioned(
-                      left: 45,
-                      top: 370,
-                      child: Text(
-                        'NAMA LENGKAP',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    
-                    // Isi Nama
-                    Positioned(
-                      left: 45,
-                      top: 390,
-                      child: Text(
-                        'Nama Kamu',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    
-                    // Card Data Diri - NO. TELP
-                    Positioned(
-                      left: 30,
-                      top: 430,
-                      child: Container(
-                        width: 380,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 5,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    // Label NO. TELP
-                    Positioned(
-                      left: 45,
-                      top: 440,
-                      child: Text(
-                        'NO. TELP',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    
-                    // Isi No Telp
-                    Positioned(
-                      left: 45,
-                      top: 460,
-                      child: Text(
-                        'No. Telp',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    
-                    // TULISAN "KIRIM" (menggantikan logo WA & Telegram)
-                    Positioned(
-                      left: 170,
-                      top: 520,
-                      child: Container(
-                        width: 100,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD27F30),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 5,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: GestureDetector(
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Data akan dikirim ke admin'),
-                                duration: Duration(seconds: 1),
-                              ),
-                            );
-                          },
-                          child: const Center(
-                            child: Text(
-                              'Kirim',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    // Catatan
-                    Positioned(
-                      left: 30,
-                      top: 600,
-                      child: Container(
-                        width: 380,
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFE1AD),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFFD27F30)),
-                        ),
-                        child: const Text(
-                          'Nb: Lakukan pembayaran di outlet',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                    
-                    // Tombol Checkout
-                    Positioned(
-                      left: 100,
-                      top: 670,
-                      child: GestureDetector(
-                        onTap: () {
-                          // Tampilkan dialog sukses
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Sukses!'),
-                              content: const Text('Pesanan Anda telah dikonfirmasi. Terima kasih!'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context); // Tutup dialog
-                                    Navigator.pushReplacementNamed(context, '/menu'); // Kembali ke menu
-                                  },
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: 240,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF1C574),
-                            borderRadius: BorderRadius.circular(25),
-                            border: Border.all(color: const Color(0xFF270C0C)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 5,
-                                offset: Offset(0, 2),
-                              ),
+                          
+                          // Total Harga
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween, // Merenggangkan teks ke ujung kiri dan ujung kanan
+                            children: [
+                              const Text('Total', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black)),
+                              const Text('Rp 54.000', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFD27F30))),
                             ],
                           ),
-                          child: const Center(
-                            child: Text(
-                              'Checkout Sekarang',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 25), // Jarak antar sesi
+
+                    // --- BAGIAN B: DATA DIRI ---
+                    Row(
+                      children: [
+                        const Icon(Icons.person, color: Color(0xFFD27F30)),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Data Diri',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF270C0C)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Kotak Putih Besar untuk Form Data Diri
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 3)),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Input Nama Lengkap
+                          const Text('NAMA LENGKAP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87)),
+                          const SizedBox(height: 5),
+                          // Memanggil fungsi _buildTextField untuk membuat kolom isian
+                          _buildTextField('Nama Kamu', Icons.person, const Color(0xFFFF9800)),
+                          
+                          const SizedBox(height: 15),
+                          
+                          // Input No Telp
+                          const Text('NO. TELP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87)),
+                          const SizedBox(height: 5),
+                          _buildTextField('No. Telp', Icons.phone_in_talk_outlined, Colors.black),
+                          
+                          const SizedBox(height: 30),
+
+                          // --- Tombol Checkout Sekarang ---
+                          Center(
+                            // ElevatedButton.icon memungkinkan kita bikin tombol yang ada logo + teks di dalamnya sekaligus
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFF1C574), // Kuning krem
+                                foregroundColor: Colors.black, // Warna teks tombol
+                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: const BorderSide(color: Colors.black, width: 0.5), // Garis pinggir hitam tipis
+                                ),
+                              ),
+                              icon: const Icon(Icons.shopping_bag, color: Color(0xFFFF7043), size: 20),
+                              label: const Text('Checkout Sekarang', style: TextStyle(fontWeight: FontWeight.bold)),
+                              onPressed: () {
+                                // showDialog digunakan untuk memunculkan pop-up pemberitahuan
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Sukses!'),
+                                    content: const Text('Pesanan Anda telah dikonfirmasi.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context); // Menutup pop-up dialog
+                                          Navigator.pushReplacementNamed(context, '/menu'); // Pergi ke menu utama
+                                        },
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 15),
+
+                          // --- Tombol Kirim ---
+                          Center(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFF1C574), 
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: const BorderSide(color: Colors.black, width: 0.5),
+                                ),
+                              ),
+                              onPressed: () {
+                                // SnackBar untuk memunculkan notifikasi kecil di bawah layar
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Data akan dikirim ke admin'), duration: Duration(seconds: 1)),
+                                );
+                              },
+                              child: const Text('Kirim', style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 20),
+
+                          // --- Label Note (Nb) ---
+                          Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF4E0),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: const Color(0xFFD27F30)),
+                              ),
+                              child: const Text(
+                                'Nb: Lakukan pembayaran di outlet',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                    
-                    // Bottom Navigation
-                    Positioned(
-                      left: 0,
-                      top: 860,
-                      child: Container(
-                        width: 440,
-                        height: 80,
-                        decoration: BoxDecoration(color: const Color(0xFFD27F30)),
-                      ),
-                    ),
-                    
-                    // Tombol Pesanan
-                    Positioned(
-                      left: 120,
-                      top: 880,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Column(
-                          children: [
-                            const Icon(Icons.shopping_bag, color: Colors.white, size: 28),
-                            const SizedBox(height: 5),
-                            Text(
-                              'Pesanan',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    // Tombol Produk
-                    Positioned(
-                      left: 270,
-                      top: 880,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacementNamed(context, '/menu');
-                        },
-                        child: Column(
-                          children: [
-                            const Icon(Icons.menu, color: Colors.white, size: 28),
-                            const SizedBox(height: 5),
-                            Text(
-                              'Produk',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
+            ),
+
+            // ==========================================
+            // 3. BOTTOM NAVIGATION BAR (FOOTER)
+            // ==========================================
+            // Footer ini berada di luar Expanded, artinya dia akan selalu menempel mati di bawah layar (Sticky Bottom)
+            Container(
+              height: 70,
+              decoration: const BoxDecoration(
+                color: Color(0xFFD27F30),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround, // Menyebarkan icon secara merata
+                children: [
+                  // Icon Pesanan
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.shopping_bag, color: Colors.white),
+                        Text('Pesanan', style: TextStyle(color: Colors.white, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                  // Icon Produk
+                  GestureDetector(
+                    onTap: () => Navigator.pushReplacementNamed(context, '/menu'),
+                    child: const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.menu, color: Colors.white),
+                        Text('Produk', style: TextStyle(color: Colors.white, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // WIDGET HELPER 1: Baris Produk di Ringkasan
+  // ==========================================
+  // Dengan membuat fungsi ini, kalau kita punya 10 produk di keranjang, 
+  // kita cukup memanggil fungsi ini 10 kali, tanpa harus mengulang kode Row berulang-ulang.
+  Widget _buildItemRingkasan(String title, String qty, String price, String imagePath) {
+    return Row(
+      children: [
+        // Kotak Gambar Produk
+        Container(
+          width: 45,
+          height: 45,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            image: DecorationImage(
+              image: AssetImage(imagePath),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        const SizedBox(width: 15),
+        
+        // Nama Produk & Jumlah (Pakai Expanded agar tulisan memanjang ke kanan dan mendorong Harga ke ujung)
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black)),
+              Text(qty, style: const TextStyle(color: Colors.grey, fontSize: 12)),
             ],
           ),
+        ),
+        
+        // Harga Produk
+        Text(price, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFD27F30))),
+      ],
+    );
+  }
+
+  // ==========================================
+  // WIDGET HELPER 2: Kotak Input Data Diri
+  // ==========================================
+  // Digunakan untuk merancang desain TextField (kolom ketik) agar seragam.
+  Widget _buildTextField(String hint, IconData icon, Color iconColor) {
+    return TextField(
+      decoration: InputDecoration(
+        hintText: hint, // Teks bayangan (contoh: "Nama Kamu")
+        hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+        prefixIcon: Icon(icon, color: iconColor, size: 22), // Ikon di dalam kotak ketik
+        fillColor: const Color(0xFFFEF6E8), // Warna latar belakang isian (krem sangat pudar)
+        filled: true, // Mengaktifkan warna latar belakang
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        
+        // Desain batas (border) saat sedang tidak diklik
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Color(0xFFD27F30)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Color(0xFFD27F30)),
+        ),
+        
+        // Desain batas (border) saat kotak sedang diklik/diisi
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Color(0xFFD27F30), width: 1.5),
         ),
       ),
     );
