@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // MANTRA FIREBASE UNTUK LOGIN
 
-class MasukPage extends StatefulWidget {
+class MasukPage extends StatefulWidget { // Mendeklarasikan halaman ini agar bisa berubah tampilan/statenya (contoh: buka tutup mata password).
   const MasukPage({super.key});
 
   @override
-  State<MasukPage> createState() => _MasukPageState();
+  State<MasukPage> createState() => _MasukPageState(); // Menghubungkan tampilan antarmuka (UI) dengan logika State di bawahnya.
 }
 
 class _MasukPageState extends State<MasukPage> {
@@ -309,7 +309,7 @@ class _MasukPageState extends State<MasukPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start, // Meratakan judul/label inputan ke sisi kiri.
         children: [
           Text(label, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
