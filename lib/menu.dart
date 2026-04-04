@@ -74,7 +74,7 @@ class MenuPage extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(25),
                       child: Image.asset(
-                        'assets/images/ya.png', // ✅ PAKAI ya.png
+                        'assets/images/banner cookies.png', // ✅ PAKAI ya.png
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           print('Error loading banner: $error');
