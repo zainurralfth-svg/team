@@ -1,123 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // MANTRA FIREBASE UNTUK LOGIN
 
-class MasukPage extends StatefulWidget { // Mendeklarasikan halaman ini agar bisa berubah tampilan/statenya (contoh: buka tutup mata password).
+class MasukPage extends StatefulWidget {
   const MasukPage({super.key});
 
   @override
-  State<MasukPage> createState() => _MasukPageState(); // Menghubungkan tampilan antarmuka (UI) dengan logika State di bawahnya.
+  State<MasukPage> createState() => _MasukPageState();
 }
 
 class _MasukPageState extends State<MasukPage> {
-  final TextEditingController _emailController = TextEditingController(); // Diganti jadi Email
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _passwordVisible = false;
-  bool _isLoading = false; // Tambahan efek loading
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  // UBAH FUNGSI INI JADI ASYNC UNTUK CEK KE FIREBASE
-  Future<void> _handleLogin() async {
-    final email = _emailController.text.trim();
+  void _handleLogin() {
+    final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    // 1. Cek kosong
-    if (email.isEmpty || password.isEmpty) {
-      _tampilkanPesanError('Email dan password tidak boleh kosong!');
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height - 150,
+            left: 20,
+            right: 20,
+          ),
+          content: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD9534F),
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
+              ],
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white, size: 24),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Username dan password tidak boleh kosong!',
+                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
       return;
     }
-
-    // 2. Mulai Loading
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // 3. PROSES CEK KE FIREBASE
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      // 4. Kalau berhasil, matikan loading dan pindah halaman
-      setState(() {
-        _isLoading = false;
-      });
-
-      _emailController.clear();
-      _passwordController.clear();
-      
-      // Pindah ke menu utama
-      Navigator.pushReplacementNamed(context, '/menu');
-
-    } on FirebaseAuthException catch (e) {
-      // 5. TANGKAP ERROR (Misal: Password salah, atau email belum terdaftar)
-      setState(() {
-        _isLoading = false;
-      });
-      
-      String pesanError = 'Terjadi kesalahan login!';
-      if (e.code == 'user-not-found') {
-        pesanError = 'Email belum terdaftar!';
-      } else if (e.code == 'wrong-password') {
-        pesanError = 'Password salah!';
-      } else if (e.code == 'invalid-email') {
-        pesanError = 'Format email tidak valid!';
-      } else if (e.code == 'invalid-credential') {
-        pesanError = 'Email atau password salah!';
-      }
-
-      _tampilkanPesanError(pesanError);
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      _tampilkanPesanError('Gagal login: $e');
-    }
-  }
-
-  // Fungsi pembantu untuk nampilin error
-  void _tampilkanPesanError(String pesan) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height - 150,
-          left: 20,
-          right: 20,
-        ),
-        content: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFD9534F),
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
-            ],
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white, size: 24),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  pesan,
-                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-        ),
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    _usernameController.clear();
+    _passwordController.clear();
+    Navigator.pushReplacementNamed(context, '/menu');
   }
 
   @override
@@ -127,6 +73,9 @@ class _MasukPageState extends State<MasukPage> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
+          
+          // Agar Desktop penuh, kita buat lebar content mengikuti lebar layar tapi dengan padding yang pas
+          // Jika Desktop, ambil 80% layar. Jika Mobile, ambil 90%.
           double contentWidth = isDesktop ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9;
 
           return Stack(
@@ -135,14 +84,14 @@ class _MasukPageState extends State<MasukPage> {
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    // 1. HEADER GAMBAR
+                    // 1. HEADER GAMBAR (Dibuat Full Width di Desktop)
                     Stack(
                       children: [
                         ClipPath(
                           clipper: HeaderClipper(),
                           child: Container(
-                            width: double.infinity, 
-                            height: isDesktop ? 400 : 280, 
+                            width: double.infinity, // Paksa lebar penuh layar
+                            height: isDesktop ? 400 : 280, // Desktop lebih tinggi
                             decoration: const BoxDecoration(
                               image: DecorationImage(
                                 image: AssetImage('assets/images/iya.jpeg'),
@@ -168,10 +117,10 @@ class _MasukPageState extends State<MasukPage> {
 
                     const SizedBox(height: 20),
 
-                    // 2. TEKS & FORM
+                    // 2. TEKS & FORM (Mengisi Rongga Desktop)
                     Center(
                       child: Container(
-                        width: contentWidth, 
+                        width: contentWidth, // Lebar yang sudah dihitung agar pas
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           children: [
@@ -179,7 +128,7 @@ class _MasukPageState extends State<MasukPage> {
                               'Selamat Datang',
                               style: TextStyle(
                                 color: Color(0xFF1A0A0A),
-                                fontSize: 36, 
+                                fontSize: 36, // Ukuran teks judul diperbesar sedikit
                                 fontWeight: FontWeight.w900,
                                 fontStyle: FontStyle.italic,
                               ),
@@ -192,7 +141,7 @@ class _MasukPageState extends State<MasukPage> {
 
                             // 3. KOTAK FORM
                             Container(
-                              width: isDesktop ? 700 : double.infinity, 
+                              width: isDesktop ? 700 : double.infinity, // Maksimal lebar form di desktop
                               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFD27F30),
@@ -204,8 +153,7 @@ class _MasukPageState extends State<MasukPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // DI SINI BERUBAH JADI EMAIL
-                                  _buildInputField('Email', 'contoh@gmail.com', Icons.email, _emailController, isDesktop),
+                                  _buildInputField('Username/No Telp', 'Ketik Disini', Icons.person, _usernameController, isDesktop),
                                   _buildInputField('Password', '*********', Icons.lock, _passwordController, isDesktop, isPassword: true),
                                   GestureDetector(
                                     onTap: () {
@@ -216,7 +164,7 @@ class _MasukPageState extends State<MasukPage> {
                                       style: TextStyle(
                                         color: Colors.white, 
                                         fontSize: 14,
-                                        decoration: TextDecoration.underline,
+                                        decoration: TextDecoration.underline, // Memberi garis bawah supaya terlihat bisa diklik
                                       ),
                                     ),
                                   ),
@@ -227,7 +175,7 @@ class _MasukPageState extends State<MasukPage> {
                             const SizedBox(height: 40),
 
                             // 4. TOMBOL LOGIN & REGISTER
-                            Wrap( 
+                            Wrap( // Menggunakan Wrap agar di Desktop bisa berdampingan jika ruang cukup
                               spacing: 20,
                               runSpacing: 15,
                               alignment: WrapAlignment.center,
@@ -241,10 +189,8 @@ class _MasukPageState extends State<MasukPage> {
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                       elevation: 5,
                                     ),
-                                    onPressed: _isLoading ? null : _handleLogin,
-                                    child: _isLoading 
-                                      ? const CircularProgressIndicator(color: Colors.white) 
-                                      : const Text('LOGIN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+                                    onPressed: _handleLogin,
+                                    child: const Text('LOGIN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
                                   ),
                                 ),
                                 SizedBox(
@@ -274,7 +220,7 @@ class _MasukPageState extends State<MasukPage> {
                 ),
               ),
 
-              // --- 6. FOOTER ---
+              // --- 6. FOOTER (Full Width) ---
               Positioned(
                 bottom: 0, left: 0, right: 0,
                 child: Container(
@@ -309,7 +255,7 @@ class _MasukPageState extends State<MasukPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // Meratakan judul/label inputan ke sisi kiri.
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
@@ -345,7 +291,7 @@ class HeaderClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     Path path = Path();
     path.lineTo(0, size.height);
-    path.lineTo(size.width, size.height - 60); 
+    path.lineTo(size.width, size.height - 60); // Sudut miring lebih tajam
     path.lineTo(size.width, 0);
     path.close();
     return path;
