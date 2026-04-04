@@ -3,225 +3,155 @@ import 'package:flutter/material.dart';
 class TampilanAwal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Mengambil ukuran layar untuk responsivitas
+    // Mengambil ukuran layar HP secara dinamis agar tampilan menyesuaikan ukuran device
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      // 1. WARNA BACKGROUND
+      // Warna krem/oranye muda solid yang pas dengan desainmu
+      backgroundColor: const Color(0xFFF0BE86), 
+      
+      // Menggunakan Stack untuk menumpuk: gambar pola kue di belakang, dan menu utama di depan
       body: Stack(
         children: [
-          // 1. Background Gradient
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFF2D7A6),
-                  Color(0xFFE08A3A),
-                ],
-              ),
-            ),
-          ),
-
-          // ===== ELEMEN DEKORATIF (GAMBAR 1-4) =====
-          
-          // GAMBAR 1 - pojok kiri atas (agak besar)
+          // ==========================================
+          // 2. ELEMEN DEKORATIF BACKGROUND (POLA KUE)
+          // ==========================================
+          // Opacity(0.15) membuat gambar jadi transparan seperti bayangan/pola
           Positioned(
-            left: -30,
-            top: 20,
+            left: -20,
+            top: 50,
             child: Opacity(
-              opacity: 0.25,
-              child: Image.asset(
-                'assets/images/satu.png',
-                width: 150,
-                height: 150,
-                fit: BoxFit.contain,
-              ),
+              opacity: 0.15, 
+              child: Image.asset('assets/images/satu.png', width: 120),
             ),
           ),
-
-          // GAMBAR 2 - pojok kanan atas (sedang)
           Positioned(
             right: -20,
-            top: 60,
+            top: 100,
             child: Opacity(
-              opacity: 0.2,
-              child: Image.asset(
-                'assets/images/dua.png',
-                width: 120,
-                height: 120,
-                fit: BoxFit.contain,
-              ),
+              opacity: 0.15,
+              child: Image.asset('assets/images/dua.png', width: 100),
             ),
           ),
-
-          // GAMBAR 3 - kiri tengah (kecil)
           Positioned(
             left: 20,
-            top: screenHeight * 0.35,
-            child: Opacity(
-              opacity: 0.2,
-              child: Image.asset(
-                'assets/images/tiga.png',
-                width: 80,
-                height: 80,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-
-          // GAMBAR 4 - kanan bawah (agak besar)
-          Positioned(
-            right: 20,
-            bottom: 150,
-            child: Opacity(
-              opacity: 0.25,
-              child: Image.asset(
-                'assets/images/empat.png',
-                width: 140,
-                height: 140,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-
-          // GAMBAR 1 (ulangan) - pojok kiri bawah (kecil)
-          Positioned(
-            left: 40,
-            bottom: 100,
+            top: screenHeight * 0.4,
             child: Opacity(
               opacity: 0.15,
-              child: Image.asset(
-                'assets/images/satu.png',
-                width: 70,
-                height: 70,
-                fit: BoxFit.contain,
-              ),
+              child: Image.asset('assets/images/tiga.png', width: 90),
             ),
           ),
-
-          // GAMBAR 2 (ulangan) - tengah kanan (kecil)
           Positioned(
-            right: 50,
-            top: screenHeight * 0.5,
+            right: 10,
+            bottom: 120,
             child: Opacity(
               opacity: 0.15,
-              child: Image.asset(
-                'assets/images/dua.png',
-                width: 60,
-                height: 60,
-                fit: BoxFit.contain,
-              ),
+              child: Image.asset('assets/images/empat.png', width: 140),
             ),
           ),
-
-          // GAMBAR 3 (ulangan) - atas tengah (sangat kecil)
           Positioned(
-            left: screenWidth * 0.45,
-            top: 120,
-            child: Opacity(
-              opacity: 0.1,
-              child: Image.asset(
-                'assets/images/tiga.png',
-                width: 50,
-                height: 50,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-
-          // GAMBAR 4 (ulangan) - kiri atas (kecil)
-          Positioned(
-            left: 100,
-            top: 180,
+            left: 30,
+            bottom: 60,
             child: Opacity(
               opacity: 0.15,
-              child: Image.asset(
-                'assets/images/empat.png',
-                width: 65,
-                height: 65,
-                fit: BoxFit.contain,
-              ),
+              child: Image.asset('assets/images/satu.png', width: 80),
             ),
           ),
 
-          // ===== KONTEN UTAMA =====
+          // ==========================================
+          // 3. KONTEN UTAMA (LOGO, KUE, TOMBOL)
+          // ==========================================
+          // SafeArea: Memastikan konten aman dari poni layar (kamera depan/status bar)
           SafeArea(
+            // PERBAIKAN PENTING: SingleChildScrollView
+            // Ini yang menghilangkan error kuning-hitam! Jika layar HP terlalu pendek, 
+            // otomatis layarnya bisa di-scroll ke bawah.
             child: SingleChildScrollView(
               child: Container(
-                height: screenHeight - MediaQuery.of(context).padding.top,
+                width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
+                // PERBAIKAN PENTING: BoxConstraints
+                // Memaksa tinggi container minimal setinggi layar. Jadi kalau layarnya panjang, 
+                // tombol Get Started akan tetap terdorong rapi ke paling bawah.
+                constraints: BoxConstraints(
+                  minHeight: screenHeight - MediaQuery.of(context).padding.top,
+                ),
                 child: Column(
+                  // MainAxisAlignment.spaceBetween membagi rata jarak vertikal: 
+                  // Atas (Logo), Tengah (Kue), Bawah (Tombol)
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, 
                   children: [
-                    const SizedBox(height: 40),
-
-                    // LOGO UTAMA (tulisan PUDDINGKU! SMART SYSTEM)
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: screenHeight * 0.2),
-                      child: Image.asset(
-                        'assets/images/tulisan_awal.png',
-                        width: screenWidth * 0.85,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-
-                    const Spacer(flex: 1),
-
-                    // GAMBAR KUE (logo puding)
-                    SizedBox(
-                      height: screenHeight * 0.35,
-                      child: Image.asset(
-                        'assets/images/logo_puding.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-
-                    const Spacer(flex: 2),
-
-                    // TOMBOL GET STARTED
-                    GestureDetector(
-                      onTap: () {
-                        // Mengarahkan ke halaman masuk (watermark)
-                        Navigator.pushNamed(context, '/masuk');
-                      },
-                      child: Container(
-                        width: screenWidth * 0.75,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF3A1F0F),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
+                    // --- BAGIAN ATAS: LOGO TULISAN ---
+                    Column(
+                      children: [
+                        const SizedBox(height: 30), 
+                        Image.asset(
+                          'assets/images/tulisan_awal.png', 
+                          // Lebar logo sedikit diperkecil jadi 65% layar biar proporsional
+                          width: screenWidth * 0.65, 
+                          fit: BoxFit.contain,
                         ),
-                        child: const Center(
-                          child: Text(
-                            'Get Started',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                      ],
+                    ),
+
+                    // --- BAGIAN TENGAH: GAMBAR KUE STRAWBERRY ---
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Image.asset(
+                        'assets/images/logo_puding.png', 
+                        // Lebar gambar kue juga disesuaikan (50%) agar tidak memakan layar
+                        width: screenWidth * 0.50, 
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+
+                    // --- BAGIAN BAWAH: TOMBOL GET STARTED ---
+                    Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            // Pindah ke halaman form masuk ('/masuk')
+                            Navigator.pushNamed(context, '/masuk');
+                          },
+                          child: Container(
+                            width: screenWidth * 0.85, 
+                            height: 60, 
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF331812), // Warna cokelat gelap
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Get Started',
+                                style: TextStyle(
+                                  color: Colors.white, 
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold, 
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                        // Jarak dari tombol "Get Started" ke pinggir bawah HP
+                        const SizedBox(height: 40), 
+                      ],
                     ),
-
-                    const SizedBox(height: 60),
                   ],
                 ),
               ),
             ),
           ),
         ],
-      ), 
+      ),
     );
   }
 }
