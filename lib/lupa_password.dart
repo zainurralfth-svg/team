@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // MANTRA FIREBASE UNTUK RESET
 
 class LupaPasswordPage extends StatefulWidget {
   const LupaPasswordPage({super.key});
@@ -9,70 +8,48 @@ class LupaPasswordPage extends StatefulWidget {
 }
 
 class _LupaPasswordPageState extends State<LupaPasswordPage> {
-  final TextEditingController _emailController = TextEditingController(); // Diganti jadi Email
-  bool _isLoading = false; // Efek loading
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  
+  // Variabel untuk mengontrol apakah kolom password baru muncul
+  bool _isPhoneVerified = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _phoneController.dispose();
+    _newPasswordController.dispose();
     super.dispose();
   }
 
-  // FUNGSI UNTUK MENGIRIM LINK RESET KE EMAIL
-  Future<void> _prosesReset() async {
-    final email = _emailController.text.trim();
+  void _prosesReset() {
+    final phone = _phoneController.text.trim();
+    final newPass = _newPasswordController.text.trim();
 
-    // 1. Cek apakah email kosong
-    if (email.isEmpty) {
-      _showError('Masukkan email Anda terlebih dahulu!');
+    // Tahap 1: Verifikasi Nomor Telepon
+    if (!_isPhoneVerified) {
+      if (phone.length < 10) {
+        _showError('Masukkan nomor telepon yang benar!');
+        return;
+      }
+      
+      // Simulasi pengecekan akun (di sini kita anggap nomor selalu terdaftar)
+      setState(() {
+        _isPhoneVerified = true;
+      });
       return;
     }
 
-    // 2. Mulai Loading
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // 3. MINTA FIREBASE KIRIM EMAIL RESET
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-
-      // 4. Matikan Loading
-      setState(() {
-        _isLoading = false;
-      });
-
-      // 5. Kasih tahu user kalau email sudah dikirim (Warna Hijau)
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Link reset password telah dikirim! Silakan cek kotak masuk Email Anda.'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 4),
-        ),
-      );
-
-      // 6. Kembalikan user ke halaman Login
-      Navigator.pop(context);
-
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      
-      String pesanError = 'Terjadi kesalahan!';
-      if (e.code == 'user-not-found') {
-        pesanError = 'Email ini belum terdaftar di aplikasi!';
-      } else if (e.code == 'invalid-email') {
-        pesanError = 'Format email tidak valid!';
-      }
-      
-      _showError(pesanError);
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      _showError('Gagal mengirim email: $e');
+    // Tahap 2: Update Password
+    if (newPass.isEmpty || newPass.length < 6) {
+      _showError('Password baru minimal 6 karakter!');
+      return;
     }
+
+    // Simulasi Berhasil
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Password berhasil diperbarui! Silakan login kembali.')),
+    );
+    Navigator.pop(context);
   }
 
   void _showError(String pesan) {
@@ -167,16 +144,18 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           children: [
-                            const Text(
-                              'LUPA PASSWORD',
+                            Text(
+                              _isPhoneVerified ? 'BUAT PASSWORD BARU' : 'RESET PASSWORD',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Color(0xFF270C0C), fontSize: 28, fontWeight: FontWeight.bold),
+                              style: const TextStyle(color: Color(0xFF270C0C), fontSize: 28, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 10),
-                            const Text(
-                              'Masukkan email yang terdaftar. Kami akan mengirimkan link untuk mereset password Anda.',
+                            Text(
+                              _isPhoneVerified 
+                                ? 'Nomor terverifikasi! Masukkan password baru Anda.' 
+                                : 'Masukkan nomor telepon yang terdaftar di akun Anda.',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Color(0xFF270C0C), fontSize: 16),
+                              style: const TextStyle(color: Color(0xFF270C0C), fontSize: 16),
                             ),
                             const SizedBox(height: 30),
 
@@ -194,20 +173,33 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // INPUT EMAIL
+                                  // INPUT NOMOR TELEPON
                                   _buildInputField(
-                                    'Email', 
-                                    'contoh@gmail.com', 
-                                    Icons.email_outlined, 
-                                    _emailController,
+                                    'Nomor Telepon', 
+                                    '08123456xxx', 
+                                    Icons.phone_android, 
+                                    _phoneController,
+                                    enabled: !_isPhoneVerified // Matikan edit jika sudah verified
                                   ),
+                                  
+                                  // INPUT PASSWORD BARU (Hanya muncul jika nomor sudah OK)
+                                  if (_isPhoneVerified) ...[
+                                    const SizedBox(height: 20),
+                                    _buildInputField(
+                                      'Password Baru', 
+                                      'Minimal 6 karakter', 
+                                      Icons.lock_outline, 
+                                      _newPasswordController,
+                                      isPassword: true
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
 
                             const SizedBox(height: 40),
 
-                            // 4. TOMBOL KIRIM RESET
+                            // 4. TOMBOL RESET
                             SizedBox(
                               width: isDesktop ? 350 : double.infinity,
                               height: 55,
@@ -217,13 +209,11 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                   elevation: 5,
                                 ),
-                                onPressed: _isLoading ? null : _prosesReset,
-                                child: _isLoading 
-                                    ? const CircularProgressIndicator(color: Colors.white)
-                                    : const Text(
-                                        'KIRIM LINK RESET', 
-                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)
-                                      ),
+                                onPressed: _prosesReset,
+                                child: Text(
+                                  _isPhoneVerified ? 'SIMPAN PASSWORD' : 'CEK NOMOR TELEPON', 
+                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)
+                                ),
                               ),
                             ),
                             const SizedBox(height: 120),
@@ -257,7 +247,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     );
   }
 
-  Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller) {
+  Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, {bool isPassword = false, bool enabled = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -265,12 +255,14 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF7E6C4), 
+            color: enabled ? const Color(0xFFF7E6C4) : Colors.grey[300], 
             borderRadius: BorderRadius.circular(12)
           ),
           child: TextField(
             controller: controller,
-            keyboardType: TextInputType.emailAddress, // Keyboard berubah sesuai format email
+            enabled: enabled,
+            obscureText: isPassword,
+            keyboardType: isPassword ? TextInputType.text : TextInputType.phone,
             style: const TextStyle(fontSize: 16),
             decoration: InputDecoration(
               prefixIcon: Icon(icon, color: const Color(0xFFFF9800), size: 24),
@@ -286,7 +278,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   }
 }
 
-// Clipper & Painter
+// Clipper & Painter agar serasi
 class HeaderClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
