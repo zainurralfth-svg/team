@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'tampilanawal.dart';
-import 'masuk.dart';
-import 'login.dart';
-import 'menu.dart';
-import 'keranjang.dart';
-import 'konfirmasipesanan.dart';
-import 'lupa_password.dart'; // 1. TAMBAHKAN IMPORT INI
+import 'front end/tampilanawal.dart';
+import 'front end/masuk.dart';
+import 'front end/login.dart';
+import 'front end/menu.dart';
+import 'front end/keranjang.dart';
+import 'front end/konfirmasipesanan.dart';
+import 'front end/lupa_password.dart'; // 1. TAMBAHKAN IMPORT INI
 
 void main() {
   runApp(PuddingkuApp());
