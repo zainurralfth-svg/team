@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 
 class LupaPasswordPage extends StatefulWidget {
   const LupaPasswordPage({super.key});
@@ -11,8 +12,11 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   
-  // Variabel untuk mengontrol apakah kolom password baru muncul
   bool _isPhoneVerified = false;
+  bool _obscureText = true; 
+  
+  // --- VARIABEL UNTUK NOTIF MERAH ---
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -21,63 +25,68 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     super.dispose();
   }
 
+  // Fungsi buat munculin banner error merah
+  void _setAlert(String pesan) {
+    setState(() {
+      _errorMessage = pesan;
+    });
+    // Hilangkan otomatis setelah 3 detik
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _errorMessage = null;
+        });
+      }
+    });
+  }
+
+  // Notifikasi Berhasil (Pop-up AwesomeDialog)
+  void _showSuccess() {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.success,
+      animType: AnimType.bottomSlide, // Gunakan bottomSlide agar aman di semua versi
+      title: 'Berhasil!',
+      desc: 'Password kamu sudah diperbarui. Silakan login kembali!',
+      btnOkText: "Siap, Login!",
+      btnOkColor: const Color(0xFF5A3114),
+      btnOkOnPress: () => Navigator.pop(context),
+    ).show();
+  }
+
   void _prosesReset() {
     final phone = _phoneController.text.trim();
     final newPass = _newPasswordController.text.trim();
 
-    // Tahap 1: Verifikasi Nomor Telepon
+    // Tahap 1: Cek Nomor Telepon
     if (!_isPhoneVerified) {
-      if (phone.length < 10) {
-        _showError('Masukkan nomor telepon yang benar!');
+      if (phone.isEmpty) {
+        _setAlert('Nomor telepon tidak boleh kosong!');
         return;
       }
-      
-      // Simulasi pengecekan akun (di sini kita anggap nomor selalu terdaftar)
+      if (phone.length < 10) {
+        _setAlert('Masukkan nomor telepon yang benar!');
+        return;
+      }
       setState(() {
+        _errorMessage = null; 
         _isPhoneVerified = true;
       });
       return;
     }
 
-    // Tahap 2: Update Password
-    if (newPass.isEmpty || newPass.length < 6) {
-      _showError('Password baru minimal 6 karakter!');
+    // Tahap 2: Cek Password Baru
+    if (newPass.isEmpty) {
+      _setAlert('Password baru tidak boleh kosong!');
+      return;
+    }
+    if (newPass.length < 6) {
+      _setAlert('Password baru minimal 6 karakter!');
       return;
     }
 
-    // Simulasi Berhasil
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Password berhasil diperbarui! Silakan login kembali.')),
-    );
-    Navigator.pop(context);
-  }
-
-  void _showError(String pesan) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height - 150,
-          left: 20, right: 20,
-        ),
-        content: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFD9534F),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(child: Text(pesan, style: const TextStyle(color: Colors.white))),
-            ],
-          ),
-        ),
-      ),
-    );
+    // Jika semua OK, panggil notif sukses
+    _showSuccess();
   }
 
   @override
@@ -91,7 +100,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
 
           return Stack(
             children: [
-              // --- BACKGROUND DEKORATIF ---
+              // Background Dekoratif (Gambar Puding Kecil)
               Positioned(
                 right: -30, top: 360,
                 child: Opacity(
@@ -100,11 +109,10 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                 ),
               ),
 
-              // --- KONTEN UTAMA ---
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    // 1. HEADER (Sesuai Desain Login/Register)
+                    // --- 1. HEADER IMAGE ---
                     Stack(
                       children: [
                         ClipPath(
@@ -135,9 +143,39 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                       ],
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
 
-                    // 2. TEKS JUDUL
+                    // --- 2. BANNER ERROR MERAH ---
+                    if (_errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD9534F),
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 5),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: Colors.white),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    const SizedBox(height: 10),
+
+                    // --- 3. JUDUL DAN FORM ---
                     Center(
                       child: Container(
                         width: contentWidth,
@@ -159,7 +197,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                             ),
                             const SizedBox(height: 30),
 
-                            // 3. KOTAK FORM
+                            // KOTAK COKELAT FORM
                             Container(
                               width: isDesktop ? 700 : double.infinity,
                               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
@@ -171,18 +209,15 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                                 ],
                               ),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // INPUT NOMOR TELEPON
                                   _buildInputField(
                                     'Nomor Telepon', 
                                     '08123456xxx', 
                                     Icons.phone_android, 
                                     _phoneController,
-                                    enabled: !_isPhoneVerified // Matikan edit jika sudah verified
+                                    enabled: !_isPhoneVerified
                                   ),
                                   
-                                  // INPUT PASSWORD BARU (Hanya muncul jika nomor sudah OK)
                                   if (_isPhoneVerified) ...[
                                     const SizedBox(height: 20),
                                     _buildInputField(
@@ -199,7 +234,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
 
                             const SizedBox(height: 40),
 
-                            // 4. TOMBOL RESET
+                            // TOMBOL ACTION
                             SizedBox(
                               width: isDesktop ? 350 : double.infinity,
                               height: 55,
@@ -225,7 +260,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                 ),
               ),
 
-              // --- 5. FOOTER ---
+              // --- 4. FOOTER ---
               Positioned(
                 bottom: 0, left: 0, right: 0,
                 child: Container(
@@ -247,6 +282,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     );
   }
 
+  // Reusable Widget untuk Input Field
   Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, {bool isPassword = false, bool enabled = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,11 +297,24 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
           child: TextField(
             controller: controller,
             enabled: enabled,
-            obscureText: isPassword,
+            obscureText: isPassword ? _obscureText : false, 
             keyboardType: isPassword ? TextInputType.text : TextInputType.phone,
             style: const TextStyle(fontSize: 16),
             decoration: InputDecoration(
               prefixIcon: Icon(icon, color: const Color(0xFFFF9800), size: 24),
+              suffixIcon: isPassword 
+                ? IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                      color: const Color(0xFFFF9800),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  )
+                : null,
               hintText: hint,
               hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 16),
               border: InputBorder.none,
@@ -278,7 +327,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   }
 }
 
-// Clipper & Painter agar serasi
+// Dekorasi Header
 class HeaderClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
