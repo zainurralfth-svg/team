@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Core/Colour.dart'; // Panggil Gudang Cat kita
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -44,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
           content: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFD9534F), 
+              color: AppColors.errorRed, // Pakai warna dari Colour.dart
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
@@ -74,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2D7A6), // Sama dengan Login
+      backgroundColor: AppColors.bgCream, // Pakai warna dari Colour.dart
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
@@ -105,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                             height: isDesktop ? 400 : 280,
                             decoration: const BoxDecoration(
                               image: DecorationImage(
-                                image: AssetImage('assets/images/brow.jpeg'),
+                                image: AssetImage('assets/images/Dessert Box Banafe.png'),
                                 fit: BoxFit.cover,
                                 alignment: Alignment.center,
                               ),
@@ -138,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                             const Text(
                               'REGISTER',
                               style: TextStyle(
-                                color: Color(0xFF270C0C),
+                                color: AppColors.textDark, // Pakai warna dari Colour.dart
                                 fontSize: 36,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 2,
@@ -146,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             const Text(
                               'Register Untuk Membuat Akun',
-                              style: TextStyle(color: Color(0xFF270C0C), fontSize: 18),
+                              style: TextStyle(color: AppColors.textDark, fontSize: 18), // Pakai warna dari Colour.dart
                             ),
                             const SizedBox(height: 30),
 
@@ -155,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
                               width: isDesktop ? 700 : double.infinity,
                               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD27F30),
+                                color: AppColors.primaryOrange, // Pakai warna dari Colour.dart
                                 borderRadius: BorderRadius.circular(30),
                                 boxShadow: [
                                   BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 5)),
@@ -180,7 +181,7 @@ class _LoginPageState extends State<LoginPage> {
                               height: 55,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFD27F30), // Tetap Cokelat agar menonjol
+                                  backgroundColor: AppColors.primaryOrange, // Pakai warna dari Colour.dart
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                   elevation: 5,
                                 ),
@@ -204,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: 65,
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFD27F30),
+                    color: AppColors.primaryOrange, // Pakai warna dari Colour.dart
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
                   ),
                   child: Row(
@@ -213,7 +214,7 @@ class _LoginPageState extends State<LoginPage> {
                       Container(
                         padding: const EdgeInsets.all(5),
                         decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                        child: const Icon(Icons.cake, color: Color(0xFFD27F30), size: 28),
+                        child: const Icon(Icons.cake, color: AppColors.primaryOrange, size: 28), // Pakai warna dari Colour.dart
                       ),
                       const SizedBox(width: 10),
                       const Text('Puddingku', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
@@ -237,13 +238,13 @@ class _LoginPageState extends State<LoginPage> {
           Text(label, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
           Container(
-            decoration: BoxDecoration(color: const Color(0xFFF7E6C4), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.inputBg, borderRadius: BorderRadius.circular(12)), // Pakai warna dari Colour.dart
             child: TextField(
               controller: controller,
               obscureText: isPassword ? !_passwordVisible : false,
               style: const TextStyle(fontSize: 16),
               decoration: InputDecoration(
-                prefixIcon: Icon(icon, color: const Color(0xFFFF9800), size: 24),
+                prefixIcon: Icon(icon, color: AppColors.iconOrange, size: 24), // Pakai warna dari Colour.dart
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: () => setState(() => _passwordVisible = !_passwordVisible),
@@ -280,7 +281,7 @@ class HeaderClipper extends CustomClipper<Path> {
 class GarisMiringPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFF111111)..strokeWidth = 7.0..style = PaintingStyle.stroke;
+    final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; // Pakai warna dari Colour.dart
     final path = Path();
     path.moveTo(0, size.height);
     path.lineTo(size.width, size.height - 60);

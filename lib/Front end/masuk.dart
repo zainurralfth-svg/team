@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Core/Colour.dart'; // Memanggil file warna kamu
 
 class MasukPage extends StatefulWidget {
   const MasukPage({super.key});
@@ -37,7 +38,7 @@ class _MasukPageState extends State<MasukPage> {
           content: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFD9534F),
+              color: AppColors.errorRed, // Pakai dari Colour.dart
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
@@ -69,29 +70,24 @@ class _MasukPageState extends State<MasukPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2D7A6),
+      backgroundColor: AppColors.bgCream, // Pakai dari Colour.dart
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
-          
-          // Agar Desktop penuh, kita buat lebar content mengikuti lebar layar tapi dengan padding yang pas
-          // Jika Desktop, ambil 80% layar. Jika Mobile, ambil 90%.
           double contentWidth = isDesktop ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9;
 
           return Stack(
             children: [
-              // --- KONTEN UTAMA ---
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    // 1. HEADER GAMBAR (Dibuat Full Width di Desktop)
                     Stack(
                       children: [
                         ClipPath(
                           clipper: HeaderClipper(),
                           child: Container(
-                            width: double.infinity, // Paksa lebar penuh layar
-                            height: isDesktop ? 400 : 280, // Desktop lebih tinggi
+                            width: double.infinity,
+                            height: isDesktop ? 400 : 280,
                             decoration: const BoxDecoration(
                               image: DecorationImage(
                                 image: AssetImage('assets/images/iya.jpeg'),
@@ -117,34 +113,32 @@ class _MasukPageState extends State<MasukPage> {
 
                     const SizedBox(height: 20),
 
-                    // 2. TEKS & FORM (Mengisi Rongga Desktop)
                     Center(
                       child: Container(
-                        width: contentWidth, // Lebar yang sudah dihitung agar pas
+                        width: contentWidth,
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           children: [
                             const Text(
                               'Selamat Datang',
                               style: TextStyle(
-                                color: Color(0xFF1A0A0A),
-                                fontSize: 36, // Ukuran teks judul diperbesar sedikit
+                                color: AppColors.textDark, // Pakai dari Colour.dart
+                                fontSize: 36,
                                 fontWeight: FontWeight.w900,
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
                             const Text(
                               'Login untuk mulai memesan',
-                              style: TextStyle(color: Color(0xFF1A0A0A), fontSize: 18),
+                              style: TextStyle(color: AppColors.textDark, fontSize: 18), // Pakai dari Colour.dart
                             ),
                             const SizedBox(height: 30),
 
-                            // 3. KOTAK FORM
                             Container(
-                              width: isDesktop ? 700 : double.infinity, // Maksimal lebar form di desktop
+                              width: isDesktop ? 700 : double.infinity,
                               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD27F30),
+                                color: AppColors.primaryOrange, // Pakai dari Colour.dart
                                 borderRadius: BorderRadius.circular(30),
                                 boxShadow: [
                                   BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 5)),
@@ -164,7 +158,7 @@ class _MasukPageState extends State<MasukPage> {
                                       style: TextStyle(
                                         color: Colors.white, 
                                         fontSize: 14,
-                                        decoration: TextDecoration.underline, // Memberi garis bawah supaya terlihat bisa diklik
+                                        decoration: TextDecoration.underline,
                                       ),
                                     ),
                                   ),
@@ -174,8 +168,7 @@ class _MasukPageState extends State<MasukPage> {
 
                             const SizedBox(height: 40),
 
-                            // 4. TOMBOL LOGIN & REGISTER
-                            Wrap( // Menggunakan Wrap agar di Desktop bisa berdampingan jika ruang cukup
+                            Wrap(
                               spacing: 20,
                               runSpacing: 15,
                               alignment: WrapAlignment.center,
@@ -185,7 +178,7 @@ class _MasukPageState extends State<MasukPage> {
                                   height: 55,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFD27F30),
+                                      backgroundColor: AppColors.primaryOrange, // Pakai dari Colour.dart
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                       elevation: 5,
                                     ),
@@ -198,7 +191,7 @@ class _MasukPageState extends State<MasukPage> {
                                   height: 55,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFD27F30),
+                                      backgroundColor: AppColors.primaryOrange, // Pakai dari Colour.dart
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                       elevation: 5,
                                     ),
@@ -220,14 +213,13 @@ class _MasukPageState extends State<MasukPage> {
                 ),
               ),
 
-              // --- 6. FOOTER (Full Width) ---
               Positioned(
                 bottom: 0, left: 0, right: 0,
                 child: Container(
                   height: 65,
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFD27F30),
+                    color: AppColors.primaryOrange, // Pakai dari Colour.dart
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
                   ),
                   child: Row(
@@ -236,7 +228,7 @@ class _MasukPageState extends State<MasukPage> {
                       Container(
                         padding: const EdgeInsets.all(5),
                         decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                        child: const Icon(Icons.cake, color: Color(0xFFD27F30), size: 28),
+                        child: const Icon(Icons.cake, color: AppColors.primaryOrange, size: 28), // Pakai dari Colour.dart
                       ),
                       const SizedBox(width: 10),
                       const Text('Puddingku', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
@@ -260,13 +252,13 @@ class _MasukPageState extends State<MasukPage> {
           Text(label, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
           Container(
-            decoration: BoxDecoration(color: const Color(0xFFEBE0C8), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.inputBg, borderRadius: BorderRadius.circular(12)), // Pakai dari Colour.dart
             child: TextField(
               controller: controller,
               obscureText: isPassword ? !_passwordVisible : false,
               style: const TextStyle(fontSize: 16),
               decoration: InputDecoration(
-                prefixIcon: Icon(icon, color: const Color(0xFFFF9800), size: 24),
+                prefixIcon: Icon(icon, color: AppColors.iconOrange, size: 24), // Pakai dari Colour.dart
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: () => setState(() => _passwordVisible = !_passwordVisible),
@@ -291,7 +283,7 @@ class HeaderClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     Path path = Path();
     path.lineTo(0, size.height);
-    path.lineTo(size.width, size.height - 60); // Sudut miring lebih tajam
+    path.lineTo(size.width, size.height - 60);
     path.lineTo(size.width, 0);
     path.close();
     return path;
@@ -303,7 +295,7 @@ class HeaderClipper extends CustomClipper<Path> {
 class HeaderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFF270C0C)..strokeWidth = 7.0..style = PaintingStyle.stroke;
+    final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; // Pakai dari Colour.dart
     final path = Path();
     path.moveTo(0, size.height);
     path.lineTo(size.width, size.height - 60);

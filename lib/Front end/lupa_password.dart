@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import '../Core/Colour.dart'; // Panggil Gudang Cat kita
 
 class LupaPasswordPage extends StatefulWidget {
   const LupaPasswordPage({super.key});
@@ -49,7 +50,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
       title: 'Berhasil!',
       desc: 'Password kamu sudah diperbarui. Silakan login kembali!',
       btnOkText: "Siap, Login!",
-      btnOkColor: const Color(0xFF5A3114),
+      btnOkColor: AppColors.primaryOrange,// Pakai warna dari Colour.dart
       btnOkOnPress: () => Navigator.pop(context),
     ).show();
   }
@@ -92,7 +93,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2D7A6),
+      backgroundColor: AppColors.bgCream, // Pakai warna dari Colour.dart
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
@@ -122,7 +123,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                             height: isDesktop ? 400 : 280,
                             decoration: const BoxDecoration(
                               image: DecorationImage(
-                                image: AssetImage('assets/images/brow.jpeg'),
+                                image: AssetImage('assets/images/Dessert Box Banafe.png'),
                                 fit: BoxFit.cover,
                                 alignment: Alignment.center,
                               ),
@@ -152,7 +153,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFD9534F),
+                            color: AppColors.errorRed, // Pakai warna dari Colour.dart
                             borderRadius: BorderRadius.circular(15),
                             boxShadow: [
                               BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 5),
@@ -185,7 +186,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                             Text(
                               _isPhoneVerified ? 'BUAT PASSWORD BARU' : 'RESET PASSWORD',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Color(0xFF270C0C), fontSize: 28, fontWeight: FontWeight.bold),
+                              style: const TextStyle(color: AppColors.strokeDark, fontSize: 28, fontWeight: FontWeight.bold), // Pakai warna dari Colour.dart
                             ),
                             const SizedBox(height: 10),
                             Text(
@@ -193,7 +194,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                                 ? 'Nomor terverifikasi! Masukkan password baru Anda.' 
                                 : 'Masukkan nomor telepon yang terdaftar di akun Anda.',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Color(0xFF270C0C), fontSize: 16),
+                              style: const TextStyle(color: AppColors.strokeDark, fontSize: 16), // Pakai warna dari Colour.dart
                             ),
                             const SizedBox(height: 30),
 
@@ -202,7 +203,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                               width: isDesktop ? 700 : double.infinity,
                               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD27F30),
+                                color: AppColors.primaryOrange, // Pakai warna dari Colour.dart
                                 borderRadius: BorderRadius.circular(30),
                                 boxShadow: [
                                   BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 5)),
@@ -240,7 +241,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                               height: 55,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF5A3114),
+                                  backgroundColor: AppColors.primaryOrange, // Disamakan dengan warna gelap tema
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                   elevation: 5,
                                 ),
@@ -267,7 +268,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                   height: 65,
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFD27F30),
+                    color: AppColors.primaryOrange, // Pakai warna dari Colour.dart
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
                   ),
                   child: const Center(
@@ -291,7 +292,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: enabled ? const Color(0xFFF7E6C4) : Colors.grey[300], 
+            color: enabled ? AppColors.inputBg : Colors.grey[300], // Pakai warna dari Colour.dart
             borderRadius: BorderRadius.circular(12)
           ),
           child: TextField(
@@ -301,12 +302,12 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             keyboardType: isPassword ? TextInputType.text : TextInputType.phone,
             style: const TextStyle(fontSize: 16),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: const Color(0xFFFF9800), size: 24),
+              prefixIcon: Icon(icon, color: AppColors.iconOrange, size: 24), // Pakai warna dari Colour.dart
               suffixIcon: isPassword 
                 ? IconButton(
                     icon: Icon(
                       _obscureText ? Icons.visibility_off : Icons.visibility,
-                      color: const Color(0xFFFF9800),
+                      color: AppColors.iconOrange, // Pakai warna dari Colour.dart
                     ),
                     onPressed: () {
                       setState(() {
@@ -316,7 +317,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                   )
                 : null,
               hintText: hint,
-              hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 16),
+              hintStyle: const TextStyle(color: Colors.grey, fontSize: 16), // Disederhanakan pakai Colors.grey
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
             ),
@@ -345,7 +346,7 @@ class HeaderClipper extends CustomClipper<Path> {
 class GarisMiringPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFF111111)..strokeWidth = 7.0..style = PaintingStyle.stroke;
+    final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; // Pakai warna dari Colour.dart
     final path = Path();
     path.moveTo(0, size.height);
     path.lineTo(size.width, size.height - 60);
