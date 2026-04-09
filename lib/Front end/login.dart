@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; // Panggil Gudang Cat kita
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../Backend/API_Service.dart'; // Panggil si pelayan backend
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -25,12 +28,13 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _prosesRegister() {
+  Future<void> _prosesRegister() async {
     final nama = _namaController.text.trim();
     final username = _usernameController.text.trim();
     final phone = _phoneController.text.trim();
     final password = _passwordController.text.trim();
 
+    // 1. Validasi Input Kosong
     if (nama.isEmpty || username.isEmpty || phone.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -45,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
           content: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.errorRed, // Pakai warna dari Colour.dart
+              color: AppColors.errorRed,
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
@@ -64,12 +68,43 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
           ),
-          duration: const Duration(seconds: 3),
         ),
       );
       return;
     }
-    Navigator.pop(context);
+
+    // 2. Panggil Pelayan Backend
+    var hasil = await ApiService.registerUser(nama, username, phone, password);
+
+    // 3. Respon dari API
+    if (hasil['status'] == 'sukses') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(hasil['pesan']), 
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      
+      _namaController.clear();
+      _usernameController.clear();
+      _phoneController.clear();
+      _passwordController.clear();
+
+      // Balik ke login setelah sukses
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        if (mounted) Navigator.pop(context);
+      });
+    } else {
+      // Munculin error kalau misalnya username sudah ada
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(hasil['pesan']), 
+          backgroundColor: AppColors.errorRed,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override

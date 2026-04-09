@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import '../Core/Colour.dart'; // Panggil Gudang Cat kita
+import '../Backend/API_Service.dart';
 
 class LupaPasswordPage extends StatefulWidget {
   const LupaPasswordPage({super.key});
@@ -55,28 +56,32 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     ).show();
   }
 
-  void _prosesReset() {
+  Future<void> _prosesReset() async {
     final phone = _phoneController.text.trim();
     final newPass = _newPasswordController.text.trim();
 
-    // Tahap 1: Cek Nomor Telepon
+    // --- TAHAP 1: CEK NOMOR TELEPON ---
     if (!_isPhoneVerified) {
       if (phone.isEmpty) {
         _setAlert('Nomor telepon tidak boleh kosong!');
         return;
       }
-      if (phone.length < 10) {
-        _setAlert('Masukkan nomor telepon yang benar!');
-        return;
+
+      // Panggil API buat cek nomor
+      var hasil = await ApiService.resetPassword(phone);
+
+      if (hasil['status'] == 'sukses') {
+        setState(() {
+          _errorMessage = null; 
+          _isPhoneVerified = true;
+        });
+      } else {
+        _setAlert(hasil['pesan']);
       }
-      setState(() {
-        _errorMessage = null; 
-        _isPhoneVerified = true;
-      });
       return;
     }
 
-    // Tahap 2: Cek Password Baru
+    // --- TAHAP 2: SIMPAN PASSWORD BARU ---
     if (newPass.isEmpty) {
       _setAlert('Password baru tidak boleh kosong!');
       return;
@@ -86,8 +91,14 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
       return;
     }
 
-    // Jika semua OK, panggil notif sukses
-    _showSuccess();
+    // Panggil API buat update password
+    var hasilUpdate = await ApiService.resetPassword(phone, newPassword: newPass);
+
+    if (hasilUpdate['status'] == 'sukses') {
+      _showSuccess(); // Munculin AwesomeDialog Sukses
+    } else {
+      _setAlert(hasilUpdate['pesan']);
+    }
   }
 
   @override

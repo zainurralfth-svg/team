@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; // Memanggil file warna kamu
+import '../Backend/API_Service.dart';
 
 class MasukPage extends StatefulWidget {
   const MasukPage({super.key});
@@ -20,10 +21,11 @@ class _MasukPageState extends State<MasukPage> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
+    // 1. Cek Validasi Kosong
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -38,7 +40,7 @@ class _MasukPageState extends State<MasukPage> {
           content: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.errorRed, // Pakai dari Colour.dart
+              color: AppColors.errorRed,
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
@@ -62,11 +64,37 @@ class _MasukPageState extends State<MasukPage> {
       );
       return;
     }
-    _usernameController.clear();
-    _passwordController.clear();
-    Navigator.pushReplacementNamed(context, '/menu');
-  }
 
+    // 2. Panggil Service Login dari Backend
+    var hasil = await ApiService.loginUser(username, password);
+
+    if (hasil['status'] == 'sukses') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(hasil['pesan']), 
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      _usernameController.clear();
+      _passwordController.clear();
+      
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (mounted) Navigator.pushReplacementNamed(context, '/menu');
+      });
+    } else {
+      // SnackBar Gagal Login (Username/Password salah)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(hasil['pesan']), 
+          backgroundColor: AppColors.errorRed,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
