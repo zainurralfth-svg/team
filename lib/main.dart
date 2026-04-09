@@ -8,6 +8,7 @@ import 'Front end/menu.dart';
 import 'Front end/keranjang.dart';
 import 'Front end/konfirmasipesanan.dart';
 import 'Front end/lupa_password.dart';
+import 'Front end/admin.dart' ;
 
 void main() {
   runApp(const PuddingkuApp()); // Tambah const biar performanya lebih ringan
@@ -30,6 +31,7 @@ class PuddingkuApp extends StatelessWidget {
         '/menu': (context) => MenuPage(),
         '/keranjang': (context) => KeranjangPage(),
         '/konfirmasi': (context) => KonfirmasiPage(),
+        '/admin_home': (context) => const HomeAdmin(),
       },
     );
   }

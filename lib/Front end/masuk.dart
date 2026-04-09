@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; // Memanggil file warna kamu
 import '../Backend/API_Service.dart';
+import '../Front end/admin.dart' ;
 
 class MasukPage extends StatefulWidget {
   const MasukPage({super.key});
@@ -25,7 +26,7 @@ class _MasukPageState extends State<MasukPage> {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    // 1. Cek Validasi Kosong
+    // 1. Cek Validasi Kosong (Tetap pakai desain SnackBar merahmu)
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -69,6 +70,7 @@ class _MasukPageState extends State<MasukPage> {
     var hasil = await ApiService.loginUser(username, password);
 
     if (hasil['status'] == 'sukses') {
+      // Munculkan pesan sukses
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(hasil['pesan']), 
@@ -80,11 +82,25 @@ class _MasukPageState extends State<MasukPage> {
       _usernameController.clear();
       _passwordController.clear();
       
+      // --- LOGIKA MULTI-ROLE DISINI ---
+      // Kita ambil data 'role' yang dikirim dari login.php
+      String roleUser = hasil['role'] ?? 'user'; 
+
       Future.delayed(const Duration(milliseconds: 1000), () {
-        if (mounted) Navigator.pushReplacementNamed(context, '/menu');
+        if (mounted) {
+          if (roleUser == 'admin') {
+            // Jika dia terdeteksi sebagai admin di database
+            print("Login sebagai Admin");
+            Navigator.pushReplacementNamed(context, '/admin_home');
+          } else {
+            // Jika dia user biasa
+            print("Login sebagai User");
+            Navigator.pushReplacementNamed(context, '/menu');
+          }
+        }
       });
     } else {
-      // SnackBar Gagal Login (Username/Password salah)
+      // SnackBar Gagal Login
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(hasil['pesan']), 
