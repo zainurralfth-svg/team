@@ -1,35 +1,14 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const PuddingkuApp());
-}
-
-class PuddingkuApp extends StatelessWidget {
-  const PuddingkuApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Puddingku Admin',
-      theme: ThemeData(
-        fontFamily: 'Signika Negative', 
-      ),
-      home: const HomeAdmin(), // Langsung buka halaman admin
-    );
-  }
-}
-
 class HomeAdmin extends StatelessWidget {
   const HomeAdmin({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFE5B9), // Warna background krem muda
+      backgroundColor: const Color(0xFFFFE5B9), 
       body: Stack(
         children: [
-          // Background Orange melengkung di atas
           Container(
             height: 330,
             decoration: const BoxDecoration(
@@ -55,7 +34,7 @@ class HomeAdmin extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigation(),
+      bottomNavigationBar: _buildBottomNavigation(context),
     );
   }
 
@@ -86,7 +65,6 @@ class HomeAdmin extends StatelessWidget {
               ),
             ],
           ),
-          // Avatar
           Container(
             width: 50,
             height: 50,
@@ -121,7 +99,7 @@ class HomeAdmin extends StatelessWidget {
       height: 105,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.24),
+        color: Colors.white.withOpacity(0.24), 
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
@@ -208,7 +186,6 @@ class HomeAdmin extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Logo 'A'
               Container(
                 width: 40,
                 height: 40,
@@ -221,7 +198,6 @@ class HomeAdmin extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 15),
-              // Detail
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,7 +223,6 @@ class HomeAdmin extends StatelessWidget {
                   ],
                 ),
               ),
-              // Status
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -286,48 +261,51 @@ class HomeAdmin extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavigation() {
+  Widget _buildBottomNavigation(BuildContext context) {
     return Container(
       height: 70,
       color: const Color(0xFFD27F30),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _bottomNavItem(Icons.home, 'BERANDA', true),
-          _bottomNavItem(Icons.person, 'PENGGUNA', false),
-          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false),
-          _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false),
+          _bottomNavItem(Icons.home, 'BERANDA', true, () {}),
+          _bottomNavItem(Icons.person, 'PENGGUNA', false, () {}),
+          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {}),
+          _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {}),
         ],
       ),
     );
   }
 
-  Widget _bottomNavItem(IconData icon, String label, bool isSelected) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
-            shape: BoxShape.circle,
+  Widget _bottomNavItem(IconData icon, String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.white : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: isSelected ? const Color(0xFFD27F30) : Colors.white,
+              size: 24,
+            ),
           ),
-          child: Icon(
-            icon,
-            color: isSelected ? const Color(0xFFD27F30) : Colors.white,
-            size: 24,
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
