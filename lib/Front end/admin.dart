@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
-import 'tambah_produk.dart';
+
+// --- IMPORT SEMUA FILE HALAMAN DI SINI ---
+import 'tambah_produk.dart'; 
+import 'halaman_produk.dart';
+import 'halaman_riwayat.dart';
+import 'halaman_laporan.dart';
+import 'halaman_pengguna.dart';
+import 'halaman_pesanan.dart';
 
 class HomeAdmin extends StatelessWidget {
   const HomeAdmin({super.key});
@@ -21,7 +28,8 @@ class HomeAdmin extends StatelessWidget {
               children: [
                 _buildHeader(),
                 const SizedBox(height: 25),
-                _buildStatCards(),
+                // Kirim context supaya kartu stat bisa diklik pindah halaman
+                _buildStatCards(context), 
                 const SizedBox(height: 25),
                 _buildIncomeCard(),
                 const SizedBox(height: 15),
@@ -80,44 +88,57 @@ class HomeAdmin extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCards() {
+  // --- KARTU STATISTIK SEKARANG BISA DIKLIK ---
+  Widget _buildStatCards(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _statCard('12\nProduk', Icons.pie_chart),
-          _statCard('Riwayat\nPesanan', Icons.shopping_bag),
-          _statCard('Laporan', Icons.assignment),
+          // Kartu 12 Produk
+          _statCard('12\nProduk', Icons.pie_chart, () {
+             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
+          }),
+          // Kartu Riwayat Pesanan
+          _statCard('Riwayat\nPesanan', Icons.shopping_bag, () {
+             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()));
+          }),
+          // Kartu Laporan
+          _statCard('Laporan', Icons.assignment, () {
+             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()));
+          }),
         ],
       ),
     );
   }
 
-  Widget _statCard(String title, IconData icon) {
-    return Container(
-      width: 105,
-      height: 105,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.24), 
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white, size: 30),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+  Widget _statCard(String title, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap, // Fungsi klik
+      child: Container(
+        width: 105,
+        height: 105,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.24), 
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 30),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -262,6 +283,7 @@ class HomeAdmin extends StatelessWidget {
     );
   }
 
+  // --- MENU BAWAH SEKARANG BISA DIKLIK ---
   Widget _buildBottomNavigation(BuildContext context) {
     return Container(
       height: 70,
@@ -270,19 +292,19 @@ class HomeAdmin extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _bottomNavItem(Icons.home, 'BERANDA', true, () {}),
-          _bottomNavItem(Icons.person, 'PENGGUNA', false, () {}),
           
-          // --- BAGIAN INI YANG KITA UBAH ---
-          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
-            // Perintah untuk pindah ke halaman Tambah Produk
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => TambahProdukPage()), // Memanggil class EditProduk milikmu
-            );
+          _bottomNavItem(Icons.person, 'PENGGUNA', false, () {
+             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanPengguna()));
           }),
-          // ---------------------------------
+          
+          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
+            // Ini manggil TambahProdukPage yang ada di file tambah_produk.dart
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const TambahProdukPage())); 
+          }),
 
-          _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {}),
+          _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
+             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanPesanan()));
+          }),
         ],
       ),
     );
@@ -291,31 +313,34 @@ class HomeAdmin extends StatelessWidget {
   Widget _bottomNavItem(IconData icon, String label, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: isSelected ? Colors.white : Colors.transparent,
-              shape: BoxShape.circle,
+      child: Container(
+        color: Colors.transparent, // Memperbesar area klik
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? const Color(0xFFD27F30) : Colors.white,
+                size: 24,
+              ),
             ),
-            child: Icon(
-              icon,
-              color: isSelected ? const Color(0xFFD27F30) : Colors.white,
-              size: 24,
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
