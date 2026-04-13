@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'tambah_produk.dart';
 
 class HomeAdmin extends StatelessWidget {
   const HomeAdmin({super.key});
@@ -270,7 +271,17 @@ class HomeAdmin extends StatelessWidget {
         children: [
           _bottomNavItem(Icons.home, 'BERANDA', true, () {}),
           _bottomNavItem(Icons.person, 'PENGGUNA', false, () {}),
-          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {}),
+          
+          // --- BAGIAN INI YANG KITA UBAH ---
+          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
+            // Perintah untuk pindah ke halaman Tambah Produk
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TambahProdukPage()), // Memanggil class EditProduk milikmu
+            );
+          }),
+          // ---------------------------------
+
           _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {}),
         ],
       ),

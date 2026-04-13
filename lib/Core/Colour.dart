@@ -21,4 +21,12 @@ class AppColors {
   
   // Warna Notifikasi Error (Merah)
   static const Color errorRed = Color(0xFFD9534F);
+
+  static const Color gradasiAtas = Color(0xFFF7CC98);
+
+  // Warna Bawah untuk Gradasi Background (Oranye Gelap)
+  static const Color gradasiBawah = Color(0xFFCE7F31);
+
+  // Warna Tombol "Get Started" (Cokelat Sangat Gelap/Pekat)
+  static const Color tombolGetStarted = Color.fromARGB(190, 255, 153, 0);
 }
