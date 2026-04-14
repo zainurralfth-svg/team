@@ -127,7 +127,7 @@ class KeranjangPage extends StatelessWidget {
                       ),
                     ),
 
-                    // Item 1 - Brownie Burnt Cheesecake
+                    // Posisi Box Produk
                     Positioned(
                       left: 30,
                       top: 140,
@@ -147,8 +147,28 @@ class KeranjangPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
-                    // Gambar Item 1
+
+                    Positioned(
+                      left: 30,
+                      top: 260,
+                      child: Container(
+                        width: 380,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 5,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Gambar Produk
                     Positioned(
                       left: 45,
                       top: 150,
@@ -158,14 +178,30 @@ class KeranjangPage extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           image: DecorationImage(
-                            image: AssetImage('assets/images/burn.jpeg'),
+                            image: AssetImage('assets/images/Brownie Burn Cheesecake.png'),
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
                     ),
                     
-                    // Nama Item 1
+                    Positioned(
+                      left: 45,
+                      top: 270,
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/Death By Chocolate.png'),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Nama Produk
                     Positioned(
                       left: 130,
                       top: 155,
@@ -179,6 +215,19 @@ class KeranjangPage extends StatelessWidget {
                       ),
                     ),
                     
+                    Positioned(
+                      left: 130,
+                      top: 275,
+                      child: Text(
+                        'Death By Cokelat',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+
                     // Harga Item 1
                     Positioned(
                       left: 130,
@@ -193,7 +242,20 @@ class KeranjangPage extends StatelessWidget {
                       ),
                     ),
                     
-                    // Tombol - Item 1
+                     Positioned(
+                      left: 130,
+                      top: 295,
+                      child: Text(
+                        'Rp 18.000',
+                        style: TextStyle(
+                          color: const Color(0xFFD27F30),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+
+                    // Tombol Kurangi Jumlah Produk
                     Positioned(
                       left: 130,
                       top: 200,
@@ -226,28 +288,41 @@ class KeranjangPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
-                    // Jumlah Item 1
+
                     Positioned(
-                      left: 160,
-                      top: 200,
-                      child: Container(
-                        width: 30,
-                        height: 25,
-                        child: const Center(
-                          child: Text(
-                            '2',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                      left: 130,
+                      top: 320,
+                      child: GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Jumlah produk dikurangi'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 25,
+                          height: 25,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFE5B9),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              '-',
+                              style: TextStyle(
+                                color: Color(0xFF270C0C),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                    
-                    // Tombol + Item 1
+
+                    // Tombol Tambah Jumlah Produk
                     Positioned(
                       left: 195,
                       top: 200,
@@ -280,8 +355,80 @@ class KeranjangPage extends StatelessWidget {
                         ),
                       ),
                     ),
+
+                    Positioned(
+                      left: 195,
+                      top: 320,
+                      child: GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Jumlah produk ditambah'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 25,
+                          height: 25,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFE5B9),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              '+',
+                              style: TextStyle(
+                                color: Color(0xFF270C0C),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                     
-                    // Tombol hapus Item 1
+                    // Jumlah Barang
+                    Positioned(
+                      left: 160,
+                      top: 200,
+                      child: Container(
+                        width: 30,
+                        height: 25,
+                        child: const Center(
+                          child: Text(
+                            '2',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    Positioned(
+                      left: 160,
+                      top: 320,
+                      child: Container(
+                        width: 30,
+                        height: 25,
+                        child: const Center(
+                          child: Text(
+                            '1',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    // Tombol Hapus Barang
                     Positioned(
                       left: 360,
                       top: 170,
@@ -321,161 +468,6 @@ class KeranjangPage extends StatelessWidget {
                       ),
                     ),
 
-                    // Item 2 - Death By Cokelat
-                    Positioned(
-                      left: 30,
-                      top: 260,
-                      child: Container(
-                        width: 380,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 5,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    // Gambar Item 2
-                    Positioned(
-                      left: 45,
-                      top: 270,
-                      child: Container(
-                        width: 70,
-                        height: 70,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/death.jpeg'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    // Nama Item 2
-                    Positioned(
-                      left: 130,
-                      top: 275,
-                      child: Text(
-                        'Death By Cokelat',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    
-                    // Harga Item 2
-                    Positioned(
-                      left: 130,
-                      top: 295,
-                      child: Text(
-                        'Rp 18.000',
-                        style: TextStyle(
-                          color: const Color(0xFFD27F30),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    
-                    // Tombol - Item 2
-                    Positioned(
-                      left: 130,
-                      top: 320,
-                      child: GestureDetector(
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Jumlah produk dikurangi'),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: 25,
-                          height: 25,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFE5B9),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              '-',
-                              style: TextStyle(
-                                color: Color(0xFF270C0C),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    // Jumlah Item 2
-                    Positioned(
-                      left: 160,
-                      top: 320,
-                      child: Container(
-                        width: 30,
-                        height: 25,
-                        child: const Center(
-                          child: Text(
-                            '1',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    // Tombol + Item 2
-                    Positioned(
-                      left: 195,
-                      top: 320,
-                      child: GestureDetector(
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Jumlah produk ditambah'),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: 25,
-                          height: 25,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFE5B9),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              '+',
-                              style: TextStyle(
-                                color: Color(0xFF270C0C),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    // Tombol hapus Item 2
                     Positioned(
                       left: 360,
                       top: 290,
@@ -529,7 +521,7 @@ class KeranjangPage extends StatelessWidget {
                       ),
                     ),
                     
-                    // Field Catatan
+                    // Kolom Catatan
                     Positioned(
                       left: 30,
                       top: 410,
@@ -613,7 +605,7 @@ class KeranjangPage extends StatelessWidget {
                       ),
                     ),
                     
-                    // 3 Item
+                    // Total Item
                     Positioned(
                       left: 45,
                       top: 500,
