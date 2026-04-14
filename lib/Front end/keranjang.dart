@@ -70,29 +70,36 @@ class KeranjangPage extends StatelessWidget {
                     
                     // Tombol Kembali
                     Positioned(
-                      left: 20,
-                      top: 25,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              '←',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                     left: 20,
+                     top: 15,
+                     child: GestureDetector(
+                     onTap: () {
+                      Navigator.pop(context);
+                     },
+                      child: Stack(
+                       children: [
+                      Container(
+                       width: 40,
+                       height: 40,
+                       decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                        ),
+                        ),
+
+                      Positioned(
+                        left: 6,  
+                        top: 0,  
+                        child: Text(
+                        '←',
+                        style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ),
@@ -100,7 +107,7 @@ class KeranjangPage extends StatelessWidget {
                     // Judul Keranjang
                     Positioned(
                       left: 150,
-                      top: 30,
+                      top: 18,
                       child: Text(
                         'Keranjang',
                         style: TextStyle(
