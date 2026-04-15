@@ -20,7 +20,7 @@ class _MenuPageState extends State<MenuPage> {
   final List<String> _categories = [
     'Pudding',
     'Dessert',
-    'Patite Cake',
+    'Cake',
     'Brownies',
     'Cookies',
   ];

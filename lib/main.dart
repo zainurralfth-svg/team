@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-// --- IMPORT DARI FOLDER FRONT END ---
 import 'Front end/tampilanawal.dart';
 import 'Front end/masuk.dart';
 import 'Front end/login.dart';
