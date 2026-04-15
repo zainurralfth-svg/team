@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; // Memanggil file warna kamu
 import '../Backend/API_Service.dart';
-import '../Front end/admin.dart' ;
 
 class MasukPage extends StatefulWidget {
   const MasukPage({super.key});
@@ -53,7 +52,7 @@ class _MasukPageState extends State<MasukPage> {
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Username dan password tidak boleh kosong!',
+                    'Username dan Password tidak boleh kosong!',
                     style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -192,7 +191,7 @@ class _MasukPageState extends State<MasukPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   _buildInputField('Username/No Telp', 'Ketik Disini', Icons.person, _usernameController, isDesktop),
-                                  _buildInputField('Password', '*********', Icons.lock, _passwordController, isDesktop, isPassword: true),
+                                  _buildInputField('Password', '******', Icons.lock, _passwordController, isDesktop, isPassword: true),
                                   GestureDetector(
                                     onTap: () {
                                       Navigator.pushNamed(context, '/lupa-password');

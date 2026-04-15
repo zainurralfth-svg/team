@@ -203,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
                                   _buildInputField('Nama Lengkap', 'Ketik Disini', Icons.badge_outlined, _namaController),
                                   _buildInputField('Username', 'Arif12309', Icons.person_outline, _usernameController),
                                   _buildInputField('Phone', '0812345678', Icons.phone_outlined, _phoneController),
-                                  _buildInputField('Password', '*********', Icons.lock_outline, _passwordController, isPassword: true),
+                                  _buildInputField('Password', '******', Icons.lock_outline, _passwordController, isPassword: true),
                                 ],
                               ),
                             ),
