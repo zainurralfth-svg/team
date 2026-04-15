@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; // Panggil Gudang Cat kita
 import '../Backend/API_Service.dart'; // Panggil si pelayan backend
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class LoginPage extends StatefulWidget { //membuat class bernama login page yang mewarisi statefull widget
+  const LoginPage({super.key}); //mengidentifikasi widget secara unik di widget tree
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState(); //membuat dan menghubungkan class state loginpagestate ke widget ini
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> { //class state yang menyimpan data yang bisa berubah milik loginpage
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
-  bool _passwordVisible = false;
+  bool _passwordVisible = false; //untuk mengatur visibilitas pada password
 
-  @override
+  @override //dipanggil setiap kali setstate di jalankan
   void dispose() {
     _namaController.dispose();
     _usernameController.dispose();
@@ -72,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     // 2. Panggil Pelayan Backend
-    var hasil = await ApiService.registerUser(nama, username, phone, password);
+    var hasil = await ApiService.registerUser(nama, username, phone, password); //mengirim data pendaftaran ke server dan menunggu hasilnya.
 
     // 3. Respon dari API
     if (hasil['status'] == 'sukses') {
@@ -106,7 +106,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { //membangun tampilan halaman yang bisa menyesuaikan ukuran layar secara otomatis.
+
     return Scaffold(
       backgroundColor: AppColors.bgCream, // Pakai warna dari Colour.dart
       body: LayoutBuilder(
@@ -261,7 +262,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-
+  //untuk membuat kotak input (text field) yang bisa dipakai ulang berkali-kali di form.
   Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, {bool isPassword = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -297,7 +298,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-class HeaderClipper extends CustomClipper<Path> {
+class HeaderClipper extends CustomClipper<Path> { //membuat bentuk header yang miring di bagian bawahnya, bukan lurus rata.
   @override
   Path getClip(Size size) {
     Path path = Path();
@@ -307,6 +308,7 @@ class HeaderClipper extends CustomClipper<Path> {
     path.close();
     return path;
   }
+  //bertugas memberitahu Flutter apakah bentuk clipper perlu digambar ulang atau tidak.
   @override
   bool shouldReclip(oldClipper) => false;
 }

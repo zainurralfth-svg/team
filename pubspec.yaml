@@ -21,6 +21,9 @@ dependencies:
   firebase_auth: ^6.3.0
   cloud_firestore: ^6.2.0
 
+  # --- Tambahan untuk ambil foto dari galeri ---
+  image_picker: ^1.0.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

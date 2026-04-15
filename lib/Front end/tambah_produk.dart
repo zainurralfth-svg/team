@@ -1,18 +1,42 @@
+import 'dart:io'; 
+import 'package:flutter/foundation.dart'; // TAMBAHAN BARU: Untuk mendeteksi apakah ini jalan di Web atau HP
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; 
 import '../Core/Colour.dart';
 
-class TambahProdukPage extends StatelessWidget {
+class TambahProdukPage extends StatefulWidget {
   const TambahProdukPage({super.key});
+
+  @override
+  State<TambahProdukPage> createState() => _TambahProdukPageState();
+}
+
+class _TambahProdukPageState extends State<TambahProdukPage> {
+  // UBAH: Sekarang menggunakan XFile bawaan image_picker agar lebih aman untuk Web
+  XFile? _selectedImage; 
+  String _fileName = 'Tidak Ada File Yang Di Pilih';
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _selectedImage = image; // Menyimpan XFile
+        _fileName = image.name; 
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryOrange, // Background utama (Oranye Kecoklatan)
+      backgroundColor: AppColors.primaryOrange, 
       body: SafeArea(
         child: Column(
           children: [
             // ==========================================
-            // 1. HEADER (Tombol Kembali, Teks, Avatar)
+            // 1. HEADER 
             // ==========================================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
@@ -20,15 +44,13 @@ class TambahProdukPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Sisi Kiri (Tombol Kembali + Teks Selamat Datang)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Tombol Kembali
                       GestureDetector(
                         onTap: () {
                           if (Navigator.canPop(context)) {
-                            Navigator.pop(context); // Fungsi kembali ke halaman sebelumnya
+                            Navigator.pop(context);
                           }
                         },
                         child: Column(
@@ -54,7 +76,6 @@ class TambahProdukPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 15),
-                      // Judul
                       const Text(
                         'Selamat Datang',
                         style: TextStyle(
@@ -75,8 +96,6 @@ class TambahProdukPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
-                  // Sisi Kanan (Avatar)
                   Container(
                     width: 50,
                     height: 50,
@@ -84,7 +103,6 @@ class TambahProdukPage extends StatelessWidget {
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
-                    // Ganti dengan Icon orang karena belum ada gambar asset aslinya
                     child: const Icon(Icons.person, color: AppColors.primaryOrange, size: 30),
                   ),
                 ],
@@ -92,7 +110,7 @@ class TambahProdukPage extends StatelessWidget {
             ),
             
             // ==========================================
-            // 2. KARTU STATISTIK & PENDAPATAN (Tengah Atas)
+            // 2. KARTU STATISTIK & PENDAPATAN
             // ==========================================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -107,13 +125,12 @@ class TambahProdukPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             
-            // Kartu Putih Pendapatan
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20.0),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(30), // Bentuk pil/kapsul
+                borderRadius: BorderRadius.circular(30),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -141,20 +158,18 @@ class TambahProdukPage extends StatelessWidget {
             const SizedBox(height: 25),
 
             // ==========================================
-            // 3. AREA FORM TAMBAH PRODUK (Bawah Melengkung)
+            // 3. AREA FORM TAMBAH PRODUK
             // ==========================================
             Expanded(
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(25),
                 decoration: const BoxDecoration(
-                  color: AppColors.primaryOrange, // Warnanya nyaru, tapi dia menimpa putih nanti jika diubah
-                  // Di desain asli sepertinya ada background melengkung ke atas, kita beri lengkungan
+                  color: AppColors.primaryOrange,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(50),
                     topRight: Radius.circular(50),
                   ),
-                  // Efek bayangan tipis ke atas
                   boxShadow: [
                      BoxShadow(
                       color: Colors.black12,
@@ -163,17 +178,16 @@ class TambahProdukPage extends StatelessWidget {
                      )
                   ]
                 ),
-                child: SingleChildScrollView( // Agar form bisa di-scroll
+                child: SingleChildScrollView( 
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header "Tambah Produk" dengan Logo Kotak
                       Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.grey[300], // Warna kotak abu
+                              color: Colors.grey[300], 
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: const Icon(Icons.add_box, color: Colors.black87, size: 30),
@@ -192,57 +206,83 @@ class TambahProdukPage extends StatelessWidget {
                       
                       const SizedBox(height: 25),
 
-                      // Kolom-kolom Input
                       _buildInputLabel('Nama Produk'),
                       _buildInputField('Ketik Disini...', Icons.inventory_2),
-                      
                       const SizedBox(height: 15),
                       
                       _buildInputLabel('Harga Produk'),
                       _buildInputField('Ketik Disini...', Icons.monetization_on),
-
                       const SizedBox(height: 15),
                       
                       _buildInputLabel('Stok Produk'),
                       _buildInputField('Ketik Disini...', Icons.layers),
-
                       const SizedBox(height: 15),
                       
                       _buildInputLabel('Deskripsi Produk'),
                       _buildInputField('Ketik Disini...', Icons.description),
-
                       const SizedBox(height: 15),
                       
                       _buildInputLabel('Tambah Foto Produk'),
-                      // Area Upload Foto Custom
+                      
+                      // ==========================================
+                      // TOMBOL FOTO (KLIKABLE + AMAN UNTUK WEB & HP)
+                      // ==========================================
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                         decoration: BoxDecoration(
-                          color: AppColors.inputBg, // Warna krem latar input
+                          color: AppColors.inputBg, 
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.image, color: Colors.black54),
-                            const SizedBox(width: 10),
-                            // Tombol Pilih File Putih
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(5),
+                        child: Material(
+                          color: Colors.transparent, 
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(20),
+                            onTap: _pickImage, 
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                              child: Row(
+                                children: [
+                                  // SOLUSI ERROR WEB ADA DI SINI:
+                                  _selectedImage != null 
+                                      ? ClipRRect(
+                                          borderRadius: BorderRadius.circular(5),
+                                          // Mengecek kIsWeb (Jika di Chrome gunakan network, jika di HP gunakan file)
+                                          child: kIsWeb 
+                                              ? Image.network(
+                                                  _selectedImage!.path,
+                                                  width: 30,
+                                                  height: 30,
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : Image.file(
+                                                  File(_selectedImage!.path),
+                                                  width: 30,
+                                                  height: 30,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                        )
+                                      : const Icon(Icons.image, color: Colors.black54),
+                                      
+                                  const SizedBox(width: 10),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: const Text('Pilih File...', style: TextStyle(fontSize: 12)),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      _fileName, 
+                                      style: const TextStyle(color: Colors.black54, fontSize: 12),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              child: const Text('Pilih File...', style: TextStyle(fontSize: 12)),
                             ),
-                            const SizedBox(width: 10),
-                            const Expanded(
-                              child: Text(
-                                'Tidak Ada File Yang Di Pilih',
-                                style: TextStyle(color: Colors.black54, fontSize: 12),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                       
@@ -252,8 +292,8 @@ class TambahProdukPage extends StatelessWidget {
                       Center(
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.bgCream, // Krem terang
-                            foregroundColor: Colors.black, // Teks hitam
+                            backgroundColor: AppColors.bgCream, 
+                            foregroundColor: Colors.black, 
                             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
@@ -265,11 +305,10 @@ class TambahProdukPage extends StatelessWidget {
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           onPressed: () {
-                             // Aksi simpan produk di sini
                              ScaffoldMessenger.of(context).showSnackBar(
                                const SnackBar(content: Text('Produk berhasil ditambahkan!')),
                              );
-                             Navigator.pop(context); // Otomatis kembali ke admin
+                             Navigator.pop(context);
                           },
                         ),
                       ),
@@ -284,11 +323,6 @@ class TambahProdukPage extends StatelessWidget {
     );
   }
 
-  // ----------------------------------------------------
-  // WIDGET BANTUAN (Helper) AGAR KODE TIDAK BERULANG PAAJANG
-  // ----------------------------------------------------
-
-  // Fungsi pembuat label tulisan putih di atas kotak input
   Widget _buildInputLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0, left: 10.0),
@@ -303,32 +337,30 @@ class TambahProdukPage extends StatelessWidget {
     );
   }
 
-  // Fungsi pembuat kotak input teks (TextField) bentuk pil/kapsul
   Widget _buildInputField(String hint, IconData icon) {
     return TextField(
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.black45, fontSize: 14),
         prefixIcon: Icon(icon, color: Colors.black54),
-        fillColor: AppColors.inputBg, // Krem dari color.dart
+        fillColor: AppColors.inputBg,
         filled: true,
         contentPadding: const EdgeInsets.symmetric(vertical: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide.none, // Hilangkan garis pinggir
+          borderSide: BorderSide.none, 
         ),
       ),
     );
   }
 
-  // Fungsi pembuat Kartu Statistik transparan di atas
   Widget _buildStatCard(String title, IconData icon) {
     return Container(
       width: 105,
       height: 105,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.24), // Transparan 24%
+        color: Colors.white.withOpacity(0.24), 
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
