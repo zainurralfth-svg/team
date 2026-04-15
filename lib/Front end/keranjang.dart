@@ -119,12 +119,12 @@ class KeranjangPage extends StatelessWidget {
                       ),
                     ),
                     
-                    // Judul Keranjangku
+                    // Judul 
                     Positioned(
                       left: 30,
                       top: 100,
                       child: Text(
-                        'Keranjangku',
+                        'Pesanan',
                         style: TextStyle(
                           color: const Color(0xFF270C0C),
                           fontSize: 22,
@@ -139,7 +139,7 @@ class KeranjangPage extends StatelessWidget {
                       left: 30,
                       top: 140,
                       child: Container(
-                        width: 380,
+                        width: 340,
                         height: 100,
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -159,7 +159,7 @@ class KeranjangPage extends StatelessWidget {
                       left: 30,
                       top: 260,
                       child: Container(
-                        width: 380,
+                        width: 340,
                         height: 100,
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -437,8 +437,8 @@ class KeranjangPage extends StatelessWidget {
                     
                     // Tombol Hapus Barang
                     Positioned(
-                      left: 360,
-                      top: 170,
+                      left: 340,
+                      top: 210,
                       child: GestureDetector(
                         onTap: () {
                           showDialog(
@@ -476,8 +476,8 @@ class KeranjangPage extends StatelessWidget {
                     ),
 
                     Positioned(
-                      left: 360,
-                      top: 290,
+                      left: 340,
+                      top: 330,
                       child: GestureDetector(
                         onTap: () {
                           showDialog(
@@ -533,7 +533,7 @@ class KeranjangPage extends StatelessWidget {
                       left: 30,
                       top: 410,
                       child: Container(
-                        width: 380,
+                        width: 340,
                         height: 50,
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -596,7 +596,7 @@ class KeranjangPage extends StatelessWidget {
                       left: 30,
                       top: 480,
                       child: Container(
-                        width: 380,
+                        width: 340,
                         height: 120,
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -654,7 +654,7 @@ class KeranjangPage extends StatelessWidget {
 
                     // Tombol Konfirmasi Pesanan
                     Positioned(
-                      left: 100,
+                      left: 90,
                       top: 620,
                       child: GestureDetector(
                         onTap: () {
@@ -702,8 +702,8 @@ class KeranjangPage extends StatelessWidget {
                     
                     // Tombol Pesanan
                     Positioned(
-                      left: 120,
-                      top: 880,
+                      left: 90,
+                      top: 870,
                       child: GestureDetector(
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -732,8 +732,8 @@ class KeranjangPage extends StatelessWidget {
                     
                     // Tombol Produk
                     Positioned(
-                      left: 270,
-                      top: 880,
+                      left: 260,
+                      top: 870,
                       child: GestureDetector(
                         onTap: () {
                           Navigator.pop(context);
