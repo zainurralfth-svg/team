@@ -14,7 +14,7 @@ class MenuPage extends StatefulWidget {
 class _MenuPageState extends State<MenuPage> {
 
   // State: index kategori yang sedang aktif (default = 4 / Cookies)
-  int _selectedIndex = 4;
+  int _selectedIndex = 0;
 
   // Urutan nama kategori
   final List<String> _categories = [
