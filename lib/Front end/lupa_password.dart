@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import '../Core/Colour.dart'; // Panggil Gudang Cat kita
-import '../Backend/API_Service.dart';
+import '../Core/Colour.dart'; // Manggil Gudang Warna
+import '../Backend/API_Service.dart'; // Manggil Jembatan ke Database
 
 class LupaPasswordPage extends StatefulWidget {
   const LupaPasswordPage({super.key});
@@ -11,28 +11,29 @@ class LupaPasswordPage extends StatefulWidget {
 }
 
 class _LupaPasswordPageState extends State<LupaPasswordPage> {
+  // Buku catatan penangkap ketikan user
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   
-  bool _isPhoneVerified = false;
-  bool _obscureText = true; 
-  
-  // --- VARIABEL UNTUK NOTIF MERAH ---
-  String? _errorMessage;
+  // Saklar-saklar pengatur tampilan
+  bool _isPhoneVerified = false; // Saklar ngecek nomor udah bener atau belum
+  bool _obscureText = true;      // Saklar sensor password (titik-titik)
+  String? _errorMessage;         // Penyimpan teks pesan error merah
 
   @override
   void dispose() {
+    // Tukang bersih-bersih memori kalau halaman ditutup
     _phoneController.dispose();
     _newPasswordController.dispose();
     super.dispose();
   }
 
-  // Fungsi buat munculin banner error merah
+  // --- FUNGSI MUNCULIN PERINGATAN MERAH ---
   void _setAlert(String pesan) {
     setState(() {
       _errorMessage = pesan;
     });
-    // Hilangkan otomatis setelah 3 detik
+    // Hilang otomatis setelah 3 detik
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         setState(() {
@@ -42,46 +43,47 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     });
   }
 
-  // Notifikasi Berhasil (Pop-up AwesomeDialog)
+  // --- FUNGSI MUNCULIN POP-UP SUKSES ---
   void _showSuccess() {
     AwesomeDialog(
       context: context,
       dialogType: DialogType.success,
-      animType: AnimType.bottomSlide, // Gunakan bottomSlide agar aman di semua versi
+      animType: AnimType.bottomSlide,
       title: 'Berhasil!',
       desc: 'Password kamu sudah diperbarui. Silakan login kembali!',
       btnOkText: "Siap, Login!",
-      btnOkColor: AppColors.primaryOrange,// Pakai warna dari Colour.dart
-      btnOkOnPress: () => Navigator.pop(context),
+      btnOkColor: AppColors.primaryOrange, // Pakai warna Oranye Utama
+      btnOkOnPress: () => Navigator.pop(context), // Balik ke halaman login
     ).show();
   }
 
+  // --- OTAK UTAMA: PROSES RESET PASSWORD ---
   Future<void> _prosesReset() async {
     final phone = _phoneController.text.trim();
     final newPass = _newPasswordController.text.trim();
 
-    // --- TAHAP 1: CEK NOMOR TELEPON ---
+    // TAHAP 1: JIKA NOMOR BELUM DIVERIFIKASI
     if (!_isPhoneVerified) {
       if (phone.isEmpty) {
         _setAlert('Nomor telepon tidak boleh kosong!');
         return;
       }
 
-      // Panggil API buat cek nomor
+      // Tanya ke database apakah nomor ini terdaftar?
       var hasil = await ApiService.resetPassword(phone);
 
       if (hasil['status'] == 'sukses') {
         setState(() {
           _errorMessage = null; 
-          _isPhoneVerified = true;
+          _isPhoneVerified = true; // Buka form password baru
         });
       } else {
-        _setAlert(hasil['pesan']);
+        _setAlert(hasil['pesan']); // Munculin error dari database
       }
       return;
     }
 
-    // --- TAHAP 2: SIMPAN PASSWORD BARU ---
+    // TAHAP 2: JIKA NOMOR UDAH BENER, SIMPAN PASSWORD BARU
     if (newPass.isEmpty) {
       _setAlert('Password baru tidak boleh kosong!');
       return;
@@ -91,20 +93,21 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
       return;
     }
 
-    // Panggil API buat update password
+    // Suruh database ganti password lama jadi password baru
     var hasilUpdate = await ApiService.resetPassword(phone, newPassword: newPass);
 
     if (hasilUpdate['status'] == 'sukses') {
-      _showSuccess(); // Munculin AwesomeDialog Sukses
+      _showSuccess(); 
     } else {
       _setAlert(hasilUpdate['pesan']);
     }
   }
 
+  // --- TAMPILAN LAYAR (UI) ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgCream, // Pakai warna dari Colour.dart
+      backgroundColor: AppColors.bgCream, // Latar Cream
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
@@ -112,7 +115,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
 
           return Stack(
             children: [
-              // Background Dekoratif (Gambar Puding Kecil)
+              // 1. Gambar Puding Hiasan di Belakang
               Positioned(
                 right: -30, top: 360,
                 child: Opacity(
@@ -124,7 +127,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    // --- 1. HEADER IMAGE ---
+                    // 2. HEADER GAMBAR KUE POTONG
                     Stack(
                       children: [
                         ClipPath(
@@ -148,7 +151,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                         Positioned(
                           left: 10, top: 30,
                           child: IconButton(
-                            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                            icon: const Icon(Icons.arrow_back, color: AppColors.textWhite, size: 30),
                             onPressed: () => Navigator.pop(context),
                           ),
                         ),
@@ -157,14 +160,14 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
 
                     const SizedBox(height: 10),
 
-                    // --- 2. BANNER ERROR MERAH ---
+                    // 3. SPANDUK PESAN ERROR (MUNCUL KALAU ADA ERROR AJA)
                     if (_errorMessage != null)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: AppColors.errorRed, // Pakai warna dari Colour.dart
+                            color: AppColors.errorRed,
                             borderRadius: BorderRadius.circular(15),
                             boxShadow: [
                               BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 5),
@@ -172,12 +175,12 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: Colors.white),
+                              const Icon(Icons.error_outline, color: AppColors.textWhite),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   _errorMessage!,
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -187,7 +190,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
 
                     const SizedBox(height: 10),
 
-                    // --- 3. JUDUL DAN FORM ---
+                    // 4. JUDUL DAN KOTAK FORM ORANYE
                     Center(
                       child: Container(
                         width: contentWidth,
@@ -197,7 +200,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                             Text(
                               _isPhoneVerified ? 'BUAT PASSWORD BARU' : 'RESET PASSWORD',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: AppColors.strokeDark, fontSize: 28, fontWeight: FontWeight.bold), // Pakai warna dari Colour.dart
+                              style: const TextStyle(color: AppColors.strokeDark, fontSize: 28, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 10),
                             Text(
@@ -205,16 +208,16 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                                 ? 'Nomor terverifikasi! Masukkan password baru Anda.' 
                                 : 'Masukkan nomor telepon yang terdaftar di akun Anda.',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: AppColors.strokeDark, fontSize: 16), // Pakai warna dari Colour.dart
+                              style: const TextStyle(color: AppColors.strokeDark, fontSize: 16),
                             ),
                             const SizedBox(height: 30),
 
-                            // KOTAK COKELAT FORM
+                            // Kotak Form
                             Container(
                               width: isDesktop ? 700 : double.infinity,
                               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryOrange, // Pakai warna dari Colour.dart
+                                color: AppColors.primaryOrange,
                                 borderRadius: BorderRadius.circular(30),
                                 boxShadow: [
                                   BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 5)),
@@ -222,14 +225,16 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                               ),
                               child: Column(
                                 children: [
+                                  // Panggil cetakan form Nomor HP
                                   _buildInputField(
                                     'Nomor Telepon', 
                                     '08123456xxx', 
                                     Icons.phone_android, 
                                     _phoneController,
-                                    enabled: !_isPhoneVerified
+                                    enabled: !_isPhoneVerified // Kalau udah verifikasi, form ini dikunci
                                   ),
                                   
+                                  // Munculin form password kalau nomor udah bener
                                   if (_isPhoneVerified) ...[
                                     const SizedBox(height: 20),
                                     _buildInputField(
@@ -246,24 +251,24 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
 
                             const SizedBox(height: 40),
 
-                            // TOMBOL ACTION
+                            // 5. TOMBOL EKSEKUSI
                             SizedBox(
                               width: isDesktop ? 350 : double.infinity,
                               height: 55,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryOrange, // Disamakan dengan warna gelap tema
+                                  backgroundColor: AppColors.primaryOrange,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                   elevation: 5,
                                 ),
-                                onPressed: _prosesReset,
+                                onPressed: _prosesReset, // Jalanin otak utama
                                 child: Text(
                                   _isPhoneVerified ? 'SIMPAN PASSWORD' : 'CEK NOMOR TELEPON', 
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)
+                                  style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 18)
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 120),
+                            const SizedBox(height: 120), // Jarak aman biar gak ketutup footer
                           ],
                         ),
                       ),
@@ -272,18 +277,18 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                 ),
               ),
 
-              // --- 4. FOOTER ---
+              // 6. FOOTER PUDDINGKU
               Positioned(
                 bottom: 0, left: 0, right: 0,
                 child: Container(
                   height: 65,
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: AppColors.primaryOrange, // Pakai warna dari Colour.dart
+                    color: AppColors.primaryOrange,
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
                   ),
                   child: const Center(
-                    child: Text('Puddingku Security', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                    child: Text('Puddingku Security', style: TextStyle(color: AppColors.textWhite, fontSize: 20, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),
@@ -294,16 +299,17 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     );
   }
 
-  // Reusable Widget untuk Input Field
+  // --- PABRIK PENCETAK FORM (Biar gak ngetik ulang kodingan panjang) ---
   Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, {bool isPassword = false, bool enabled = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+        Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: enabled ? AppColors.inputBg : Colors.grey[300], // Pakai warna dari Colour.dart
+            // Kalau form dikunci (enabled = false), warnanya berubah jadi abu-abu
+            color: enabled ? AppColors.inputBg : AppColors.inputDisabledBg, 
             borderRadius: BorderRadius.circular(12)
           ),
           child: TextField(
@@ -313,12 +319,12 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             keyboardType: isPassword ? TextInputType.text : TextInputType.phone,
             style: const TextStyle(fontSize: 16),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: AppColors.iconOrange, size: 24), // Pakai warna dari Colour.dart
+              prefixIcon: Icon(icon, color: AppColors.iconOrange, size: 24),
               suffixIcon: isPassword 
                 ? IconButton(
                     icon: Icon(
                       _obscureText ? Icons.visibility_off : Icons.visibility,
-                      color: AppColors.iconOrange, // Pakai warna dari Colour.dart
+                      color: AppColors.iconOrange,
                     ),
                     onPressed: () {
                       setState(() {
@@ -328,7 +334,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                   )
                 : null,
               hintText: hint,
-              hintStyle: const TextStyle(color: Colors.grey, fontSize: 16), // Disederhanakan pakai Colors.grey
+              hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 16), // Teks bayangan
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
             ),
@@ -339,7 +345,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   }
 }
 
-// Dekorasi Header
+// --- RUMUS PEMOTONG GAMBAR HEADER ---
 class HeaderClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -357,7 +363,7 @@ class HeaderClipper extends CustomClipper<Path> {
 class GarisMiringPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; // Pakai warna dari Colour.dart
+    final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke;
     final path = Path();
     path.moveTo(0, size.height);
     path.lineTo(size.width, size.height - 60);

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; // Memanggil file warna kamu
+import '../Core/Colour.dart'; // Manggil Gudang Cat kita
 import '../Backend/API_Service.dart';
 
 class MasukPage extends StatefulWidget {
@@ -10,6 +10,7 @@ class MasukPage extends StatefulWidget {
 }
 
 class _MasukPageState extends State<MasukPage> {
+  // Buku catatan penangkap ketikan user
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _passwordVisible = false;
@@ -21,15 +22,16 @@ class _MasukPageState extends State<MasukPage> {
     super.dispose();
   }
 
+  // --- OTAK UTAMA: PROSES LOGIN ---
   Future<void> _handleLogin() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    // 1. Cek Validasi Kosong (Tetap pakai desain SnackBar merahmu)
+    // 1. Cek Validasi Kosong
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.transparent, // Transparan karena containernya udah diwarnain
           elevation: 0,
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.only(
@@ -40,7 +42,7 @@ class _MasukPageState extends State<MasukPage> {
           content: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.errorRed,
+              color: AppColors.errorRed, // Pakai dari Colour.dart
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
@@ -48,12 +50,12 @@ class _MasukPageState extends State<MasukPage> {
             ),
             child: const Row(
               children: [
-                Icon(Icons.error_outline, color: Colors.white, size: 24),
+                Icon(Icons.error_outline, color: AppColors.textWhite, size: 24), // Pakai dari Colour.dart
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'Username dan Password tidak boleh kosong!',
-                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600), // Pakai dari Colour.dart
                   ),
                 ),
               ],
@@ -65,51 +67,62 @@ class _MasukPageState extends State<MasukPage> {
       return;
     }
 
-    // 2. Panggil Service Login dari Backend
-    var hasil = await ApiService.loginUser(username, password);
+    // JARING PENGAMAN: Biar aplikasi gak freeze kalau server mati
+    try {
+      // 2. Panggil Service Login dari Backend
+      var hasil = await ApiService.loginUser(username, password);
 
-    if (hasil['status'] == 'sukses') {
-      // Munculkan pesan sukses
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(hasil['pesan']), 
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      if (hasil['status'] == 'sukses') {
+        // Munculkan pesan sukses
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(hasil['pesan']), 
+            backgroundColor: AppColors.successGreen, // Pakai hijau dari Colour.dart
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
 
-      _usernameController.clear();
-      _passwordController.clear();
-      
-      // --- LOGIKA MULTI-ROLE DISINI ---
-      // Kita ambil data 'role' yang dikirim dari login.php
-      String roleUser = hasil['role'] ?? 'user'; 
+        _usernameController.clear();
+        _passwordController.clear();
+        
+        // --- LOGIKA MULTI-ROLE DISINI ---
+        String roleUser = hasil['role'] ?? 'user'; 
 
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        if (mounted) {
-          if (roleUser == 'admin') {
-            // Jika dia terdeteksi sebagai admin di database
-            print("Login sebagai Admin");
-            Navigator.pushReplacementNamed(context, '/admin_home');
-          } else {
-            // Jika dia user biasa
-            print("Login sebagai User");
-            Navigator.pushReplacementNamed(context, '/menu');
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          if (mounted) {
+            if (roleUser == 'admin') {
+              print("Login sebagai Admin");
+              Navigator.pushReplacementNamed(context, '/admin_home');
+            } else {
+              print("Login sebagai User");
+              Navigator.pushReplacementNamed(context, '/menu');
+            }
           }
-        }
-      });
-    } else {
-      // SnackBar Gagal Login
+        });
+      } else {
+        // SnackBar Gagal Login (Password salah / User tidak ada)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(hasil['pesan']), 
+            backgroundColor: AppColors.errorRed, // Pakai dari Colour.dart
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      // JIKA TERJADI ERROR GAIB (Server XAMPP mati / IP salah)
+      print("Error Server: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(hasil['pesan']), 
-          backgroundColor: AppColors.errorRed,
+        const SnackBar(
+          content: Text('Gagal terhubung ke server! Cek koneksi / XAMPP.'), 
+          backgroundColor: AppColors.errorRed, // Pakai dari Colour.dart
           behavior: SnackBarBehavior.floating,
         ),
       );
     }
   }
   
+  // --- TAMPILAN LAYAR (UI) ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,6 +137,7 @@ class _MasukPageState extends State<MasukPage> {
               SingleChildScrollView(
                 child: Column(
                   children: [
+                    // --- HEADER GAMBAR ---
                     Stack(
                       children: [
                         ClipPath(
@@ -147,7 +161,7 @@ class _MasukPageState extends State<MasukPage> {
                         Positioned(
                           left: 10, top: 30,
                           child: IconButton(
-                            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                            icon: const Icon(Icons.arrow_back, color: AppColors.textWhite, size: 30), // Pakai putih dari Colour.dart
                             onPressed: () => Navigator.pop(context),
                           ),
                         ),
@@ -156,6 +170,7 @@ class _MasukPageState extends State<MasukPage> {
 
                     const SizedBox(height: 20),
 
+                    // --- JUDUL & KOTAK FORM ---
                     Center(
                       child: Container(
                         width: contentWidth,
@@ -199,7 +214,7 @@ class _MasukPageState extends State<MasukPage> {
                                     child: const Text(
                                       'Lupa password?', 
                                       style: TextStyle(
-                                        color: Colors.white, 
+                                        color: AppColors.textWhite, // Pakai putih dari Colour.dart
                                         fontSize: 14,
                                         decoration: TextDecoration.underline,
                                       ),
@@ -211,6 +226,7 @@ class _MasukPageState extends State<MasukPage> {
 
                             const SizedBox(height: 40),
 
+                            // --- TOMBOL LOGIN & REGISTER ---
                             Wrap(
                               spacing: 20,
                               runSpacing: 15,
@@ -226,7 +242,7 @@ class _MasukPageState extends State<MasukPage> {
                                       elevation: 5,
                                     ),
                                     onPressed: _handleLogin,
-                                    child: const Text('LOGIN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+                                    child: const Text('LOGIN', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), // Pakai putih dari Colour.dart
                                   ),
                                 ),
                                 SizedBox(
@@ -242,7 +258,7 @@ class _MasukPageState extends State<MasukPage> {
                                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                       Navigator.pushNamed(context, '/login');
                                     },
-                                    child: const Text('REGISTER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+                                    child: const Text('REGISTER', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), // Pakai putih dari Colour.dart
                                   ),
                                 ),
                               ],
@@ -256,6 +272,7 @@ class _MasukPageState extends State<MasukPage> {
                 ),
               ),
 
+              // --- FOOTER BAWAH ---
               Positioned(
                 bottom: 0, left: 0, right: 0,
                 child: Container(
@@ -270,11 +287,11 @@ class _MasukPageState extends State<MasukPage> {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(5),
-                        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                        decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle), // Pakai putih dari Colour.dart
                         child: const Icon(Icons.cake, color: AppColors.primaryOrange, size: 28), // Pakai dari Colour.dart
                       ),
                       const SizedBox(width: 10),
-                      const Text('Puddingku', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                      const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)), // Pakai putih dari Colour.dart
                     ],
                   ),
                 ),
@@ -286,13 +303,14 @@ class _MasukPageState extends State<MasukPage> {
     );
   }
 
+  // --- PABRIK PENCETAK FORM INPUT ---
   Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, bool isDesktop, {bool isPassword = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)), // Pakai putih dari Colour.dart
           const SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(color: AppColors.inputBg, borderRadius: BorderRadius.circular(12)), // Pakai dari Colour.dart
@@ -305,11 +323,15 @@ class _MasukPageState extends State<MasukPage> {
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: () => setState(() => _passwordVisible = !_passwordVisible),
-                        child: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off, color: Colors.grey, size: 24),
+                        child: Icon(
+                          _passwordVisible ? Icons.visibility : Icons.visibility_off, 
+                          color: AppColors.textHint, // Pakai warna abu-abu hint dari Colour.dart
+                          size: 24
+                        ),
                       )
                     : null,
                 hintText: hint,
-                hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 16),
+                hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 16), // Pakai warna abu-abu hint dari Colour.dart
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
               ),
@@ -321,6 +343,7 @@ class _MasukPageState extends State<MasukPage> {
   }
 }
 
+// --- PEMOTONG GAMBAR HEADER ---
 class HeaderClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
