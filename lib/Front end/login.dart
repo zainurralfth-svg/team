@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; // Panggil Gudang Cat kita
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../Backend/API_Service.dart'; // Panggil si pelayan backend
 
 class LoginPage extends StatefulWidget {
