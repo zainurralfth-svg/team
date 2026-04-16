@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
-import 'admin.dart';
 
-class KonfirmasiPage extends StatelessWidget {
+class KonfirmasiPage extends StatefulWidget {
+  const KonfirmasiPage({super.key});
+
+  @override
+  State<KonfirmasiPage> createState() => _KonfirmasiPageState();
+}
+
+class _KonfirmasiPageState extends State<KonfirmasiPage> {
+  // ALAT PENANGKAP TEKS
+  final TextEditingController _namaController = TextEditingController();
+  final TextEditingController _telpController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Bersihkan memori saat pindah halaman
+    _namaController.dispose();
+    _telpController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,12 +141,15 @@ class KonfirmasiPage extends StatelessWidget {
                         children: [
                           const Text('NAMA LENGKAP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87)),
                           const SizedBox(height: 5),
-                          _buildTextField('Nama Kamu', Icons.person, const Color(0xFFFF9800)),
+                          // Masukkan controller nama ke sini
+                          _buildTextField('Nama Kamu', Icons.person, const Color(0xFFFF9800), _namaController),
                           const SizedBox(height: 15),
                           const Text('NO. TELP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87)),
                           const SizedBox(height: 5),
-                          _buildTextField('No. Telp', Icons.phone_in_talk_outlined, Colors.black),
+                          // Masukkan controller telp ke sini
+                          _buildTextField('No. Telp', Icons.phone_in_talk_outlined, Colors.black, _telpController),
                           const SizedBox(height: 30),
+                          
                           Center(
                             child: ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
@@ -143,25 +164,18 @@ class KonfirmasiPage extends StatelessWidget {
                               icon: const Icon(Icons.shopping_bag, color: Color(0xFFFF7043), size: 20),
                               label: const Text('Checkout Sekarang', style: TextStyle(fontWeight: FontWeight.bold)),
                               onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Sukses!'),
-                                    content: const Text('Pesanan Anda telah dikonfirmasi.'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context); // Tutup pop-up
-                                          // Pindah ke halaman admin
-                                          Navigator.pushReplacement(
-                                            context, 
-                                            MaterialPageRoute(builder: (context) => const HomeAdmin())
-                                          );
-                                        },
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  ),
+                                // AMBIL TEKS YANG DIKETIK
+                                String namaInput = _namaController.text;
+                                String telpInput = _telpController.text;
+
+                                // Pindah ke bukti pemesanan sambil MEMBAWA DATA (arguments)
+                                Navigator.pushNamed(
+                                  context, 
+                                  '/bukti_pemesanan',
+                                  arguments: {
+                                    'nama': namaInput.isEmpty ? 'Pelanggan' : namaInput, // Jika kosong, tulis 'Pelanggan'
+                                    'telp': telpInput.isEmpty ? '-' : telpInput,
+                                  }
                                 );
                               },
                             ),
@@ -221,8 +235,10 @@ class KonfirmasiPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(String hint, IconData icon, Color iconColor) {
+  // UBAH: Tambahkan parameter TextEditingController di sini
+  Widget _buildTextField(String hint, IconData icon, Color iconColor, TextEditingController controller) {
     return TextField(
+      controller: controller, // Pasang controller-nya
       decoration: InputDecoration(
         hintText: hint, 
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
