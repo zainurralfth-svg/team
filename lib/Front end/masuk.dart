@@ -149,10 +149,6 @@ class _MasukPageState extends State<MasukPage> {
     );
   }
 
-<<<<<<< HEAD
-  // --- TOMBOL MATA ---
-  Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, bool isDesktop, {bool isPassword = false}) {
-=======
   // ==============================================================
   // --- KUMPULAN WIDGET KOMPONEN ---
   // ==============================================================
@@ -270,7 +266,6 @@ class _MasukPageState extends State<MasukPage> {
 
   // WIDGET REUSABLE: Cetakan Input Field
   Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, {bool isPassword = false}) {
->>>>>>> 3f19fe5fead7c791e2f9752b300ec2b121bd537c
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -314,12 +309,8 @@ class HeaderClipper extends CustomClipper<Path> {
   @override Path getClip(Size size) { Path path = Path(); path.lineTo(0, size.height); path.lineTo(size.width, size.height); path.lineTo(size.width, 0); path.close(); return path; }
   @override bool shouldReclip(oldClipper) => false;
 }
-<<<<<<< HEAD
-//GARIS MIRING
-=======
 
 // Class untuk menggambar garis batas dekoratif pada potongan gambar
->>>>>>> 3f19fe5fead7c791e2f9752b300ec2b121bd537c
 class HeaderPainter extends CustomPainter {
   @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); }
   @override bool shouldRepaint(oldDelegate) => false;

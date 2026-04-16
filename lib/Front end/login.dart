@@ -124,87 +124,17 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
           double contentWidth = isDesktop ? 650 : constraints.maxWidth * 0.9;
-
+          
           return Stack(
             children: [
-              _buildBackgroundImage(),             // Memanggil background dekoratif
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop),       // Memanggil komponen Header
+                    _buildHeader(isDesktop),             // 1. Panggil Header
                     const SizedBox(height: 20),
-<<<<<<< HEAD
-
-                    // 2. TEKS JUDUL
-                    Center(
-                      child: Container(
-                        width: contentWidth,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          children: [
-                            const Text(
-                              'REGISTER',
-                              style: TextStyle(
-                                color: AppColors.textDark, // Pakai warna dari Colour.dart
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 2,
-                              ),
-                            ),
-                            const Text(
-                              'Register Untuk Membuat Akun',
-                              style: TextStyle(color: AppColors.textDark, fontSize: 18), // Pakai warna dari Colour.dart
-                            ),
-                            const SizedBox(height: 30),
-
-                            // 3. KOTAK FORM (LEBIH LEBAR DI DESKTOP)
-                            Container(
-                              width: isDesktop ? 700 : double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryOrange, // Pakai warna dari Colour.dart
-                                borderRadius: BorderRadius.circular(30),
-                                boxShadow: [
-                                  BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 5)),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start, // Rata kiri/atas
-                                children: [
-                                  _buildInputField('Nama Lengkap', 'Ketik Disini', Icons.badge_outlined, _namaController),
-                                  _buildInputField('Username', 'Arif12309', Icons.person_outline, _usernameController),
-                                  _buildInputField('Phone', '0812345678', Icons.phone_outlined, _phoneController),
-                                  _buildInputField('Password', '******', Icons.lock_outline, _passwordController, isPassword: true),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 40),
-
-                            // 4. TOMBOL REGISTER
-                            SizedBox(
-                              width: isDesktop ? 350 : double.infinity,
-                              height: 55,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryOrange, // Pakai warna dari Colour.dart
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                  elevation: 5,
-                                ),
-                                onPressed: _prosesRegister,
-                                child: const Text('REGISTER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
-                              ),
-                            ),
-                            const SizedBox(height: 120),
-                          ],
-                        ),
-                      ),
-                    ),
-=======
-                    _buildForm(contentWidth, isDesktop), // Memanggil komponen Form Utama
-                    const SizedBox(height: 120),   // Spacer agar form tidak tertutup footer
-                    _buildFooter(),
->>>>>>> 3f19fe5fead7c791e2f9752b300ec2b121bd537c
+                    _buildForm(contentWidth, isDesktop), // 2. Panggil Form
+                    const SizedBox(height: 80),          // 3. Jarak sebelum footer
+                    _buildFooter(),                      // 4. Footer SEKARANG IKUT KE-SCROLL DI SINI!
                   ],
                 ),
               ),
@@ -218,19 +148,7 @@ class _LoginPageState extends State<LoginPage> {
   // ==============================================================
   // --- KUMPULAN WIDGET KOMPONEN ---
   // ==============================================================
-
-  // KOMPONEN 1: Background Dekoratif (Gambar Opacity)
-  Widget _buildBackgroundImage() {
-    return Positioned(
-      right: -30, top: 360,
-      child: Opacity(
-        opacity: 0.1,
-        child: Image.asset('assets/images/', width: 150, errorBuilder: (c, e, s) => const SizedBox()),
-      ),
-    );
-  }
-
-  // KOMPONEN 2: Header Gambar Lurus
+  // KOMPONEN 1: Header Gambar Lurus
   Widget _buildHeader(bool isDesktop) {
     return Stack(
       children: [
@@ -243,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
-        CustomPaint(size: Size(double.infinity, isDesktop ? 253 : 280), painter: HeaderPainter()),
+        CustomPaint(size: Size(double.infinity, isDesktop ? 230 : 280), painter: HeaderPainter()),
         Positioned(
           left: 10, top: 30,
           child: IconButton(icon: const Icon(Icons.arrow_back, color: AppColors.textWhite, size: 30), onPressed: () => Navigator.pop(context)),
@@ -252,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // KOMPONEN 3: Struktur Form dan Judul
+  // KOMPONEN 2: Struktur Form dan Judul
   Widget _buildForm(double contentWidth, bool isDesktop) {
     return Center(
       child: Container(
@@ -260,7 +178,8 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            const Text('REGISTER', style: TextStyle(color: AppColors.textDark, fontSize: 36, fontWeight: FontWeight.bold, letterSpacing: 1, fontStyle: FontStyle.italic)),
+            // Tambahin miring (italic) biar seragam sama halaman Masuk
+            const Text('REGISTER', style: TextStyle(color: AppColors.textDark, fontSize: 36, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, letterSpacing: 1)),
             const Text('Register Untuk Membuat Akun', style: TextStyle(color: AppColors.textDark, fontSize: 18)),
             const SizedBox(height: 30),
 
@@ -300,28 +219,25 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // KOMPONEN 4: Footer Statis
+  // KOMPONEN 3: Footer Statis (Lem Super "Positioned" udah dicabut!)
   Widget _buildFooter() {
-    return Positioned(
-      bottom: 0, left: 0, right: 0,
-      child: Container(
-        height: 65, width: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.primaryOrange, 
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(5),
-              decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle),
-              child: const Icon(Icons.cake, color: AppColors.primaryOrange, size: 28), 
-            ),
-            const SizedBox(width: 10),
-            const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
-          ],
-        ),
+    return Container( // <--- Positioned dihapus, jadi langsung Container
+      height: 65, width: double.infinity,
+      decoration: const BoxDecoration(
+        color: AppColors.primaryOrange, 
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(5),
+            decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle),
+            child: const Icon(Icons.cake, color: AppColors.primaryOrange, size: 28), 
+          ),
+          const SizedBox(width: 10),
+          const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }
@@ -363,7 +279,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 // ==============================================================
-// --- CLASS DEKORASI BENTUK GARIS HITAM---
+// --- CLASS DEKORASI BENTUK ---
 // ==============================================================
 
 class HeaderClipper extends CustomClipper<Path> {
@@ -371,19 +287,7 @@ class HeaderClipper extends CustomClipper<Path> {
   @override bool shouldReclip(oldClipper) => false;
 }
 
-<<<<<<< HEAD
-class GarisMiringPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = Path();
-    path.moveTo(0, size.height);
-    path.lineTo(size.width, size.height - 60);
-  }
-  @override
-  bool shouldRepaint(oldDelegate) => false;
-=======
 class HeaderPainter extends CustomPainter {
   @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); }
   @override bool shouldRepaint(oldDelegate) => false;
->>>>>>> 3f19fe5fead7c791e2f9752b300ec2b121bd537c
 }
