@@ -28,8 +28,19 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  
+  # --- Alat Tukang Ganti Logo Aplikasi ---
+  flutter_launcher_icons: "^0.13.1"
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
+
+# --- PENGATURAN LOGO PUDDINGKU ---
+# Pastikan nama file gambar kamu adalah "logo.png"
+# dan sudah ditaruh di dalam folder "assets/images/"
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
