@@ -197,7 +197,7 @@ class _LoginPageState extends State<LoginPage> { //class state yang menyimpan da
                                 ],
                               ),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start, // Rata kiri/atas
                                 children: [
                                   _buildInputField('Nama Lengkap', 'Ketik Disini', Icons.badge_outlined, _namaController),
                                   _buildInputField('Username', 'Arif12309', Icons.person_outline, _usernameController),
@@ -316,11 +316,9 @@ class HeaderClipper extends CustomClipper<Path> { //membuat bentuk header yang m
 class GarisMiringPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; // Pakai warna dari Colour.dart
     final path = Path();
     path.moveTo(0, size.height);
     path.lineTo(size.width, size.height - 60);
-    canvas.drawPath(path, paint);
   }
   @override
   bool shouldRepaint(oldDelegate) => false;

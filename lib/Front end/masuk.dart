@@ -303,7 +303,7 @@ class _MasukPageState extends State<MasukPage> {
     );
   }
 
-  // --- PABRIK PENCETAK FORM INPUT ---
+  // --- TOMBOL MATA ---
   Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, bool isDesktop, {bool isPassword = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -357,7 +357,7 @@ class HeaderClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(oldClipper) => false;
 }
-
+//GARIS MIRING
 class HeaderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
