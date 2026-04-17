@@ -30,6 +30,7 @@ class PuddingkuApp extends StatelessWidget {
         '/menu': (context) => MenuPage(),
         '/keranjang': (context) => KeranjangPage(),
         '/konfirmasi': (context) => KonfirmasiPage(),
+        '/bukti_pemesanan': (context) => const BuktiPemesanan(),
         '/admin_home': (context) => const HomeAdmin(),
       },
     );

@@ -110,7 +110,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                     _buildErrorBanner(),                 // Memanggil komponen Banner Error
                     _buildForm(contentWidth, isDesktop), // Memanggil komponen Form Utama
                     const SizedBox(height: 120),         // Spacer agar konten tidak tertutup Footer
-                    _buildFooter(),                            // Memanggil komponen Footer (posisi fixed di bawah)
+                    _buildFooter(),                      // 4. Footer SEKARANG IKUT KE-SCROLL DI SINI!
                   ],
                 ),
               ),
@@ -176,9 +176,9 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            Text(_isPhoneVerified ? 'BUAT PASSWORD BARU' : 'RESET PASSWORD', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.strokeDark, fontSize: 28, fontWeight: FontWeight.bold)),
+            Text(_isPhoneVerified ? 'BUAT PASSWORD BARU' : 'RESET PASSWORD', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.strokeDark, fontSize: 28, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
             const SizedBox(height: 10),
-            Text(_isPhoneVerified ? 'Nomor terverifikasi! Masukkan password baru Anda.' : 'Masukkan nomor telepon yang terdaftar di akun Anda.', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.strokeDark, fontSize: 16)),
+            Text(_isPhoneVerified ? 'Nomor terverifikasi! Masukkan Password Baru Anda.' : 'Masukkan Nomor Telepon Yang Terdaftar Di Akun Anda.', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.strokeDark, fontSize: 16)),
             const SizedBox(height: 30),
 
             // Container Background Form (Warna Oranye)
@@ -219,15 +219,23 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
 
   // KOMPONEN 4: Menampilkan Footer Statis di bagian bawah layar
   Widget _buildFooter() {
-    return Positioned(
-      bottom: 0, left: 0, right: 0,
-      child: Container(
-        height: 65, width: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.primaryOrange,
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
-        ),
-        child: const Center(child: Text('Puddingku Security', style: TextStyle(color: AppColors.textWhite, fontSize: 20, fontWeight: FontWeight.bold))),
+    return Container( // <--- Positioned dihapus, jadi langsung Container
+      height: 65, width: double.infinity,
+      decoration: const BoxDecoration(
+        color: AppColors.primaryOrange, 
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(5),
+            decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle),
+            child: const Icon(Icons.cake, color: AppColors.primaryOrange, size: 28), 
+          ),
+          const SizedBox(width: 10),
+          const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }
