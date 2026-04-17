@@ -78,10 +78,28 @@ class KonfirmasiPage extends StatelessWidget {
                           BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 3)),
                         ],
                       ),
+
+                      //Kolom Untuk Foto Produk
                       child: Column(
                         children: [
                           _buildItemRingkasan('Brownie Burnt Cheesecake', 'x2', 'Rp 36.000'),
                           const SizedBox(height: 15),
+                          Positioned(
+                          left: -50,
+                          top: 10,
+                          child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/Brownie Burn Cheesecake.png'),
+                            fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+
                           _buildItemRingkasan('Death By Cokelat', 'x1', 'Rp 18.000'),
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 10),
