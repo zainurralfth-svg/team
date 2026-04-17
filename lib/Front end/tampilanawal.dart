@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; // Memanggil file warna kamu
-// PENTING: Jangan lupa import file color.dart kamu di sini!
-// Misalnya nama file-nya 'color.dart':
-// import 'color.dart'; 
+import '../Core/Colour.dart'; 
 
 class TampilanAwal extends StatelessWidget {
   @override
