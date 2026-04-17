@@ -7,6 +7,7 @@ import 'Front end/keranjang.dart';
 import 'Front end/konfirmasipesanan.dart';
 import 'Front end/lupa_password.dart';
 import 'Front end/admin.dart' ;
+import 'Front end/product_detail.dart' ;
 
 void main() {
   runApp(const PuddingkuApp()); // Tambah const biar performanya lebih ringan

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Gunakan localhost jika di Web/Windows, gunakan 10.0.2.2 jika di Emulator Android
-  static const String baseUrl = "http://192.168.0.107/api_puddingku";
+  static const String baseUrl = "http://localhost/api_puddingku";
 
   // 1. FUNGSI REGISTER
   static Future<Map<String, dynamic>> registerUser(

@@ -1,8 +1,51 @@
 import 'package:flutter/material.dart';
+import 'product_detail.dart'; // import file detail
+
+// =====================================================================
+// Helper: Animasi Instagram-style (slide dari bawah + fade + scale back)
+// =====================================================================
+PageRoute instagramSlideRoute(Widget page) {
+  return PageRouteBuilder(
+    transitionDuration: const Duration(milliseconds: 420),
+    reverseTransitionDuration: const Duration(milliseconds: 350),
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      // Slide dari bawah ke atas
+      final slide = Tween<Offset>(
+        begin: const Offset(0, 1),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      ));
+
+      // Fade in saat muncul
+      final fade = CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+      );
+
+      // Halaman lama mengecil sedikit (efek kedalaman seperti Instagram)
+      final scaleBack = Tween<double>(begin: 1.0, end: 0.93).animate(
+        CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut),
+      );
+
+      return ScaleTransition(
+        scale: scaleBack,
+        child: SlideTransition(
+          position: slide,
+          child: FadeTransition(
+            opacity: fade,
+            child: child,
+          ),
+        ),
+      );
+    },
+  );
+}
 
 // =====================================================================
 // MenuPage - Halaman utama untuk menampilkan menu produk
-// Menggunakan StatefulWidget agar kategori bisa berpindah
 // =====================================================================
 class MenuPage extends StatefulWidget {
   const MenuPage({Key? key}) : super(key: key);
@@ -12,11 +55,8 @@ class MenuPage extends StatefulWidget {
 }
 
 class _MenuPageState extends State<MenuPage> {
-
-  // State: index kategori yang sedang aktif (default = 4 / Cookies)
   int _selectedIndex = 0;
 
-  // Urutan nama kategori
   final List<String> _categories = [
     'Pudding',
     'Dessert',
@@ -25,7 +65,6 @@ class _MenuPageState extends State<MenuPage> {
     'Cookies',
   ];
 
-  // Banner per kategori
   final List<String> _banners = [
     'banner pudding.png',
     'banner dessert.png',
@@ -34,44 +73,43 @@ class _MenuPageState extends State<MenuPage> {
     'banner cookies.png',
   ];
 
-  // Data produk per kategori
   final List<List<Map<String, String>>> _allProducts = [
     // Pudding (8 produk)
     [
-      {'name': 'Silky Pudding Taro',     'price': 'Rp. 4.000', 'image': 'Silky Pudding Taro.png'},
-      {'name': 'Tripple Choco Pudding',    'price': 'Rp. 4.000', 'image': 'Tripple Choco Pudding.png'},
-      {'name': 'Silky Pudding Chocolate', 'price': 'Rp. 4.000', 'image': 'Silky Pudding Chocolate.png'},
-      {'name': 'Silky Pudding Manggo',     'price': 'Rp. 4.000', 'image': 'Silky Pudding Mango.png'},
-      {'name': 'Silky Pudding Banana',       'price': 'Rp. 4.000', 'image': 'Silky Pudding Banana.png'},
-      {'name': 'Silky Pudding Bubble Gum',     'price': 'Rp. 4.000', 'image': 'Silky Pudding Bubble Gum.png'},
-      {'name': 'Silky Pudding Strawberry',      'price': 'Rp. 4.000', 'image': 'Silky Pudding Strawberry.png'},
-      {'name': 'Silky Pudding Leci',    'price': 'Rp. 4.000', 'image': 'Silky Pudding Leci.png'},
+      {'name': 'Silky Pudding Taro',        'price': 'Rp. 4.000',  'image': 'Silky Pudding Taro.png'},
+      {'name': 'Tripple Choco Pudding',      'price': 'Rp. 4.000',  'image': 'Tripple Choco Pudding.png'},
+      {'name': 'Silky Pudding Chocolate',    'price': 'Rp. 4.000',  'image': 'Silky Pudding Chocolate.png'},
+      {'name': 'Silky Pudding Manggo',       'price': 'Rp. 4.000',  'image': 'Silky Pudding Mango.png'},
+      {'name': 'Silky Pudding Banana',       'price': 'Rp. 4.000',  'image': 'Silky Pudding Banana.png'},
+      {'name': 'Silky Pudding Bubble Gum',   'price': 'Rp. 4.000',  'image': 'Silky Pudding Bubble Gum.png'},
+      {'name': 'Silky Pudding Strawberry',   'price': 'Rp. 4.000',  'image': 'Silky Pudding Strawberry.png'},
+      {'name': 'Silky Pudding Leci',         'price': 'Rp. 4.000',  'image': 'Silky Pudding Leci.png'},
     ],
     // Dessert (6 produk)
     [
-      {'name': 'Dessert Box Banafe',      'price': 'Rp. 20.000', 'image': 'Dessert Box Banafe.png'},
+      {'name': 'Dessert Box Banafe',         'price': 'Rp. 20.000', 'image': 'Dessert Box Banafe.png'},
       {'name': 'Cheese Cuit Strawberry',     'price': 'Rp. 18.000', 'image': 'Cheese Cuit Strawberry.png'},
-      {'name': 'Death By Chocolate', 'price': 'Rp. 18.000', 'image': 'Death By Chocolate.png'},
-      {'name': 'Milk Bath Chocolate',       'price': 'Rp. 20.000', 'image': 'Milk Bath Chocolate.png'},
-      {'name': 'Milk Bath Keju',       'price': 'Rp. 20.000', 'image': 'Milk Bath Keju.png'},
-      {'name': 'Milk Bun',    'price': 'Rp. 20.000', 'image': 'Milk Bun.png'},
+      {'name': 'Death By Chocolate',         'price': 'Rp. 18.000', 'image': 'Death By Chocolate.png'},
+      {'name': 'Milk Bath Chocolate',        'price': 'Rp. 20.000', 'image': 'Milk Bath Chocolate.png'},
+      {'name': 'Milk Bath Keju',             'price': 'Rp. 20.000', 'image': 'Milk Bath Keju.png'},
+      {'name': 'Milk Bun',                   'price': 'Rp. 20.000', 'image': 'Milk Bun.png'},
     ],
     // Cake (8 produk)
     [
-      {'name': 'Mango Mouse Cake',   'price': 'Rp. 15.000', 'image': 'Mango Mouse Cake.png'},
-      {'name': 'Cookies and Cream Mouse Cake',    'price': 'Rp. 15.000', 'image': 'Cookies and  Cream Mouse.png'},
-      {'name': 'Peach Mouse Cake', 'price': 'Rp. 15.000', 'image': 'Peach Mouse Cake.png'},
-      {'name': 'Taro Mouse Cake',        'price': 'Rp. 15.000', 'image': 'Taro Mouse Cake.png'},
-      {'name': 'Strawberry Mouse Cake',    'price': 'Rp. 15.000', 'image': 'Strawberry Petite Cake.png'},
-      {'name': 'Tiramisu Mouse Cake',      'price': 'Rp. 15.000', 'image': 'Tiramisu Mouse Cake.png'},
-      {'name': 'Matcha Mouse Cake',  'price': 'Rp. 15.000', 'image': 'Matcha Mouse Cake.png'},
-      {'name': 'Strawberry Short Cake',        'price': 'Rp. 15.000', 'image': 'Strawberry Mouse Cake.png'},
+      {'name': 'Mango Mouse Cake',              'price': 'Rp. 15.000', 'image': 'Mango Mouse Cake.png'},
+      {'name': 'Cookies and Cream Mouse Cake',  'price': 'Rp. 15.000', 'image': 'Cookies and  Cream Mouse.png'},
+      {'name': 'Peach Mouse Cake',              'price': 'Rp. 15.000', 'image': 'Peach Mouse Cake.png'},
+      {'name': 'Taro Mouse Cake',               'price': 'Rp. 15.000', 'image': 'Taro Mouse Cake.png'},
+      {'name': 'Strawberry Mouse Cake',         'price': 'Rp. 15.000', 'image': 'Strawberry Petite Cake.png'},
+      {'name': 'Tiramisu Mouse Cake',           'price': 'Rp. 15.000', 'image': 'Tiramisu Mouse Cake.png'},
+      {'name': 'Matcha Mouse Cake',             'price': 'Rp. 15.000', 'image': 'Matcha Mouse Cake.png'},
+      {'name': 'Strawberry Short Cake',         'price': 'Rp. 15.000', 'image': 'Strawberry Mouse Cake.png'},
     ],
     // Brownies (3 produk)
     [
-      {'name': 'Browkies',      'price': 'Rp. 12.000', 'image': 'Browkies.png'},
-      {'name': 'Brownie Burn Cheese Cake', 'price': 'Rp. 15.000', 'image': 'Brownie Burn Cheesecake.png'},
-      {'name': 'Brownies Bites',         'price': 'Rp. 15.000', 'image': 'Brownies Bites.png'},
+      {'name': 'Browkies',                   'price': 'Rp. 12.000', 'image': 'Browkies.png'},
+      {'name': 'Brownie Burn Cheese Cake',   'price': 'Rp. 15.000', 'image': 'Brownie Burn Cheesecake.png'},
+      {'name': 'Brownies Bites',             'price': 'Rp. 15.000', 'image': 'Brownies Bites.png'},
     ],
     // Cookies (5 produk)
     [
@@ -83,11 +121,17 @@ class _MenuPageState extends State<MenuPage> {
     ],
   ];
 
-  // Fungsi ganti kategori saat tombol ditekan
   void _onCategoryTap(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
+  }
+
+  // ── Navigasi ke halaman detail dengan animasi Instagram ──
+  void _goToDetail(BuildContext context, String name, String price, String img) {
+    Navigator.of(context).push(
+      instagramSlideRoute(
+        ProductDetailPage(name: name, price: price, image: img),
+      ),
+    );
   }
 
   @override
@@ -98,21 +142,16 @@ class _MenuPageState extends State<MenuPage> {
     const Color colorBorder  = Color(0xFF7A4A21);
     const Color colorText    = Color(0xFF3A1F0F);
 
-    final String activeBanner                      = _banners[_selectedIndex];
-    final String activeName                        = _categories[_selectedIndex];
+    final String activeBanner   = _banners[_selectedIndex];
+    final String activeName     = _categories[_selectedIndex];
     final List<Map<String, String>> activeProducts = _allProducts[_selectedIndex];
 
-    // Ambil lebar layar untuk hitung lebar tombol kategori
-    final double screenWidth = MediaQuery.of(context).size.width;
-    // Total padding kiri kanan halaman = 16 + 16 = 32
-    // Jarak antar 5 tombol = 4 celah x 8px = 32
-    // Lebar 1 tombol = (screenWidth - 32 - 32) / 5
+    final double screenWidth      = MediaQuery.of(context).size.width;
     final double categoryBtnWidth = (screenWidth - 32 - 32) / 5;
 
     return Scaffold(
       backgroundColor: colorBg,
 
-      // AppBar
       appBar: AppBar(
         backgroundColor: colorPrimary,
         elevation: 0,
@@ -141,7 +180,6 @@ class _MenuPageState extends State<MenuPage> {
 
       body: Stack(
         children: [
-          // Background pattern transparan
           Opacity(
             opacity: 0.1,
             child: Image.asset(
@@ -159,8 +197,7 @@ class _MenuPageState extends State<MenuPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  // Banner - berubah sesuai kategori aktif
+                  // Banner
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
@@ -210,11 +247,7 @@ class _MenuPageState extends State<MenuPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ==============================================================
-                  // TOMBOL KATEGORI
-                  // Pakai Row + SizedBox dengan lebar dihitung dari lebar layar
-                  // agar semua tombol pas penuh 1 baris & ukurannya sama rata
-                  // ==============================================================
+                  // Tombol Kategori
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List.generate(_categories.length, (index) {
@@ -222,10 +255,10 @@ class _MenuPageState extends State<MenuPage> {
                       return GestureDetector(
                         onTap: () => _onCategoryTap(index),
                         child: SizedBox(
-                          // Lebar tombol dihitung otomatis dari lebar layar
                           width: categoryBtnWidth,
                           height: 42,
-                          child: Container(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
                             decoration: BoxDecoration(
                               color: isActive ? colorPrimary : colorCard,
                               borderRadius: BorderRadius.circular(25),
@@ -274,7 +307,7 @@ class _MenuPageState extends State<MenuPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Grid Produk - jumlah item sesuai kategori aktif
+                  // Grid Produk
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -307,7 +340,6 @@ class _MenuPageState extends State<MenuPage> {
         ],
       ),
 
-      // Bottom Navigation Bar
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
@@ -328,7 +360,6 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  // Widget kartu produk
   Widget _buildProductCard(
     BuildContext context,
     String name,
@@ -355,23 +386,31 @@ class _MenuPageState extends State<MenuPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Gambar produk
+          // ── Gambar produk dengan Hero tag (untuk transisi halus) ──
           Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-              child: Image.asset(
-                'assets/images/$img',
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (c, e, s) => Container(
-                  color: btnColor.withOpacity(0.2),
-                  child: Center(
-                    child: Icon(Icons.image, color: btnColor, size: 40),
+            child: GestureDetector(
+              // Klik gambar juga langsung ke detail
+              onTap: () => _goToDetail(context, name, price, img),
+              child: Hero(
+                tag: 'product-$name',
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                  child: Image.asset(
+                    'assets/images/$img',
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (c, e, s) => Container(
+                      color: btnColor.withOpacity(0.2),
+                      child: Center(
+                        child: Icon(Icons.image, color: btnColor, size: 40),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
+
           // Info produk
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -385,6 +424,8 @@ class _MenuPageState extends State<MenuPage> {
                     fontSize: 13,
                     color: textColor,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -395,26 +436,28 @@ class _MenuPageState extends State<MenuPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Tombol Details
+                    // ── Tombol Details → navigasi ke halaman detail ──
                     GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Details $name')),
-                        );
-                      },
+                      onTap: () => _goToDetail(context, name, price, img),
                       child: const Text(
                         'Details',
                         style: TextStyle(
                           fontSize: 10,
                           decoration: TextDecoration.underline,
+                          color: Color(0xFF7A4A21),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
+
                     // Tombol + Order
                     GestureDetector(
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('$name ditambahkan ke keranjang')),
+                          SnackBar(
+                            content: Text('$name ditambahkan ke keranjang'),
+                            backgroundColor: const Color(0xFFC9792B),
+                          ),
                         );
                       },
                       child: Container(
@@ -443,7 +486,6 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  // Widget item bottom nav
   Widget _buildBottomNavItem(IconData icon, String label) {
     return Column(
       mainAxisSize: MainAxisSize.min,
