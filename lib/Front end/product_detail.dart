@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // =====================================================================
-// ProductDetailPage - Halaman detail produk (full page)
+// ProductDetail - Halaman detail produk (full page)
 // =====================================================================
 class ProductDetailPage extends StatefulWidget {
   final String name;
