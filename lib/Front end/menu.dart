@@ -57,7 +57,7 @@ class _MenuPageState extends State<MenuPage> {
   final List<String> _categories = ['Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
   final List<String> _banners = ['banner pudding.png', 'banner dessert.png', 'banner cake.png', 'banner brownies.png', 'banner cookies.png'];
 
-  // Anggap saja ini adalah ID User yang sedang login (sementara kita buat '1' dulu)
+  // Anggap saja ini adalah ID User yang sedang login
   final String currentUserId = "1"; 
 
   @override
@@ -82,9 +82,18 @@ class _MenuPageState extends State<MenuPage> {
     setState(() => _selectedIndex = index);
   }
 
-  void _goToDetail(BuildContext context, String name, String price, String imgUrl) {
+  // =====================================================================
+  // PERBAIKAN: Menambahkan parameter "description" untuk dikirim ke Detail
+  // =====================================================================
+  void _goToDetail(BuildContext context, String idMenu, String name, String price, String imgUrl, String description) {
     Navigator.of(context).push(
-      instagramSlideRoute(ProductDetailPage(name: name, price: price, image: imgUrl)),
+      instagramSlideRoute(ProductDetailPage(
+        idMenu: idMenu, 
+        name: name, 
+        price: price, 
+        image: imgUrl,
+        description: description // <- Ini dia data yang ditunggu-tunggu Product Detail!
+      )),
     );
   }
 
@@ -194,13 +203,18 @@ class _MenuPageState extends State<MenuPage> {
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.85, crossAxisSpacing: 12, mainAxisSpacing: 12),
                     itemBuilder: (context, index) {
                       final product = produkFilter[index];
-                      String idMenu = product['id_menu']?.toString() ?? ''; // AMBIL ID MENU
+                      String idMenu = product['id_menu']?.toString() ?? ''; 
                       String namaDB = product['nama_produk'] ?? 'Tanpa Nama';
                       String hargaDB = 'Rp ${product['harga']}';
                       String namaFileGambar = product['gambar'] ?? '';
                       String urlGambarLengkap = Uri.encodeFull("${ApiService.baseUrl}/uploads/$namaFileGambar");
+                      
+                      // =======================================================
+                      // PERBAIKAN: Ambil deskripsi dari database
+                      // =======================================================
+                      String deskripsiDB = product['deskripsi'] ?? 'Deskripsi tidak tersedia.';
 
-                      return _buildProductCard(context, idMenu, namaDB, hargaDB, urlGambarLengkap, colorCard, colorBorder, colorText, colorPrimary);
+                      return _buildProductCard(context, idMenu, namaDB, hargaDB, urlGambarLengkap, deskripsiDB, colorCard, colorBorder, colorText, colorPrimary);
                     },
                   );
                 }
@@ -211,28 +225,20 @@ class _MenuPageState extends State<MenuPage> {
         ),
       ),
       
-      // ==============================================================
-      // BOTTOM NAVIGATION BAR (SUDAH BISA DIKLIK)
-      // ==============================================================
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(color: colorPrimary, borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            // TOMBOL 1: Pesanan
             GestureDetector(
               onTap: () {
-                // Berpindah ke halaman cek pesanan
                 Navigator.pushNamed(context, '/cek_pesanan');
               },
               child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan'),
             ),
-            
-            // TOMBOL 2: Produk
             GestureDetector(
               onTap: () {
-                // Tidak melakukan apa-apa karena sudah berada di halaman produk
               },
               child: _buildBottomNavItem(Icons.cake, 'Produk'),
             ),
@@ -242,7 +248,8 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  Widget _buildProductCard(BuildContext context, String idMenu, String name, String price, String imgUrl, Color cardColor, Color borderColor, Color textColor, Color btnColor) {
+  // PERBAIKAN: Tambahkan parameter description di sini
+  Widget _buildProductCard(BuildContext context, String idMenu, String name, String price, String imgUrl, String description, Color cardColor, Color borderColor, Color textColor, Color btnColor) {
     return Container(
       decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(15), border: Border.all(color: borderColor, width: 1), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 3))]),
       child: Column(
@@ -250,7 +257,8 @@ class _MenuPageState extends State<MenuPage> {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () => _goToDetail(context, name, price, imgUrl),
+              // PERBAIKAN: Lempar description ke halaman detail
+              onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description),
               child: Hero(
                 tag: 'product-$name',
                 child: ClipRRect(
@@ -273,7 +281,8 @@ class _MenuPageState extends State<MenuPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
-                      onTap: () => _goToDetail(context, name, price, imgUrl),
+                      // PERBAIKAN: Lempar description ke halaman detail
+                      onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description),
                       child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: Color(0xFF7A4A21), fontWeight: FontWeight.w600)),
                     ),
                     GestureDetector(
@@ -310,10 +319,9 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  // UPDATE: Tambahkan area transparan agar lebih mudah diklik
   Widget _buildBottomNavItem(IconData icon, String label) {
     return Container(
-      color: Colors.transparent, // Memperluas area hitbox jari
+      color: Colors.transparent,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Column(
         mainAxisSize: MainAxisSize.min, 
