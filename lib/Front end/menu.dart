@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'product_detail.dart'; 
-import '../Backend/api_service.dart'; // PASTIKAN FOLDER INI BENAR
+import '../Backend/api_service.dart';
 
 // =====================================================================
-// Helper: Animasi Instagram-style (slide dari bawah + fade + scale back)
+// Helper: Animasi Instagram-style
 // =====================================================================
 PageRoute instagramSlideRoute(Widget page) {
   return PageRouteBuilder(
@@ -42,9 +42,6 @@ PageRoute instagramSlideRoute(Widget page) {
   );
 }
 
-// =====================================================================
-// MenuPage - Halaman utama untuk menampilkan menu produk
-// =====================================================================
 class MenuPage extends StatefulWidget {
   const MenuPage({Key? key}) : super(key: key);
 
@@ -54,25 +51,14 @@ class MenuPage extends StatefulWidget {
 
 class _MenuPageState extends State<MenuPage> {
   int _selectedIndex = 0;
-  
   List<dynamic> _menuDariDatabase = [];
   bool _isLoading = true;
 
-  final List<String> _categories = [
-    'Pudding',
-    'Dessert',
-    'Cake',
-    'Brownies',
-    'Cookies',
-  ];
+  final List<String> _categories = ['Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
+  final List<String> _banners = ['banner pudding.png', 'banner dessert.png', 'banner cake.png', 'banner brownies.png', 'banner cookies.png'];
 
-  final List<String> _banners = [
-    'banner pudding.png',
-    'banner dessert.png',
-    'banner cake.png',
-    'banner brownies.png',
-    'banner cookies.png',
-  ];
+  // Anggap saja ini adalah ID User yang sedang login (sementara kita buat '1' dulu)
+  final String currentUserId = "1"; 
 
   @override
   void initState() {
@@ -88,10 +74,7 @@ class _MenuPageState extends State<MenuPage> {
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      print("Gagal mengambil menu: $e");
+      setState(() => _isLoading = false);
     }
   }
 
@@ -101,29 +84,25 @@ class _MenuPageState extends State<MenuPage> {
 
   void _goToDetail(BuildContext context, String name, String price, String imgUrl) {
     Navigator.of(context).push(
-      instagramSlideRoute(
-        ProductDetailPage(name: name, price: price, image: imgUrl),
-      ),
+      instagramSlideRoute(ProductDetailPage(name: name, price: price, image: imgUrl)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    const Color colorBg      = Color(0xFFF2D7A6);
+    const Color colorBg = Color(0xFFF2D7A6);
     const Color colorPrimary = Color(0xFFC9792B);
-    const Color colorCard    = Color(0xFFF7E6C4);
-    const Color colorBorder  = Color(0xFF7A4A21);
-    const Color colorText    = Color(0xFF3A1F0F);
+    const Color colorCard = Color(0xFFF7E6C4);
+    const Color colorBorder = Color(0xFF7A4A21);
+    const Color colorText = Color(0xFF3A1F0F);
 
-    final String activeBanner   = _banners[_selectedIndex];
-    final String activeName     = _categories[_selectedIndex];
-
-    final double screenWidth      = MediaQuery.of(context).size.width;
+    final String activeBanner = _banners[_selectedIndex];
+    final String activeName = _categories[_selectedIndex];
+    final double screenWidth = MediaQuery.of(context).size.width;
     final double categoryBtnWidth = (screenWidth - 32 - 32) / 5;
 
     return Scaffold(
       backgroundColor: colorBg,
-
       appBar: AppBar(
         backgroundColor: colorPrimary,
         elevation: 0,
@@ -131,10 +110,7 @@ class _MenuPageState extends State<MenuPage> {
         title: Image.asset(
           'assets/images/tulisanmenu.png',
           height: 40,
-          errorBuilder: (context, error, stackTrace) => const Text(
-            'PUDDINGKU',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
+          errorBuilder: (context, error, stackTrace) => const Text('PUDDINGKU', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         ),
         actions: [
           Padding(
@@ -149,64 +125,34 @@ class _MenuPageState extends State<MenuPage> {
           ),
         ],
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Banner
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: Image.asset(
                   'assets/images/$activeBanner',
-                  width: double.infinity,
-                  height: 180,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: double.infinity,
-                    height: 180,
-                    decoration: BoxDecoration(
-                      color: colorPrimary.withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Banner $activeName',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  width: double.infinity, height: 180, fit: BoxFit.cover,
+                  errorBuilder: (c, e, s) => Container(
+                    width: double.infinity, height: 180,
+                    decoration: BoxDecoration(color: colorPrimary.withOpacity(0.4), borderRadius: BorderRadius.circular(20)),
+                    child: Center(child: Text('Banner $activeName', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Search Bar
               TextField(
                 decoration: InputDecoration(
-                  hintText: 'Search Produk',
-                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(color: colorBorder, width: 0.5),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(color: colorBorder, width: 0.5),
-                  ),
+                  hintText: 'Search Produk', prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  filled: true, fillColor: Colors.white, contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: colorBorder, width: 0.5)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: colorBorder, width: 0.5)),
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Tombol Kategori
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(_categories.length, (index) {
@@ -214,36 +160,17 @@ class _MenuPageState extends State<MenuPage> {
                   return GestureDetector(
                     onTap: () => _onCategoryTap(index),
                     child: SizedBox(
-                      width: categoryBtnWidth,
-                      height: 42,
+                      width: categoryBtnWidth, height: 42,
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
                         decoration: BoxDecoration(
                           color: isActive ? colorPrimary : colorCard,
                           borderRadius: BorderRadius.circular(25),
-                          border: Border.all(
-                            color: colorBorder,
-                            width: isActive ? 2 : 1,
-                          ),
-                          boxShadow: isActive
-                              ? [
-                                  BoxShadow(
-                                    color: colorPrimary.withOpacity(0.5),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 3),
-                                  )
-                                ]
-                              : [],
+                          border: Border.all(color: colorBorder, width: isActive ? 2 : 1),
+                          boxShadow: isActive ? [BoxShadow(color: colorPrimary.withOpacity(0.5), blurRadius: 8, offset: const Offset(0, 3))] : [],
                         ),
                         child: Center(
-                          child: Text(
-                            _categories[index],
-                            style: TextStyle(
-                              color: isActive ? Colors.white : colorBorder,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
+                          child: Text(_categories[index], style: TextStyle(color: isActive ? Colors.white : colorBorder, fontWeight: FontWeight.bold, fontSize: 13)),
                         ),
                       ),
                     ),
@@ -251,79 +178,29 @@ class _MenuPageState extends State<MenuPage> {
                 }),
               ),
               const SizedBox(height: 24),
-
-              // Judul Kategori Aktif
               Center(
-                child: Text(
-                  activeName.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: colorText,
-                    letterSpacing: 2,
-                  ),
-                ),
+                child: Text(activeName.toUpperCase(), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: colorText, letterSpacing: 2)),
               ),
               const SizedBox(height: 16),
-
-              // =======================================================
-              // LOGIKA TAMPIL PRODUK
-              // =======================================================
               Builder(
                 builder: (context) {
-                  if (_isLoading) {
-                    return const Center(child: CircularProgressIndicator(color: colorPrimary));
-                  }
-
-                  final produkFilter = _menuDariDatabase.where((produk) {
-                    return produk['kategori'] == activeName; 
-                  }).toList();
-
+                  if (_isLoading) return const Center(child: CircularProgressIndicator(color: colorPrimary));
+                  final produkFilter = _menuDariDatabase.where((produk) => produk['kategori'] == activeName).toList();
                   if (produkFilter.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Text(
-                          "Belum ada produk di kategori $activeName.",
-                          style: const TextStyle(color: colorText, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    );
+                    return Center(child: Padding(padding: const EdgeInsets.all(20.0), child: Text("Belum ada produk di kategori $activeName.", style: const TextStyle(color: colorText, fontWeight: FontWeight.bold))));
                   }
-
                   return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: produkFilter.length, 
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.85, 
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
+                    shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: produkFilter.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.85, crossAxisSpacing: 12, mainAxisSpacing: 12),
                     itemBuilder: (context, index) {
-                      final product = produkFilter[index]; 
-                      
+                      final product = produkFilter[index];
+                      String idMenu = product['id_menu']?.toString() ?? ''; // AMBIL ID MENU
                       String namaDB = product['nama_produk'] ?? 'Tanpa Nama';
                       String hargaDB = 'Rp ${product['harga']}';
-                      
                       String namaFileGambar = product['gambar'] ?? '';
-                      
-                      // ==========================================================
-                      // SOLUSI: Pakai Uri.encodeFull untuk mengatasi spasi di nama file
-                      // ==========================================================
                       String urlGambarLengkap = Uri.encodeFull("${ApiService.baseUrl}/uploads/$namaFileGambar");
 
-                      return _buildProductCard(
-                        context,
-                        namaDB,
-                        hargaDB,
-                        urlGambarLengkap, 
-                        colorCard,
-                        colorBorder,
-                        colorText,
-                        colorPrimary,
-                      );
+                      return _buildProductCard(context, idMenu, namaDB, hargaDB, urlGambarLengkap, colorCard, colorBorder, colorText, colorPrimary);
                     },
                   );
                 }
@@ -333,50 +210,41 @@ class _MenuPageState extends State<MenuPage> {
           ),
         ),
       ),
-
+      
+      // ==============================================================
+      // BOTTOM NAVIGATION BAR (SUDAH BISA DIKLIK)
+      // ==============================================================
       bottomNavigationBar: Container(
         height: 70,
-        decoration: const BoxDecoration(
-          color: colorPrimary,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
+        decoration: const BoxDecoration(color: colorPrimary, borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildBottomNavItem(Icons.receipt_long, 'Pesanan'),
-            _buildBottomNavItem(Icons.cake, 'Produk'),
+            // TOMBOL 1: Pesanan
+            GestureDetector(
+              onTap: () {
+                // Berpindah ke halaman cek pesanan
+                Navigator.pushNamed(context, '/cek_pesanan');
+              },
+              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan'),
+            ),
+            
+            // TOMBOL 2: Produk
+            GestureDetector(
+              onTap: () {
+                // Tidak melakukan apa-apa karena sudah berada di halaman produk
+              },
+              child: _buildBottomNavItem(Icons.cake, 'Produk'),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProductCard(
-    BuildContext context,
-    String name,
-    String price,
-    String imgUrl, 
-    Color cardColor,
-    Color borderColor,
-    Color textColor,
-    Color btnColor,
-  ) {
+  Widget _buildProductCard(BuildContext context, String idMenu, String name, String price, String imgUrl, Color cardColor, Color borderColor, Color textColor, Color btnColor) {
     return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: borderColor, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(15), border: Border.all(color: borderColor, width: 1), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 3))]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -387,18 +255,7 @@ class _MenuPageState extends State<MenuPage> {
                 tag: 'product-$name',
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                  child: Image.network(
-                    imgUrl,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    // Menampilkan icon fastfood jika gambar gagal dimuat
-                    errorBuilder: (c, e, s) => Container(
-                      color: btnColor.withOpacity(0.2),
-                      child: Center(
-                        child: Icon(Icons.fastfood, color: btnColor, size: 40),
-                      ),
-                    ),
-                  ),
+                  child: Image.network(imgUrl, width: double.infinity, fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(color: btnColor.withOpacity(0.2), child: Center(child: Icon(Icons.fastfood, color: btnColor, size: 40)))),
                 ),
               ),
             ),
@@ -408,60 +265,39 @@ class _MenuPageState extends State<MenuPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: textColor,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text(name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
-                Text(
-                  price,
-                  style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 12),
-                ),
+                Text(price, style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 12)),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
                       onTap: () => _goToDetail(context, name, price, imgUrl),
-                      child: const Text(
-                        'Details',
-                        style: TextStyle(
-                          fontSize: 10,
-                          decoration: TextDecoration.underline,
-                          color: Color(0xFF7A4A21),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: Color(0xFF7A4A21), fontWeight: FontWeight.w600)),
                     ),
                     GestureDetector(
-                      onTap: () {
+                      onTap: () async {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('$name ditambahkan ke keranjang'),
-                            backgroundColor: const Color(0xFFC9792B),
-                          ),
+                          const SnackBar(content: Text('Memasukkan ke keranjang...'), duration: Duration(milliseconds: 500)),
                         );
+
+                        var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
+
+                        if (response['status'] == 'sukses') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('$name berhasil ditambahkan! 🛒'), backgroundColor: Colors.green),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Gagal: ${response['pesan']}')),
+                          );
+                        }
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: btnColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Text(
-                          '+ Order',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        decoration: BoxDecoration(color: btnColor, borderRadius: BorderRadius.circular(10)),
+                        child: const Text('+ Order', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
@@ -474,13 +310,19 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
+  // UPDATE: Tambahkan area transparan agar lebih mudah diklik
   Widget _buildBottomNavItem(IconData icon, String label) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: Colors.white),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
-      ],
+    return Container(
+      color: Colors.transparent, // Memperluas area hitbox jari
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      child: Column(
+        mainAxisSize: MainAxisSize.min, 
+        children: [
+          Icon(icon, color: Colors.white), 
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12))
+        ]
+      ),
     );
   }
 }
