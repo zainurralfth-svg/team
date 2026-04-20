@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'product_detail.dart'; // import file detail
+import 'product_detail.dart'; 
+import '../Backend/api_service.dart'; // PASTIKAN FOLDER INI BENAR
 
 // =====================================================================
 // Helper: Animasi Instagram-style (slide dari bawah + fade + scale back)
@@ -10,7 +11,6 @@ PageRoute instagramSlideRoute(Widget page) {
     reverseTransitionDuration: const Duration(milliseconds: 350),
     pageBuilder: (context, animation, secondaryAnimation) => page,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      // Slide dari bawah ke atas
       final slide = Tween<Offset>(
         begin: const Offset(0, 1),
         end: Offset.zero,
@@ -19,13 +19,11 @@ PageRoute instagramSlideRoute(Widget page) {
         curve: Curves.easeOutCubic,
       ));
 
-      // Fade in saat muncul
       final fade = CurvedAnimation(
         parent: animation,
         curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
       );
 
-      // Halaman lama mengecil sedikit (efek kedalaman seperti Instagram)
       final scaleBack = Tween<double>(begin: 1.0, end: 0.93).animate(
         CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut),
       );
@@ -56,6 +54,9 @@ class MenuPage extends StatefulWidget {
 
 class _MenuPageState extends State<MenuPage> {
   int _selectedIndex = 0;
+  
+  List<dynamic> _menuDariDatabase = [];
+  bool _isLoading = true;
 
   final List<String> _categories = [
     'Pudding',
@@ -73,63 +74,35 @@ class _MenuPageState extends State<MenuPage> {
     'banner cookies.png',
   ];
 
-  final List<List<Map<String, String>>> _allProducts = [
-    // Pudding (8 produk)
-    [
-      {'name': 'Silky Pudding Taro',        'price': 'Rp. 4.000',  'image': 'Silky Pudding Taro.png'},
-      {'name': 'Tripple Choco Pudding',      'price': 'Rp. 4.000',  'image': 'Tripple Choco Pudding.png'},
-      {'name': 'Silky Pudding Chocolate',    'price': 'Rp. 4.000',  'image': 'Silky Pudding Chocolate.png'},
-      {'name': 'Silky Pudding Manggo',       'price': 'Rp. 4.000',  'image': 'Silky Pudding Mango.png'},
-      {'name': 'Silky Pudding Banana',       'price': 'Rp. 4.000',  'image': 'Silky Pudding Banana.png'},
-      {'name': 'Silky Pudding Bubble Gum',   'price': 'Rp. 4.000',  'image': 'Silky Pudding Bubble Gum.png'},
-      {'name': 'Silky Pudding Strawberry',   'price': 'Rp. 4.000',  'image': 'Silky Pudding Strawberry.png'},
-      {'name': 'Silky Pudding Leci',         'price': 'Rp. 4.000',  'image': 'Silky Pudding Leci.png'},
-    ],
-    // Dessert (6 produk)
-    [
-      {'name': 'Dessert Box Banafe',         'price': 'Rp. 20.000', 'image': 'Dessert Box Banafe.png'},
-      {'name': 'Cheese Cuit Strawberry',     'price': 'Rp. 18.000', 'image': 'Cheese Cuit Strawberry.png'},
-      {'name': 'Death By Chocolate',         'price': 'Rp. 18.000', 'image': 'Death By Chocolate.png'},
-      {'name': 'Milk Bath Chocolate',        'price': 'Rp. 20.000', 'image': 'Milk Bath Chocolate.png'},
-      {'name': 'Milk Bath Keju',             'price': 'Rp. 20.000', 'image': 'Milk Bath Keju.png'},
-      {'name': 'Milk Bun',                   'price': 'Rp. 20.000', 'image': 'Milk Bun.png'},
-    ],
-    // Cake (8 produk)
-    [
-      {'name': 'Mango Mouse Cake',              'price': 'Rp. 15.000', 'image': 'Mango Mouse Cake.png'},
-      {'name': 'Cookies and Cream Mouse Cake',  'price': 'Rp. 15.000', 'image': 'Cookies and  Cream Mouse.png'},
-      {'name': 'Peach Mouse Cake',              'price': 'Rp. 15.000', 'image': 'Peach Mouse Cake.png'},
-      {'name': 'Taro Mouse Cake',               'price': 'Rp. 15.000', 'image': 'Taro Mouse Cake.png'},
-      {'name': 'Strawberry Mouse Cake',         'price': 'Rp. 15.000', 'image': 'Strawberry Petite Cake.png'},
-      {'name': 'Tiramisu Mouse Cake',           'price': 'Rp. 15.000', 'image': 'Tiramisu Mouse Cake.png'},
-      {'name': 'Matcha Mouse Cake',             'price': 'Rp. 15.000', 'image': 'Matcha Mouse Cake.png'},
-      {'name': 'Strawberry Short Cake',         'price': 'Rp. 15.000', 'image': 'Strawberry Mouse Cake.png'},
-    ],
-    // Brownies (3 produk)
-    [
-      {'name': 'Browkies',                   'price': 'Rp. 12.000', 'image': 'Browkies.png'},
-      {'name': 'Brownie Burn Cheese Cake',   'price': 'Rp. 15.000', 'image': 'Brownie Burn Cheesecake.png'},
-      {'name': 'Brownies Bites',             'price': 'Rp. 15.000', 'image': 'Brownies Bites.png'},
-    ],
-    // Cookies (5 produk)
-    [
-      {'name': 'Cookies Choco Chips', 'price': 'Rp. 5.000', 'image': 'chocochips.png'},
-      {'name': 'Cookies Oat Milk',    'price': 'Rp. 5.000', 'image': 'oat_milk.png'},
-      {'name': 'Cookies Red Velvet',  'price': 'Rp. 5.000', 'image': 'red_velvet.png'},
-      {'name': 'Cookies Chocolate',   'price': 'Rp. 5.000', 'image': 'chocolate.png'},
-      {'name': 'Cookies Oreo',        'price': 'Rp. 5.000', 'image': 'oreo.png'},
-    ],
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _ambilDataMenu();
+  }
+
+  Future<void> _ambilDataMenu() async {
+    try {
+      final data = await ApiService.getMenu();
+      setState(() {
+        _menuDariDatabase = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print("Gagal mengambil menu: $e");
+    }
+  }
 
   void _onCategoryTap(int index) {
     setState(() => _selectedIndex = index);
   }
 
-  // ── Navigasi ke halaman detail dengan animasi Instagram ──
-  void _goToDetail(BuildContext context, String name, String price, String img) {
+  void _goToDetail(BuildContext context, String name, String price, String imgUrl) {
     Navigator.of(context).push(
       instagramSlideRoute(
-        ProductDetailPage(name: name, price: price, image: img),
+        ProductDetailPage(name: name, price: price, image: imgUrl),
       ),
     );
   }
@@ -144,7 +117,6 @@ class _MenuPageState extends State<MenuPage> {
 
     final String activeBanner   = _banners[_selectedIndex];
     final String activeName     = _categories[_selectedIndex];
-    final List<Map<String, String>> activeProducts = _allProducts[_selectedIndex];
 
     final double screenWidth      = MediaQuery.of(context).size.width;
     final double categoryBtnWidth = (screenWidth - 32 - 32) / 5;
@@ -178,166 +150,188 @@ class _MenuPageState extends State<MenuPage> {
         ],
       ),
 
-      body: Stack(
-        children: [
-          Opacity(
-            opacity: 0.1,
-            child: Image.asset(
-              'assets/images/tiramisu.png',
-              width: double.infinity,
-              height: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (c, e, s) => Container(),
-            ),
-          ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Banner
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  'assets/images/$activeBanner',
+                  width: double.infinity,
+                  height: 180,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: double.infinity,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      color: colorPrimary.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Banner $activeName',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
 
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Banner
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      'assets/images/$activeBanner',
-                      width: double.infinity,
-                      height: 180,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: double.infinity,
-                        height: 180,
+              // Search Bar
+              TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search Produk',
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(color: colorBorder, width: 0.5),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(color: colorBorder, width: 0.5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Tombol Kategori
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(_categories.length, (index) {
+                  final bool isActive = _selectedIndex == index;
+                  return GestureDetector(
+                    onTap: () => _onCategoryTap(index),
+                    child: SizedBox(
+                      width: categoryBtnWidth,
+                      height: 42,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
                         decoration: BoxDecoration(
-                          color: colorPrimary.withOpacity(0.4),
-                          borderRadius: BorderRadius.circular(20),
+                          color: isActive ? colorPrimary : colorCard,
+                          borderRadius: BorderRadius.circular(25),
+                          border: Border.all(
+                            color: colorBorder,
+                            width: isActive ? 2 : 1,
+                          ),
+                          boxShadow: isActive
+                              ? [
+                                  BoxShadow(
+                                    color: colorPrimary.withOpacity(0.5),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  )
+                                ]
+                              : [],
                         ),
                         child: Center(
                           child: Text(
-                            'Banner $activeName',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
+                            _categories[index],
+                            style: TextStyle(
+                              color: isActive ? Colors.white : colorBorder,
                               fontWeight: FontWeight.bold,
+                              fontSize: 13,
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                  );
+                }),
+              ),
+              const SizedBox(height: 24),
 
-                  // Search Bar
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search Produk',
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: const BorderSide(color: colorBorder, width: 0.5),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: const BorderSide(color: colorBorder, width: 0.5),
-                      ),
-                    ),
+              // Judul Kategori Aktif
+              Center(
+                child: Text(
+                  activeName.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: colorText,
+                    letterSpacing: 2,
                   ),
-                  const SizedBox(height: 16),
+                ),
+              ),
+              const SizedBox(height: 16),
 
-                  // Tombol Kategori
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(_categories.length, (index) {
-                      final bool isActive = _selectedIndex == index;
-                      return GestureDetector(
-                        onTap: () => _onCategoryTap(index),
-                        child: SizedBox(
-                          width: categoryBtnWidth,
-                          height: 42,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            decoration: BoxDecoration(
-                              color: isActive ? colorPrimary : colorCard,
-                              borderRadius: BorderRadius.circular(25),
-                              border: Border.all(
-                                color: colorBorder,
-                                width: isActive ? 2 : 1,
-                              ),
-                              boxShadow: isActive
-                                  ? [
-                                      BoxShadow(
-                                        color: colorPrimary.withOpacity(0.5),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 3),
-                                      )
-                                    ]
-                                  : [],
-                            ),
-                            child: Center(
-                              child: Text(
-                                _categories[index],
-                                style: TextStyle(
-                                  color: isActive ? Colors.white : colorBorder,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ),
+              // =======================================================
+              // LOGIKA TAMPIL PRODUK
+              // =======================================================
+              Builder(
+                builder: (context) {
+                  if (_isLoading) {
+                    return const Center(child: CircularProgressIndicator(color: colorPrimary));
+                  }
+
+                  final produkFilter = _menuDariDatabase.where((produk) {
+                    return produk['kategori'] == activeName; 
+                  }).toList();
+
+                  if (produkFilter.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Text(
+                          "Belum ada produk di kategori $activeName.",
+                          style: const TextStyle(color: colorText, fontWeight: FontWeight.bold),
                         ),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Judul Kategori Aktif
-                  Center(
-                    child: Text(
-                      activeName.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: colorText,
-                        letterSpacing: 2,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                    );
+                  }
 
-                  // Grid Produk
-                  GridView.builder(
+                  return GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: activeProducts.length,
+                    itemCount: produkFilter.length, 
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.75,
+                      childAspectRatio: 0.85, 
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
                     itemBuilder: (context, index) {
-                      final product = activeProducts[index];
+                      final product = produkFilter[index]; 
+                      
+                      String namaDB = product['nama_produk'] ?? 'Tanpa Nama';
+                      String hargaDB = 'Rp ${product['harga']}';
+                      
+                      String namaFileGambar = product['gambar'] ?? '';
+                      
+                      // ==========================================================
+                      // SOLUSI: Pakai Uri.encodeFull untuk mengatasi spasi di nama file
+                      // ==========================================================
+                      String urlGambarLengkap = Uri.encodeFull("${ApiService.baseUrl}/uploads/$namaFileGambar");
+
                       return _buildProductCard(
                         context,
-                        product['name']!,
-                        product['price']!,
-                        product['image']!,
+                        namaDB,
+                        hargaDB,
+                        urlGambarLengkap, 
                         colorCard,
                         colorBorder,
                         colorText,
                         colorPrimary,
                       );
                     },
-                  ),
-                  const SizedBox(height: 100),
-                ],
+                  );
+                }
               ),
-            ),
+              const SizedBox(height: 100),
+            ],
           ),
-        ],
+        ),
       ),
 
       bottomNavigationBar: Container(
@@ -364,7 +358,7 @@ class _MenuPageState extends State<MenuPage> {
     BuildContext context,
     String name,
     String price,
-    String img,
+    String imgUrl, 
     Color cardColor,
     Color borderColor,
     Color textColor,
@@ -386,23 +380,22 @@ class _MenuPageState extends State<MenuPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Gambar produk dengan Hero tag (untuk transisi halus) ──
           Expanded(
             child: GestureDetector(
-              // Klik gambar juga langsung ke detail
-              onTap: () => _goToDetail(context, name, price, img),
+              onTap: () => _goToDetail(context, name, price, imgUrl),
               child: Hero(
                 tag: 'product-$name',
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                  child: Image.asset(
-                    'assets/images/$img',
+                  child: Image.network(
+                    imgUrl,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                    // Menampilkan icon fastfood jika gambar gagal dimuat
                     errorBuilder: (c, e, s) => Container(
                       color: btnColor.withOpacity(0.2),
                       child: Center(
-                        child: Icon(Icons.image, color: btnColor, size: 40),
+                        child: Icon(Icons.fastfood, color: btnColor, size: 40),
                       ),
                     ),
                   ),
@@ -410,8 +403,6 @@ class _MenuPageState extends State<MenuPage> {
               ),
             ),
           ),
-
-          // Info produk
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -436,9 +427,8 @@ class _MenuPageState extends State<MenuPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // ── Tombol Details → navigasi ke halaman detail ──
                     GestureDetector(
-                      onTap: () => _goToDetail(context, name, price, img),
+                      onTap: () => _goToDetail(context, name, price, imgUrl),
                       child: const Text(
                         'Details',
                         style: TextStyle(
@@ -449,8 +439,6 @@ class _MenuPageState extends State<MenuPage> {
                         ),
                       ),
                     ),
-
-                    // Tombol + Order
                     GestureDetector(
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,8 +1,9 @@
 import 'dart:io'; 
-import 'package:flutter/foundation.dart'; // TAMBAHAN BARU: Untuk mendeteksi apakah ini jalan di Web atau HP
+import 'package:flutter/foundation.dart'; 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; 
 import '../Core/Colour.dart';
+import '../Backend/api_service.dart'; // PASTIKAN FOLDER IMPORT INI BENAR
 
 class TambahProdukPage extends StatefulWidget {
   const TambahProdukPage({super.key});
@@ -12,7 +13,21 @@ class TambahProdukPage extends StatefulWidget {
 }
 
 class _TambahProdukPageState extends State<TambahProdukPage> {
-  // UBAH: Sekarang menggunakan XFile bawaan image_picker agar lebih aman untuk Web
+  final TextEditingController _namaController = TextEditingController();
+  final TextEditingController _hargaController = TextEditingController();
+  final TextEditingController _stokController = TextEditingController();
+  final TextEditingController _deskripsiController = TextEditingController();
+
+  // Variabel untuk Dropdown Kategori
+  String? _selectedKategori;
+  final List<String> _kategoriList = [
+    'Pudding',
+    'Dessert',
+    'Cake',
+    'Brownies',
+    'Cookies'
+  ];
+
   XFile? _selectedImage; 
   String _fileName = 'Tidak Ada File Yang Di Pilih';
 
@@ -22,10 +37,19 @@ class _TambahProdukPageState extends State<TambahProdukPage> {
 
     if (image != null) {
       setState(() {
-        _selectedImage = image; // Menyimpan XFile
+        _selectedImage = image; 
         _fileName = image.name; 
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _namaController.dispose();
+    _hargaController.dispose();
+    _stokController.dispose();
+    _deskripsiController.dispose();
+    super.dispose();
   }
 
   @override
@@ -110,7 +134,7 @@ class _TambahProdukPageState extends State<TambahProdukPage> {
             ),
             
             // ==========================================
-            // 2. KARTU STATISTIK & PENDAPATAN
+            // 2. KARTU STATISTIK 
             // ==========================================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -207,26 +231,54 @@ class _TambahProdukPageState extends State<TambahProdukPage> {
                       const SizedBox(height: 25),
 
                       _buildInputLabel('Nama Produk'),
-                      _buildInputField('Ketik Disini...', Icons.inventory_2),
+                      _buildInputField('Ketik Disini...', Icons.inventory_2, _namaController),
+                      const SizedBox(height: 15),
+
+                      // INPUT KATEGORI DROPDOWN
+                      _buildInputLabel('Kategori Produk'),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: AppColors.inputBg,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            dropdownColor: AppColors.inputBg,
+                            hint: const Text('Pilih Kategori...', style: TextStyle(color: Colors.black45, fontSize: 14)),
+                            value: _selectedKategori,
+                            icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+                            items: _kategoriList.map((String kategori) {
+                              return DropdownMenuItem<String>(
+                                value: kategori,
+                                child: Text(kategori, style: const TextStyle(fontSize: 14)),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedKategori = newValue;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 15),
                       
                       _buildInputLabel('Harga Produk'),
-                      _buildInputField('Ketik Disini...', Icons.monetization_on),
+                      _buildInputField('Ketik Disini...', Icons.monetization_on, _hargaController, type: TextInputType.number),
                       const SizedBox(height: 15),
                       
                       _buildInputLabel('Stok Produk'),
-                      _buildInputField('Ketik Disini...', Icons.layers),
+                      _buildInputField('Ketik Disini...', Icons.layers, _stokController, type: TextInputType.number),
                       const SizedBox(height: 15),
                       
                       _buildInputLabel('Deskripsi Produk'),
-                      _buildInputField('Ketik Disini...', Icons.description),
+                      _buildInputField('Ketik Disini...', Icons.description, _deskripsiController),
                       const SizedBox(height: 15),
                       
                       _buildInputLabel('Tambah Foto Produk'),
                       
-                      // ==========================================
-                      // TOMBOL FOTO (KLIKABLE + AMAN UNTUK WEB & HP)
-                      // ==========================================
                       Container(
                         decoration: BoxDecoration(
                           color: AppColors.inputBg, 
@@ -241,11 +293,9 @@ class _TambahProdukPageState extends State<TambahProdukPage> {
                               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                               child: Row(
                                 children: [
-                                  // SOLUSI ERROR WEB ADA DI SINI:
                                   _selectedImage != null 
                                       ? ClipRRect(
                                           borderRadius: BorderRadius.circular(5),
-                                          // Mengecek kIsWeb (Jika di Chrome gunakan network, jika di HP gunakan file)
                                           child: kIsWeb 
                                               ? Image.network(
                                                   _selectedImage!.path,
@@ -288,7 +338,9 @@ class _TambahProdukPageState extends State<TambahProdukPage> {
                       
                       const SizedBox(height: 30),
 
-                      // Tombol Konfirmasi Produk
+                      // ==========================================
+                      // LOGIKA SUBMIT API MULTIPART (GAMBAR)
+                      // ==========================================
                       Center(
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
@@ -304,11 +356,42 @@ class _TambahProdukPageState extends State<TambahProdukPage> {
                             'Konfirmasi Produk',
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
-                          onPressed: () {
-                             ScaffoldMessenger.of(context).showSnackBar(
-                               const SnackBar(content: Text('Produk berhasil ditambahkan!')),
-                             );
-                             Navigator.pop(context);
+                          onPressed: () async {
+                            String nama = _namaController.text.trim();
+                            String deskripsi = _deskripsiController.text.trim();
+                            
+                            // MENGHILANGKAN HURUF "Rp", TITIK, DAN SPASI AGAR JADI ANGKA MURNI
+                            String hargaBeresih = _hargaController.text.replaceAll(RegExp(r'[^0-9]'), '');
+                            String stokBeresih = _stokController.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+                            int harga = int.tryParse(hargaBeresih) ?? 0;
+                            int stok = int.tryParse(stokBeresih) ?? 0;
+
+                            // Validasi: Pastikan Kategori juga terisi
+                            if (nama.isEmpty || _selectedKategori == null || harga == 0 || stok == 0 || deskripsi.isEmpty) {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                 const SnackBar(content: Text('Tolong isi semua data dan pilih kategori produk!')),
+                               );
+                               return; 
+                            }
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                 const SnackBar(content: Text('Menyimpan produk & foto ke database...')),
+                            );
+
+                            // Memanggil API dengan membawa 6 data (Termasuk Foto Asli)
+                            var response = await ApiService.tambahMenu(nama, _selectedKategori!, harga, stok, deskripsi, _selectedImage);
+
+                            if (response['status'] == 'sukses') {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                 const SnackBar(content: Text('Produk beserta foto berhasil ditambahkan!')),
+                               );
+                               Navigator.pop(context); 
+                            } else {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                 SnackBar(content: Text('Gagal: ${response['pesan']}')),
+                               );
+                            }
                           },
                         ),
                       ),
@@ -337,8 +420,10 @@ class _TambahProdukPageState extends State<TambahProdukPage> {
     );
   }
 
-  Widget _buildInputField(String hint, IconData icon) {
+  Widget _buildInputField(String hint, IconData icon, TextEditingController controller, {TextInputType type = TextInputType.text}) {
     return TextField(
+      controller: controller, 
+      keyboardType: type, 
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.black45, fontSize: 14),

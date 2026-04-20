@@ -1,8 +1,41 @@
 import 'package:flutter/material.dart';
+import '../Backend/api_service.dart'; // PASTIKAN IMPORT INI BENAR
 
 // Class Halaman Produk (Bentuk Full Dashboard Manajemen Menu)
-class HalamanProduk extends StatelessWidget {
+class HalamanProduk extends StatefulWidget {
   const HalamanProduk({super.key});
+
+  @override
+  State<HalamanProduk> createState() => _HalamanProdukState();
+}
+
+class _HalamanProdukState extends State<HalamanProduk> {
+  // ==========================================
+  // VARIABEL UNTUK MENAMPUNG DATA DATABASE
+  // ==========================================
+  List<dynamic> _listProduk = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _ambilDataProduk(); // Tarik data saat halaman dibuka
+  }
+
+  Future<void> _ambilDataProduk() async {
+    try {
+      final data = await ApiService.getMenu();
+      setState(() {
+        _listProduk = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print("Gagal mengambil menu: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +132,8 @@ class HalamanProduk extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _statCard('12\nProduk', Icons.pie_chart),
+          // Menampilkan jumlah produk dinamis sesuai isi database
+          _statCard('${_listProduk.length}\nProduk', Icons.pie_chart),
           _statCard('Riwayat\nPesanan', Icons.shopping_bag),
           _statCard('Laporan', Icons.assignment),
         ],
@@ -171,14 +205,14 @@ class HalamanProduk extends StatelessWidget {
   }
 
   // ==========================================
-  // 4. JUDUL MANAJEMEN MENU (Disamakan dengan Daftar Pesanan)
+  // 4. JUDUL MANAJEMEN MENU
   // ==========================================
   Widget _buildSectionTitle() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFC77833), // Warna cokelat oranye gelap
-        borderRadius: BorderRadius.circular(15), // Melengkung di semua sudut (Kapsul)
+        color: const Color(0xFFC77833), 
+        borderRadius: BorderRadius.circular(15), 
       ),
       child: const Text(
         'Manajemen Menu',
@@ -192,26 +226,36 @@ class HalamanProduk extends StatelessWidget {
   }
 
   // ==========================================
-  // 5. DAFTAR KARTU PRODUK (Desain disesuaikan)
+  // 5. DAFTAR KARTU PRODUK (DIHUBUNGKAN KE DATABASE)
   // ==========================================
   Widget _buildMenuList() {
-    final List<String> menuItems = [
-      'BROWNIE BURNT CHEES CAKE',
-      'JIGGLY PUDDING RABIT',
-      'MILK BUN',
-      'MANGGO MOUSE CAKE'
-    ];
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator(color: Color(0xFFD27F30)));
+    }
+
+    if (_listProduk.isEmpty) {
+      return const Center(
+        child: Text(
+          "Belum ada produk yang ditambahkan.",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+        ),
+      );
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      itemCount: menuItems.length,
+      itemCount: _listProduk.length,
       itemBuilder: (context, index) {
+        var produk = _listProduk[index];
+        String namaProduk = produk['nama_produk'] ?? 'Tanpa Nama';
+        // Kalau sudah ada kategori di db, bisa dipanggil dengan produk['kategori']
+
         return Container(
           margin: const EdgeInsets.only(bottom: 15),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20), // Sudut membulat
+            borderRadius: BorderRadius.circular(20), 
           ),
           child: Row(
             children: [
@@ -222,24 +266,55 @@ class HalamanProduk extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(15),
+                  // Nanti kalau upload gambar sukses, ganti ini dengan Image.network()
                 ),
+                child: const Icon(Icons.image, color: Colors.grey),
               ),
               const SizedBox(width: 15),
               // Nama Produk
               Expanded(
-                child: Text(
-                  menuItems[index],
-                  style: const TextStyle(
-                    fontSize: 14, // Ukuran font disesuaikan
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      namaProduk.toUpperCase(), // Dibuat huruf besar semua biar keren
+                      style: const TextStyle(
+                        fontSize: 14, 
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      "Rp ${produk['harga']}",
+                      style: const TextStyle(
+                        fontSize: 12, 
+                        color: Color(0xFFD27F30),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              // Ikon Edit dan Hapus (Sesuai posisi di gambar)
-              const Icon(Icons.edit, color: Colors.green, size: 24),
+              // Ikon Edit
+              GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Fitur Edit segera hadir!")),
+                  );
+                },
+                child: const Icon(Icons.edit, color: Colors.green, size: 24),
+              ),
               const SizedBox(width: 10),
-              const Icon(Icons.delete, color: Colors.orange, size: 24),
+              // Ikon Hapus
+              GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Fitur Hapus segera hadir!")),
+                  );
+                },
+                child: const Icon(Icons.delete, color: Colors.orange, size: 24),
+              ),
               const SizedBox(width: 5),
             ],
           ),
@@ -258,13 +333,13 @@ class HalamanProduk extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // BERANDA -> Saat diklik kembali ke admin
           _bottomNavItem(Icons.home, 'BERANDA', false, () {
              Navigator.pop(context); 
           }),
-          
           _bottomNavItem(Icons.person, 'PENGGUNA', false, () {}),
-          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {}),
+          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
+             // Arahkan ke halaman tambah_produk.dart jika diperlukan
+          }),
           _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {}),
         ],
       ),
