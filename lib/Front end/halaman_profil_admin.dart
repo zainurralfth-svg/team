@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Backend/API_Service.dart'; // Sesuaikan folder API lo
+import '../Core/Colour.dart'; 
+import '../Backend/API_Service.dart'; 
 
 class HalamanProfilAdmin extends StatefulWidget {
   const HalamanProfilAdmin({Key? key}) : super(key: key);
@@ -65,11 +66,10 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
             onPressed: () async {
               Navigator.pop(context);
               SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.clear(); // Hapus ingatan
-              // PENTING: Pastikan rute '/masuk' sesuai dengan halaman login lo
+              await prefs.clear(); // Hapus ingatan sesi
               Navigator.pushNamedAndRemoveUntil(context, '/masuk', (route) => false);
             },
-            child: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: const Text('Logout', style: TextStyle(color: AppColors.errorRed, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -78,21 +78,16 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
 
   @override
   Widget build(BuildContext context) {
-    // WARNA KHUSUS TEMA ADMIN
-    const Color colorBg = Color(0xFFFFE5B9);
-    const Color colorPrimary = Color(0xFFD27F30);
-    const Color colorText = Color(0xFF3A1F0F);
-    
     return Scaffold(
-      backgroundColor: colorBg,
+      backgroundColor: AppColors.adminBg,
       appBar: AppBar(
-        backgroundColor: colorPrimary,
+        backgroundColor: AppColors.adminPrimary,
         elevation: 0,
-        title: const Text('Profil Admin', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('Profil Admin', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold)),
+        iconTheme: const IconThemeData(color: AppColors.textWhite),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: colorPrimary))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.adminPrimary))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -103,20 +98,20 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.textWhite,
                       shape: BoxShape.circle,
-                      border: Border.all(color: colorPrimary, width: 4),
+                      border: Border.all(color: AppColors.adminPrimary, width: 4),
                       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
                     ),
-                    child: const Icon(Icons.admin_panel_settings, size: 70, color: colorPrimary),
+                    child: const Icon(Icons.admin_panel_settings, size: 70, color: AppColors.adminPrimary),
                   ),
                   const SizedBox(height: 10),
                   
                   // Label Role Admin
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    decoration: BoxDecoration(color: colorPrimary, borderRadius: BorderRadius.circular(20)),
-                    child: const Text('SUPER ADMIN', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    decoration: BoxDecoration(color: AppColors.adminPrimary, borderRadius: BorderRadius.circular(20)),
+                    child: const Text('SUPER ADMIN', style: TextStyle(color: AppColors.textWhite, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
                   ),
                   const SizedBox(height: 30),
                   
@@ -125,18 +120,18 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.textWhite,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow(Icons.badge, 'Nama Admin', _adminData['nama'] ?? '-', colorText, colorPrimary),
+                        _buildInfoRow(Icons.badge, 'Nama Admin', _adminData['nama'] ?? '-', AppColors.textDark, AppColors.adminPrimary),
                         const Divider(height: 30, color: Colors.grey),
-                        _buildInfoRow(Icons.alternate_email, 'Username', _adminData['username'] ?? '-', colorText, colorPrimary),
+                        _buildInfoRow(Icons.alternate_email, 'Username', _adminData['username'] ?? '-', AppColors.textDark, AppColors.adminPrimary),
                         const Divider(height: 30, color: Colors.grey),
-                        _buildInfoRow(Icons.phone_android, 'No. Handphone', _adminData['phone'] ?? '-', colorText, colorPrimary),
+                        _buildInfoRow(Icons.phone_android, 'No. Handphone', _adminData['phone'] ?? '-', AppColors.textDark, AppColors.adminPrimary),
                       ],
                     ),
                   ),
@@ -149,10 +144,10 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
                     height: 55,
                     child: ElevatedButton.icon(
                       onPressed: _prosesLogout,
-                      icon: const Icon(Icons.power_settings_new, color: Colors.white),
-                      label: const Text('LOGOUT ADMIN', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.5)),
+                      icon: const Icon(Icons.power_settings_new, color: AppColors.textWhite),
+                      label: const Text('LOGOUT ADMIN', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite, letterSpacing: 1.5)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade600,
+                        backgroundColor: AppColors.errorRed,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         elevation: 5,
                       ),
@@ -170,7 +165,7 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFE5B9), // Warnanya langsung ditembak di sini
+            color: AppColors.adminBg, 
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: iconColor, size: 26),

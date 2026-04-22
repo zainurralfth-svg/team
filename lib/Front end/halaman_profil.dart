@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import baru
+import 'package:shared_preferences/shared_preferences.dart';
+import '../Core/Colour.dart'; // Sesuaikan folder lo
 import '../Backend/API_Service.dart'; 
 
 class HalamanProfil extends StatefulWidget {
@@ -12,17 +13,14 @@ class HalamanProfil extends StatefulWidget {
 class _HalamanProfilState extends State<HalamanProfil> {
   bool _isLoading = true;
   Map<String, dynamic> _userData = {};
-  
-  // Sekarang variabel ini kosong dan nggak ada tulisan "final"
   String currentUserId = ""; 
 
   @override
   void initState() {
     super.initState();
-    _loadUserId(); // Panggil fungsi memori pertama kali
+    _loadUserId();
   }
 
-  // FUNGSI BARU: Mengambil ID dari memori HP
   Future<void> _loadUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedId = prefs.getString('id_user');
@@ -31,10 +29,8 @@ class _HalamanProfilState extends State<HalamanProfil> {
       setState(() {
         currentUserId = savedId;
       });
-      // Kalau ID ketemu, baru ambil data dari XAMPP
       _ambilDataProfil(); 
     } else {
-      // Kalau nggak ada ID di memori (belum login), tendang ke halaman login
       Navigator.pushNamedAndRemoveUntil(context, '/masuk', (route) => false);
     }
   }
@@ -69,14 +65,11 @@ class _HalamanProfilState extends State<HalamanProfil> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              
-              // HAPUS INGATAN SAAT LOGOUT
               SharedPreferences prefs = await SharedPreferences.getInstance();
               await prefs.clear();
-
               Navigator.pushNamedAndRemoveUntil(context, '/masuk', (route) => false);
             },
-            child: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: const Text('Logout', style: TextStyle(color: AppColors.errorRed, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -85,21 +78,16 @@ class _HalamanProfilState extends State<HalamanProfil> {
 
   @override
   Widget build(BuildContext context) {
-    const Color colorBg = Color(0xFFF2D7A6);
-    const Color colorPrimary = Color(0xFFC9792B);
-    const Color colorText = Color(0xFF3A1F0F);
-    const Color colorCard = Color(0xFFF7E6C4);
-
     return Scaffold(
-      backgroundColor: colorBg,
+      backgroundColor: AppColors.profileBg,
       appBar: AppBar(
-        backgroundColor: colorPrimary,
+        backgroundColor: AppColors.profilePrimary,
         elevation: 0,
-        title: const Text('Profil Kamu', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('Profil Kamu', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold)),
+        iconTheme: const IconThemeData(color: AppColors.textWhite),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: colorPrimary))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.profilePrimary))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -109,11 +97,11 @@ class _HalamanProfilState extends State<HalamanProfil> {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: colorPrimary.withOpacity(0.2),
+                      color: AppColors.profilePrimary.withOpacity(0.2),
                       shape: BoxShape.circle,
-                      border: Border.all(color: colorPrimary, width: 3),
+                      border: Border.all(color: AppColors.profilePrimary, width: 3),
                     ),
-                    child: const Icon(Icons.person, size: 80, color: colorPrimary),
+                    child: const Icon(Icons.person, size: 80, color: AppColors.profilePrimary),
                   ),
                   const SizedBox(height: 24),
                   
@@ -121,7 +109,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: colorCard,
+                      color: AppColors.profileCard,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
@@ -130,11 +118,11 @@ class _HalamanProfilState extends State<HalamanProfil> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow(Icons.badge, 'Nama Lengkap', _userData['nama'] ?? 'Belum disetting', colorText, colorPrimary),
+                        _buildInfoRow(Icons.badge, 'Nama Lengkap', _userData['nama'] ?? 'Belum disetting', AppColors.profileText, AppColors.profilePrimary),
                         const Divider(height: 30, color: Colors.grey),
-                        _buildInfoRow(Icons.alternate_email, 'Username', _userData['username'] ?? '-', colorText, colorPrimary),
+                        _buildInfoRow(Icons.alternate_email, 'Username', _userData['username'] ?? '-', AppColors.profileText, AppColors.profilePrimary),
                         const Divider(height: 30, color: Colors.grey),
-                        _buildInfoRow(Icons.phone_android, 'No. Handphone', _userData['phone'] ?? '-', colorText, colorPrimary),
+                        _buildInfoRow(Icons.phone_android, 'No. Handphone', _userData['phone'] ?? '-', AppColors.profileText, AppColors.profilePrimary),
                       ],
                     ),
                   ),
@@ -146,10 +134,10 @@ class _HalamanProfilState extends State<HalamanProfil> {
                     height: 50,
                     child: ElevatedButton.icon(
                       onPressed: _prosesLogout,
-                      icon: const Icon(Icons.logout, color: Colors.white),
-                      label: const Text('LOGOUT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.5)),
+                      icon: const Icon(Icons.logout, color: AppColors.textWhite),
+                      label: const Text('LOGOUT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite, letterSpacing: 1.5)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade400,
+                        backgroundColor: AppColors.errorRed,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         elevation: 3,
                       ),

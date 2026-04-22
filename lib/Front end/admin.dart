@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Core/Colour.dart'; // Sesuaikan folder lo
 import 'tambah_produk.dart'; 
 import 'halaman_produk.dart';
 import 'halaman_riwayat.dart';
@@ -13,13 +14,13 @@ class HomeAdmin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFE5B9), 
+      backgroundColor: AppColors.adminBg, 
       body: Stack(
         children: [
           Container(
             height: 330,
             decoration: const BoxDecoration(
-              color: Color(0xFFD27F30),
+              color: AppColors.adminPrimary,
             ),
           ),
           SafeArea(
@@ -27,7 +28,6 @@ class HomeAdmin extends StatelessWidget {
               children: [
                 _buildHeader(),
                 const SizedBox(height: 25),
-                // Kirim context supaya kartu stat bisa diklik pindah halaman
                 _buildStatCards(context), 
                 const SizedBox(height: 25),
                 _buildIncomeCard(),
@@ -46,9 +46,6 @@ class HomeAdmin extends StatelessWidget {
     );
   }
 
-  // ==============================================================
-  // BAGIAN YANG DIUPDATE: HEADER (IKON PROFIL BISA DIKLIK)
-  // ==============================================================
   Widget _buildHeader() {
     return Builder(
       builder: (context) {
@@ -62,23 +59,14 @@ class HomeAdmin extends StatelessWidget {
                 children: [
                   Text(
                     'Selamat Datang',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(color: AppColors.textWhite, fontSize: 26, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     'Dashboard Admin',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(color: AppColors.textWhite, fontSize: 26, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-              // Tambahan GestureDetector biar bisa diklik ke Profil Admin
               GestureDetector(
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfilAdmin()));
@@ -87,11 +75,10 @@ class HomeAdmin extends StatelessWidget {
                   width: 50,
                   height: 50,
                   decoration: const BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.textWhite,
                     shape: BoxShape.circle,
-                    boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 2))],
                   ),
-                  child: const Icon(Icons.person, color: Color(0xFFD27F30), size: 30),
+                  child: const Icon(Icons.person, color: AppColors.adminPrimary, size: 30),
                 ),
               ),
             ],
@@ -101,22 +88,18 @@ class HomeAdmin extends StatelessWidget {
     );
   }
 
-  // --- KARTU STATISTIK SEKARANG BISA DIKLIK ---
   Widget _buildStatCards(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Kartu 12 Produk
           _statCard('12\nProduk', Icons.pie_chart, () {
              Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
           }),
-          // Kartu Riwayat Pesanan
           _statCard('Riwayat\nPesanan', Icons.shopping_bag, () {
              Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()));
           }),
-          // Kartu Laporan
           _statCard('Laporan', Icons.assignment, () {
              Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()));
           }),
@@ -127,28 +110,24 @@ class HomeAdmin extends StatelessWidget {
 
   Widget _statCard(String title, IconData icon, VoidCallback onTap) {
     return GestureDetector(
-      onTap: onTap, // Fungsi klik
+      onTap: onTap,
       child: Container(
         width: 105,
         height: 105,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.24), 
+          color: AppColors.adminStatCard, 
           borderRadius: BorderRadius.circular(22),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Colors.white, size: 30),
+            Icon(icon, color: AppColors.textWhite, size: 30),
             const SizedBox(height: 8),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -161,27 +140,19 @@ class HomeAdmin extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20.0),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textWhite,
         borderRadius: BorderRadius.circular(30),
       ),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: const [
+        children: [
           Text(
             'Pendapatan',
-            style: TextStyle(
-              color: Color(0xFFD27F30),
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold),
           ),
           Text(
             '570.000',
-            style: TextStyle(
-              color: Color(0xFFD27F30),
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -192,16 +163,12 @@ class HomeAdmin extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFD27F30),
+        color: AppColors.adminPrimary,
         borderRadius: BorderRadius.circular(15),
       ),
       child: const Text(
         'Daftar Pesanan',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(color: AppColors.textWhite, fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -215,46 +182,32 @@ class HomeAdmin extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 15),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.textWhite,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 40, height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3DE),
+                  color: AppColors.adminCardLight,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Center(
-                  child: Text('A', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFD27F30))),
+                  child: Text('A', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.adminPrimary)),
                 ),
               ),
               const SizedBox(width: 15),
-              Expanded(
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Mr.A',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Taro pudding 1x, Browkies 1x',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Rp 25.000',
-                      style: TextStyle(
-                        color: Color(0xFFD27F30),
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text('Mr.A', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 4),
+                    Text('Taro pudding 1x, Browkies 1x', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    SizedBox(height: 8),
+                    Text('Rp 25.000', style: TextStyle(color: AppColors.adminPrimary, fontSize: 14, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -263,19 +216,12 @@ class HomeAdmin extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFE5B9),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Row(
+                    decoration: BoxDecoration(color: AppColors.adminBg, borderRadius: BorderRadius.circular(5)),
+                    child: const Row(
                       children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
-                        ),
-                        const SizedBox(width: 4),
-                        const Text('PROSES', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                        Icon(Icons.circle, size: 6, color: Colors.blue),
+                        SizedBox(width: 4),
+                        Text('PROSES', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -296,25 +242,20 @@ class HomeAdmin extends StatelessWidget {
     );
   }
 
-  // --- MENU BAWAH SEKARANG BISA DIKLIK ---
   Widget _buildBottomNavigation(BuildContext context) {
     return Container(
       height: 70,
-      color: const Color(0xFFD27F30),
+      color: AppColors.adminPrimary,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _bottomNavItem(Icons.home, 'BERANDA', true, () {}),
-          
           _bottomNavItem(Icons.person, 'PENGGUNA', false, () {
              Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanPengguna()));
           }),
-          
           _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
-            // Ini manggil TambahProdukPage yang ada di file tambah_produk.dart
             Navigator.push(context, MaterialPageRoute(builder: (context) => const TambahProdukPage())); 
           }),
-
           _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
              Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanPesanan()));
           }),
@@ -327,31 +268,20 @@ class HomeAdmin extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        color: Colors.transparent, // Memperbesar area klik
+        color: Colors.transparent,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white : Colors.transparent,
+                color: isSelected ? AppColors.textWhite : Colors.transparent,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: isSelected ? const Color(0xFFD27F30) : Colors.white,
-                size: 24,
-              ),
+              child: Icon(icon, color: isSelected ? AppColors.adminPrimary : AppColors.textWhite, size: 24),
             ),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
