@@ -48,10 +48,26 @@ class AppColors {
   // ==========================================
   // --- WARNA KHUSUS PROFIL USER ---
   // ==========================================
-  static const Color profileBg = Color(0xFFF2D7A6);      // Krem Dasar
-  static const Color profilePrimary = Color(0xFFC9792B); // Oranye Profil
-  static const Color profileCard = Color(0xFFF7E6C4);    // Latar Kotak Info
-  static const Color profileText = Color(0xFF3A1F0F);    // Teks Cokelat Tua
+  static const Color profileBg = Color(0xFFF2D7A6);      
+  static const Color profilePrimary = Color(0xFFC9792B); 
+  static const Color profileCard = Color(0xFFF7E6C4);    
+  static const Color profileText = Color(0xFF3A1F0F);    
+
+  // ==========================================
+  // --- WARNA KHUSUS CEK PESANAN ---
+  // ==========================================
+  static const Color cekPesananInputSecondary = Color(0xFFE0E0E0); 
+  static const Color statusProsesBlue = Colors.blue;               
+  static const Color statusText = Color(0xFF000000);              
+
+  // ==========================================
+  // --- WARNA KHUSUS KERANJANG ---
+  // ==========================================
+  static const Color cartBg = Color(0xFFD27F30);          // Krem background keranjang
+  static const Color cartPrimary = Color(0xFFD27F30);     // Oranye header & teks harga
+  static const Color cartBtnQty = Color(0xFFD27F30);      // Background tombol + dan -
+  static const Color cartConfirmBtn = Color(0xFFF1C574);  // Kuning tombol Konfirmasi
+  static const Color cartConfirmStroke = Color(0xFF270C0C); // Garis pinggir tombol konfirmasi
 
   // ==========================================
   // --- WARNA KHUSUS & BAYANGAN ---

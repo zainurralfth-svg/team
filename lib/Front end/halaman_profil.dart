@@ -83,6 +83,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
       appBar: AppBar(
         backgroundColor: AppColors.profilePrimary,
         elevation: 0,
+        centerTitle: true, 
         title: const Text('Profil Kamu', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: AppColors.textWhite),
       ),
@@ -146,6 +147,41 @@ class _HalamanProfilState extends State<HalamanProfil> {
                 ],
               ),
             ),
+            
+      // ==============================================================
+      // FOOTER BAWAAN MENU (KEMBAR IDENTIK DENGAN BUNDERAN AKTIF)
+      // ==============================================================
+      bottomNavigationBar: Container(
+        height: 70,
+        decoration: const BoxDecoration(
+          color: AppColors.adminPrimary, 
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/cek_pesanan');
+              },
+              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, AppColors.adminPrimary),
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/menu');
+              },
+              child: _buildBottomNavItem(Icons.cake, 'Produk', false, AppColors.adminPrimary),
+            ),
+            GestureDetector(
+              onTap: () {
+                // Udah di halaman Profil, gak usah ngapa-ngapain
+              },
+              // TRUE -> Bunderan putihnya nyala di tombol Profil
+              child: _buildBottomNavItem(Icons.person, 'Profil', true, AppColors.adminPrimary),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -169,6 +205,42 @@ class _HalamanProfilState extends State<HalamanProfil> {
           ),
         ),
       ],
+    );
+  }
+
+  // ==============================================================
+  // HELPER BOTTOM ITEM (DENGAN LOGIKA BUNDERAN PUTIH AKTIF)
+  // ==============================================================
+  Widget _buildBottomNavItem(IconData icon, String label, bool isSelected, Color activeColor) {
+    return Container(
+      color: Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      child: Column(
+        mainAxisSize: MainAxisSize.min, 
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.white : Colors.transparent, // Bunderan putih kalau aktif
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon, 
+              color: isSelected ? activeColor : Colors.white, // Ikon menyesuaikan warna
+              size: 24,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label, 
+            style: const TextStyle(
+              color: Colors.white, 
+              fontSize: 12,
+              fontWeight: FontWeight.bold // Teks tegas
+            )
+          )
+        ]
+      ),
     );
   }
 }

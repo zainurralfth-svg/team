@@ -4,7 +4,7 @@ import '../Backend/api_service.dart';
 import 'halaman_profil.dart';
 
 // =====================================================================
-// Helper: Animasi Instagram-style
+// Helper: Animasi Instagram-style (Tetap ada buat halaman Detail Produk)
 // =====================================================================
 PageRoute instagramSlideRoute(Widget page) {
   return PageRouteBuilder(
@@ -58,7 +58,6 @@ class _MenuPageState extends State<MenuPage> {
   final List<String> _categories = ['Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
   final List<String> _banners = ['banner pudding.png', 'banner dessert.png', 'banner cake.png', 'banner brownies.png', 'banner cookies.png'];
 
-  // Anggap saja ini adalah ID User yang sedang login
   final String currentUserId = "1"; 
 
   @override
@@ -83,9 +82,6 @@ class _MenuPageState extends State<MenuPage> {
     setState(() => _selectedIndex = index);
   }
 
-  // =====================================================================
-  // PERBAIKAN: Menambahkan parameter "description" untuk dikirim ke Detail
-  // =====================================================================
   void _goToDetail(BuildContext context, String idMenu, String name, String price, String imgUrl, String description) {
     Navigator.of(context).push(
       instagramSlideRoute(ProductDetailPage(
@@ -93,7 +89,7 @@ class _MenuPageState extends State<MenuPage> {
         name: name, 
         price: price, 
         image: imgUrl,
-        description: description // <- Ini dia data yang ditunggu-tunggu Product Detail!
+        description: description 
       )),
     );
   }
@@ -209,10 +205,6 @@ class _MenuPageState extends State<MenuPage> {
                       String hargaDB = 'Rp ${product['harga']}';
                       String namaFileGambar = product['gambar'] ?? '';
                       String urlGambarLengkap = Uri.encodeFull("${ApiService.baseUrl}/uploads/$namaFileGambar");
-                      
-                      // =======================================================
-                      // PERBAIKAN: Ambil deskripsi dari database
-                      // =======================================================
                       String deskripsiDB = product['deskripsi'] ?? 'Deskripsi tidak tersedia.';
 
                       return _buildProductCard(context, idMenu, namaDB, hargaDB, urlGambarLengkap, deskripsiDB, colorCard, colorBorder, colorText, colorPrimary);
@@ -236,23 +228,19 @@ class _MenuPageState extends State<MenuPage> {
               onTap: () {
                 Navigator.pushNamed(context, '/cek_pesanan');
               },
-              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan'),
+              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, colorPrimary),
             ),
             GestureDetector(
               onTap: () {
-                // Biarkan kosong karena kita sedang ada di halaman Produk (Menu)
+                // Biarkan kosong, karena ini sedang di halaman Produk
               },
-              child: _buildBottomNavItem(Icons.cake, 'Produk'),
+              child: _buildBottomNavItem(Icons.cake, 'Produk', true, colorPrimary), // TRUE -> Ada bunderan putihnya
             ),
-            // ==========================================
-            // TAMBAHAN TOMBOL PROFIL DI SINI
-            // ==========================================
             GestureDetector(
               onTap: () {
-                // Pakai animasi slide Instagram buatan lo buat pindah ke Profil!
-                Navigator.of(context).push(instagramSlideRoute(const HalamanProfil()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfil()));
               },
-              child: _buildBottomNavItem(Icons.person, 'Profil'),
+              child: _buildBottomNavItem(Icons.person, 'Profil', false, colorPrimary),
             ),
           ],
         ),
@@ -260,7 +248,6 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  // PERBAIKAN: Tambahkan parameter description di sini
   Widget _buildProductCard(BuildContext context, String idMenu, String name, String price, String imgUrl, String description, Color cardColor, Color borderColor, Color textColor, Color btnColor) {
     return Container(
       decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(15), border: Border.all(color: borderColor, width: 1), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 3))]),
@@ -269,7 +256,6 @@ class _MenuPageState extends State<MenuPage> {
         children: [
           Expanded(
             child: GestureDetector(
-              // PERBAIKAN: Lempar description ke halaman detail
               onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description),
               child: Hero(
                 tag: 'product-$name',
@@ -293,7 +279,6 @@ class _MenuPageState extends State<MenuPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
-                      // PERBAIKAN: Lempar description ke halaman detail
                       onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description),
                       child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: Color(0xFF7A4A21), fontWeight: FontWeight.w600)),
                     ),
@@ -331,16 +316,37 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  Widget _buildBottomNavItem(IconData icon, String label) {
+  // ==============================================================
+  // HELPER BOTTOM ITEM DENGAN BUNDERAN PUTIH UNTUK MENU AKTIF
+  // ==============================================================
+  Widget _buildBottomNavItem(IconData icon, String label, bool isSelected, Color activeColor) {
     return Container(
       color: Colors.transparent,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Column(
         mainAxisSize: MainAxisSize.min, 
         children: [
-          Icon(icon, color: Colors.white), 
-          const SizedBox(height: 4),
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12))
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.white : Colors.transparent, // Bunderan putih kalau aktif
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon, 
+              color: isSelected ? activeColor : Colors.white, // Ikon jadi orange kalau aktif
+              size: 24,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label, 
+            style: const TextStyle(
+              color: Colors.white, 
+              fontSize: 12,
+              fontWeight: FontWeight.bold // Biar tulisannya tegas
+            )
+          )
         ]
       ),
     );
