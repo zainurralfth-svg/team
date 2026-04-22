@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'product_detail.dart'; 
 import '../Backend/api_service.dart';
+import 'halaman_profil.dart';
 
 // =====================================================================
 // Helper: Animasi Instagram-style
@@ -239,8 +240,19 @@ class _MenuPageState extends State<MenuPage> {
             ),
             GestureDetector(
               onTap: () {
+                // Biarkan kosong karena kita sedang ada di halaman Produk (Menu)
               },
               child: _buildBottomNavItem(Icons.cake, 'Produk'),
+            ),
+            // ==========================================
+            // TAMBAHAN TOMBOL PROFIL DI SINI
+            // ==========================================
+            GestureDetector(
+              onTap: () {
+                // Pakai animasi slide Instagram buatan lo buat pindah ke Profil!
+                Navigator.of(context).push(instagramSlideRoute(const HalamanProfil()));
+              },
+              child: _buildBottomNavItem(Icons.person, 'Profil'),
             ),
           ],
         ),

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-// PASTIKAN SEMUA IMPORT INI SESUAI DENGAN NAMA FOLDERMU
 import 'Front end/tampilanawal.dart';
 import 'Front end/masuk.dart';
 import 'Front end/login.dart';
@@ -31,23 +29,9 @@ class PuddingkuApp extends StatelessWidget {
         '/masuk': (context) => const MasukPage(), 
         '/login': (context) => const LoginPage(), 
         '/lupa-password': (context) => const LupaPasswordPage(), 
-        
-        // Halaman Utama Menu / Produk
         '/menu': (context) => MenuPage(), 
-        
-        // =========================================================
-        // PUSAT RUTE NAVIGASI (SUDAH DIPISAH & SESUAI NAMA CLASS)
-        // =========================================================
-        
-        // 1. Ikon Keranjang (Kanan Atas) -> Menuju file keranjang.dart
         '/keranjang': (context) => KeranjangPage(), 
-        
-        // 2. Ikon Pesanan (Navigasi Bawah) -> Menuju file cek.pesanan.dart
-        // Perhatikan namanya sekarang sudah benar: CekPesananPage()
         '/cek_pesanan': (context) => CekPesananPage(), 
-
-        // =========================================================
-        
         '/konfirmasi': (context) => KonfirmasiPage(),
         '/bukti_pemesanan': (context) => const BuktiPemesanan(),
         '/admin_home': (context) => const HomeAdmin(),

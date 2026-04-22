@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
   // PENTING: Menggunakan 127.0.0.1 sebagai pengganti localhost 
   // agar terhindar dari pemblokiran CORS (Failed to fetch) di Google Chrome
+  // CATATAN: Kalau nanti di-build jadi APK untuk HP fisik, 127.0.0.1 harus diganti IP WiFi laptop ya!
   static const String baseUrl = "http://127.0.0.1/api_puddingku";
 
   // ==========================================
@@ -182,6 +183,21 @@ class ApiService {
       return jsonDecode(response.body);
     } catch (e) {
       return {"status": "error", "pesan": "Gagal terhubung ke server: $e"};
+    }
+  }
+
+  // ==========================================
+  // 5. FUNGSI PROFIL PENGGUNA
+  // ==========================================
+  static Future<Map<String, dynamic>> getProfil(String idUser) async {
+    try {
+      var response = await http.post(
+        Uri.parse('$baseUrl/get_profil.php'),
+        body: {'id_user': idUser},
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'status': 'error', 'pesan': 'Gagal koneksi ke server: $e'};
     }
   }
 }
