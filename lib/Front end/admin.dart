@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-
-// --- IMPORT SEMUA FILE HALAMAN DI SINI ---
 import 'tambah_produk.dart'; 
 import 'halaman_produk.dart';
 import 'halaman_riwayat.dart';
 import 'halaman_laporan.dart';
 import 'halaman_pengguna.dart';
 import 'halaman_pesanan.dart';
+import 'halaman_profil_admin.dart';
 
 class HomeAdmin extends StatelessWidget {
   const HomeAdmin({super.key});
@@ -47,44 +46,58 @@ class HomeAdmin extends StatelessWidget {
     );
   }
 
+  // ==============================================================
+  // BAGIAN YANG DIUPDATE: HEADER (IKON PROFIL BISA DIKLIK)
+  // ==============================================================
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Builder(
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Selamat Datang',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Selamat Datang',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Dashboard Admin',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                'Dashboard Admin',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
+              // Tambahan GestureDetector biar bisa diklik ke Profil Admin
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfilAdmin()));
+                },
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 2))],
+                  ),
+                  child: const Icon(Icons.person, color: Color(0xFFD27F30), size: 30),
                 ),
               ),
             ],
           ),
-          Container(
-            width: 50,
-            height: 50,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.person, color: Color(0xFFD27F30), size: 30),
-          ),
-        ],
-      ),
+        );
+      }
     );
   }
 

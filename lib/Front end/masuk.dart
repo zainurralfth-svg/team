@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; 
 import '../Backend/API_Service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MasukPage extends StatefulWidget {
   const MasukPage({super.key});
@@ -78,6 +79,23 @@ class _MasukPageState extends State<MasukPage> {
         _usernameController.clear();
         _passwordController.clear();
         
+        // ==============================================================
+        // INI DIA TAMBAHANNYA: SIMPAN ID KE MEMORI HP!
+        // ==============================================================
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        
+        // Kita cari angka ID dari balikan XAMPP. 
+        // Bisa di dalam hasil['id'], hasil['data']['id'], atau hasil['id_user']
+        String idUserLogin = hasil['id']?.toString() ?? hasil['data']?['id']?.toString() ?? "";
+        
+        if (idUserLogin.isNotEmpty) {
+          await prefs.setString('id_user', idUserLogin);
+          print("Mantap! ID User $idUserLogin berhasil disimpan ke memori!");
+        } else {
+          print("Waduh! ID User nggak ketemu dari balikan PHP.");
+        }
+        // ==============================================================
+
         // --- LOGIKA MULTI-ROLE (Routing berdasarkan hak akses) ---
         String roleUser = hasil['role'] ?? 'user'; 
 
@@ -96,7 +114,7 @@ class _MasukPageState extends State<MasukPage> {
         // Tampilkan pesan error jika kredensial salah
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(hasil['pesan']), 
+            content: Text(hasil['pesan'] ?? 'Login Gagal'), 
             backgroundColor: AppColors.errorRed, 
             behavior: SnackBarBehavior.floating,
           ),
