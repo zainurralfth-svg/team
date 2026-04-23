@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart'; 
 import 'halaman_profil.dart';
+import 'konfirmasipesanan.dart'; // Pastikan file ini sudah ada
 
 class KeranjangPage extends StatefulWidget {
   const KeranjangPage({super.key});
@@ -13,7 +14,6 @@ class KeranjangPage extends StatefulWidget {
 class _KeranjangPageState extends State<KeranjangPage> {
   List<dynamic> _cartItems = [];
   bool _isLoading = true;
-  
   final String currentUserId = "1"; 
 
   @override
@@ -26,7 +26,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _fetchCartData();
-}
+  }
 
   Future<void> _fetchCartData() async {
     try {
@@ -40,21 +40,37 @@ class _KeranjangPageState extends State<KeranjangPage> {
     }
   }
 
-  // ======================================================
-  // HITUNG TOTAL HARGA (DIBERSIHKAN DARI TITIK/RP)
-  // ======================================================
-  // Update fungsi totalHarga di keranjang.dart
-int get _totalHarga {
-  int total = 0;
-  for (var item in _cartItems) {
-    // Bersihkan karakter non-angka
-    String hargaStr = item['harga'].toString().replaceAll(RegExp(r'[^0-9]'), '');
-    int harga = int.tryParse(hargaStr) ?? 0;
-    int jumlah = int.tryParse(item['jumlah'].toString()) ?? 0;
-    total += (harga * jumlah);
+  Future<void> _updateJumlah(String idProduk, int delta) async {
+    final item = _cartItems.firstWhere((e) => e['id_produk'].toString() == idProduk);
+    int jumlahSekarang = int.tryParse(item['jumlah'].toString()) ?? 1;
+    if (delta == -1 && jumlahSekarang <= 1) return;
+
+    setState(() => _isLoading = true);
+    final response = await ApiService.tambahKeranjang(currentUserId, idProduk, delta);
+    if (response['status'] == 'sukses') {
+      await _fetchCartData();
+    } else {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Gagal: ${response['pesan']}")));
+    }
   }
-  return total;
-}
+
+  void _hapusItem(String idProduk) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Fitur hapus memerlukan api_hapus.php")),
+    );
+  }
+
+  int get _totalHarga {
+    int total = 0;
+    for (var item in _cartItems) {
+      String hargaStr = item['harga'].toString().replaceAll(RegExp(r'[^0-9]'), '');
+      int harga = int.tryParse(hargaStr) ?? 0;
+      int jumlah = int.tryParse(item['jumlah'].toString()) ?? 0;
+      total += (harga * jumlah);
+    }
+    return total;
+  }
 
   int get _totalItem {
     int total = 0;
@@ -97,6 +113,7 @@ int get _totalHarga {
                           itemBuilder: (context, index) {
                             final item = _cartItems[index];
                             return _buildCartCard(
+                              item['id_produk'].toString(),
                               item['nama_produk'] ?? 'Tanpa Nama',
                               'Rp ${item['harga']}',
                               int.tryParse(item['jumlah'].toString()) ?? 1,
@@ -124,7 +141,7 @@ int get _totalHarga {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('$_totalItem Item', style: const TextStyle(fontSize: 14)),
-                                  const Text('Subtotal', style: const TextStyle(fontSize: 14)),
+                                  const Text('Subtotal', style: TextStyle(fontSize: 14)),
                                 ],
                               ),
                               const SizedBox(height: 10),
@@ -135,7 +152,19 @@ int get _totalHarga {
                         const SizedBox(height: 30),
                         Center(
                           child: GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              if (_cartItems.isNotEmpty) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const KonfirmasiPage(),
+                                    settings: RouteSettings(
+                                      arguments: {'items': _cartItems, 'total': _totalHarga},
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                             child: Container(
                               width: 240, height: 45,
                               decoration: BoxDecoration(color: const Color(0xFFF1C574), borderRadius: BorderRadius.circular(25), border: Border.all(color: AppColors.textDark)),
@@ -164,7 +193,7 @@ int get _totalHarga {
     );
   }
 
-  Widget _buildCartCard(String nama, String harga, int jumlah, String imgUrl) {
+  Widget _buildCartCard(String idProduk, String nama, String harga, int jumlah, String imgUrl) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(12),
@@ -185,11 +214,11 @@ int get _totalHarga {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    _buildQtyBtn('-'),
+                    GestureDetector(onTap: () => _updateJumlah(idProduk, -1), child: _buildQtyBtn('-')),
                     SizedBox(width: 30, child: Center(child: Text('$jumlah'))),
-                    _buildQtyBtn('+'),
+                    GestureDetector(onTap: () => _updateJumlah(idProduk, 1), child: _buildQtyBtn('+')),
                     const Spacer(),
-                    const Icon(Icons.delete_outline, color: AppColors.textDark, size: 22),
+                    GestureDetector(onTap: () => _hapusItem(idProduk), child: const Icon(Icons.delete_outline, color: AppColors.textDark, size: 22)),
                   ],
                 ),
               ],
