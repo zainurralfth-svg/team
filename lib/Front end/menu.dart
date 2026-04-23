@@ -3,9 +3,7 @@ import 'product_detail.dart';
 import '../Backend/api_service.dart';
 import 'halaman_profil.dart';
 
-// =====================================================================
-// Helper: Animasi Instagram-style (Tetap ada buat halaman Detail Produk)
-// =====================================================================
+// Helper: Animasi Instagram-style
 PageRoute instagramSlideRoute(Widget page) {
   return PageRouteBuilder(
     transitionDuration: const Duration(milliseconds: 420),
@@ -19,16 +17,13 @@ PageRoute instagramSlideRoute(Widget page) {
         parent: animation,
         curve: Curves.easeOutCubic,
       ));
-
       final fade = CurvedAnimation(
         parent: animation,
         curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
       );
-
       final scaleBack = Tween<double>(begin: 1.0, end: 0.93).animate(
         CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut),
       );
-
       return ScaleTransition(
         scale: scaleBack,
         child: SlideTransition(
@@ -200,7 +195,7 @@ class _MenuPageState extends State<MenuPage> {
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.85, crossAxisSpacing: 12, mainAxisSpacing: 12),
                     itemBuilder: (context, index) {
                       final product = produkFilter[index];
-                      String idMenu = product['id_menu']?.toString() ?? ''; 
+                      String idMenu = product['id_produk']?.toString() ?? '';
                       String namaDB = product['nama_produk'] ?? 'Tanpa Nama';
                       String hargaDB = 'Rp ${product['harga']}';
                       String namaFileGambar = product['gambar'] ?? '';
@@ -225,21 +220,15 @@ class _MenuPageState extends State<MenuPage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/cek_pesanan');
-              },
+              onTap: () { Navigator.pushNamed(context, '/cek_pesanan'); },
               child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, colorPrimary),
             ),
             GestureDetector(
-              onTap: () {
-                // Biarkan kosong, karena ini sedang di halaman Produk
-              },
-              child: _buildBottomNavItem(Icons.cake, 'Produk', true, colorPrimary), // TRUE -> Ada bunderan putihnya
+              onTap: () {},
+              child: _buildBottomNavItem(Icons.cake, 'Produk', true, colorPrimary),
             ),
             GestureDetector(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfil()));
-              },
+              onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfil())); },
               child: _buildBottomNavItem(Icons.person, 'Profil', false, colorPrimary),
             ),
           ],
@@ -282,17 +271,29 @@ class _MenuPageState extends State<MenuPage> {
                       onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description),
                       child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: Color(0xFF7A4A21), fontWeight: FontWeight.w600)),
                     ),
+                    // ==========================================
+                    // FITUR TAMBAH KERANJANG DISINI
+                    // ==========================================
                     GestureDetector(
                       onTap: () async {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Memasukkan ke keranjang...'), duration: Duration(milliseconds: 500)),
+                          const SnackBar(content: Text('Menambahkan ke keranjang...'), duration: Duration(milliseconds: 500)),
                         );
 
+                        // Panggil ApiService
                         var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
 
                         if (response['status'] == 'sukses') {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$name berhasil ditambahkan! 🛒'), backgroundColor: Colors.green),
+                            SnackBar(
+                              content: Text('$name masuk keranjang! 🛒'), 
+                              backgroundColor: Colors.green,
+                              action: SnackBarAction(
+                                label: 'LIHAT', 
+                                textColor: Colors.white,
+                                onPressed: () => Navigator.pushNamed(context, '/keranjang')
+                              ),
+                            ),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -316,9 +317,6 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  // ==============================================================
-  // HELPER BOTTOM ITEM DENGAN BUNDERAN PUTIH UNTUK MENU AKTIF
-  // ==============================================================
   Widget _buildBottomNavItem(IconData icon, String label, bool isSelected, Color activeColor) {
     return Container(
       color: Colors.transparent,
@@ -328,25 +326,11 @@ class _MenuPageState extends State<MenuPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: isSelected ? Colors.white : Colors.transparent, // Bunderan putih kalau aktif
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon, 
-              color: isSelected ? activeColor : Colors.white, // Ikon jadi orange kalau aktif
-              size: 24,
-            ),
+            decoration: BoxDecoration(color: isSelected ? Colors.white : Colors.transparent, shape: BoxShape.circle),
+            child: Icon(icon, color: isSelected ? activeColor : Colors.white, size: 24),
           ),
           const SizedBox(height: 2),
-          Text(
-            label, 
-            style: const TextStyle(
-              color: Colors.white, 
-              fontSize: 12,
-              fontWeight: FontWeight.bold // Biar tulisannya tegas
-            )
-          )
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))
         ]
       ),
     );

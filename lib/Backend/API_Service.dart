@@ -2,32 +2,22 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
+  // Gunakan 127.0.0.1 jika running di Edge/Chrome Browser
   static const String baseUrl = "http://127.0.0.1/api_puddingku";
 
   // =========================================================
-  // PERBAIKAN UTAMA: Helper decode JSON dengan aman.
-  // Jika server mengembalikan HTML (misal karena PHP warning),
-  // fungsi ini TIDAK akan crash — langsung kembalikan error map.
+  // HELPER: Decode JSON aman agar aplikasi tidak crash
   // =========================================================
   static Map<String, dynamic> _safeDecodeMap(String body) {
     try {
       final trimmed = body.trim();
-      if (trimmed.isEmpty) {
-        return {"status": "error", "pesan": "Server mengembalikan response kosong."};
-      }
-      // HTML selalu diawali '<' — tangkap sebelum jsonDecode
+      if (trimmed.isEmpty) return {"status": "error", "pesan": "Response kosong"};
       if (trimmed.startsWith('<')) {
-        return {
-          "status": "error",
-          "pesan": "Server error: PHP mengembalikan HTML bukan JSON. "
-              "Cek log error di server."
-        };
+        return {"status": "error", "pesan": "PHP Error: Server mengirim HTML (Cek XAMPP)"};
       }
-      final decoded = jsonDecode(trimmed);
-      if (decoded is Map<String, dynamic>) return decoded;
-      return {"status": "error", "pesan": "Format response tidak dikenali."};
+      return jsonDecode(trimmed);
     } catch (e) {
-      return {"status": "error", "pesan": "Gagal membaca response: $e"};
+      return {"status": "error", "pesan": "Gagal membaca JSON: $e"};
     }
   }
 
@@ -36,15 +26,14 @@ class ApiService {
       final trimmed = body.trim();
       if (trimmed.isEmpty || trimmed.startsWith('<')) return [];
       final decoded = jsonDecode(trimmed);
-      if (decoded is List) return decoded;
-      return [];
+      return decoded is List ? decoded : [];
     } catch (_) {
       return [];
     }
   }
 
   // ==========================================
-  // 1. FUNGSI OTENTIKASI
+  // 1. OTENTIKASI (LOGIN, REGISTER, RESET)
   // ==========================================
   static Future<Map<String, dynamic>> registerUser(
       String nama, String username, String phone, String password) async {
@@ -53,9 +42,9 @@ class ApiService {
         Uri.parse("$baseUrl/register.php"),
         body: {"nama": nama, "username": username, "phone": phone, "password": password},
       );
-      return _safeDecodeMap(response.body); // ← diganti
+      return _safeDecodeMap(response.body);
     } catch (e) {
-      return {"status": "error", "pesan": "Gagal terhubung ke server: $e"};
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
     }
   }
 
@@ -65,9 +54,9 @@ class ApiService {
         Uri.parse("$baseUrl/login.php"),
         body: {"username": username, "password": password},
       );
-      return _safeDecodeMap(response.body); // ← diganti
+      return _safeDecodeMap(response.body);
     } catch (e) {
-      return {"status": "error", "pesan": "Gagal terhubung ke server: $e"};
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
     }
   }
 
@@ -77,65 +66,51 @@ class ApiService {
         Uri.parse("$baseUrl/reset_password.php"),
         body: {"phone": phone, "new_password": newPassword ?? ""},
       );
-      return _safeDecodeMap(response.body); // ← diganti
+      return _safeDecodeMap(response.body);
     } catch (e) {
-      return {"status": "error", "pesan": "Gagal terhubung ke server: $e"};
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
     }
   }
 
   // ==========================================
-  // 2. FUNGSI MENU / PRODUK
+  // 2. MENU & PRODUK (ADMIN & USER)
   // ==========================================
   static Future<List<dynamic>> getMenu() async {
     try {
       var response = await http.get(Uri.parse("$baseUrl/api_menu.php"));
-      return _safeDecodeList(response.body); // ← diganti
+      return _safeDecodeList(response.body);
     } catch (e) {
       return [];
     }
   }
 
-  static Future<Map<String, dynamic>> tambahMenu(
+  // Cari bagian ini di API_Service.dart dan pastikan isinya begini:
+static Future<Map<String, dynamic>> tambahMenu(
       String nama, String kategori, int harga, int stok, String deskripsi, var imageFile) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse("$baseUrl/api_menu.php"));
-
+      // Sesuaikan nama field dengan database kamu
       request.fields['nama_produk'] = nama;
-      request.fields['kategori']    = kategori;
-      request.fields['harga']       = harga.toString();
-      request.fields['stok']        = stok.toString();
-      request.fields['deskripsi']   = deskripsi;
+      request.fields['kategori'] = kategori;
+      request.fields['harga'] = harga.toString();
+      request.fields['stok'] = stok.toString();
+      request.fields['deskripsi'] = deskripsi;
 
       if (imageFile != null) {
         var bytes = await imageFile.readAsBytes();
-        request.files.add(http.MultipartFile.fromBytes(
-          'gambar',
-          bytes,
-          filename: imageFile.name,
-        ));
+        request.files.add(http.MultipartFile.fromBytes('gambar', bytes, filename: imageFile.name));
       }
-
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
-
-      // PERBAIKAN: cek status code dulu, lalu decode dengan aman
-      if (response.statusCode != 200) {
-        return {"status": "error", "pesan": "Server Error: ${response.statusCode}"};
-      }
-
-      return _safeDecodeMap(response.body); // ← diganti (ini inti perbaikannya)
-    } catch (e) {
-      return {"status": "error", "pesan": "Gagal mengirim data: $e"};
-    }
+      var res = await http.Response.fromStream(await request.send());
+      return _safeDecodeMap(res.body);
+    } catch (e) { return {"status": "error", "pesan": e.toString()}; }
   }
-
   // ==========================================
-  // 3. FUNGSI KERANJANG
+  // 3. KERANJANG (CUSTOMER)
   // ==========================================
   static Future<List<dynamic>> getKeranjang(String idUser) async {
     try {
       var response = await http.get(Uri.parse("$baseUrl/api_keranjang.php?id_user=$idUser"));
-      return _safeDecodeList(response.body); // ← diganti
+      return _safeDecodeList(response.body);
     } catch (e) {
       return [];
     }
@@ -145,24 +120,28 @@ class ApiService {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/api_keranjang.php"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"id_user": idUser, "id_menu": idMenu, "jumlah": jumlah}),
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: {
+          "id_user": idUser.toString(),
+          "id_menu": idMenu.toString(),
+          "jumlah": jumlah.toString(),
+        },
       );
-      return _safeDecodeMap(response.body); // ← diganti
+      return _safeDecodeMap(response.body);
     } catch (e) {
       return {"status": "error", "pesan": "Gagal terhubung ke server: $e"};
     }
   }
 
   // ==========================================
-  // 4. FUNGSI PESANAN & CHECKOUT
+  // 4. PESANAN & CHECKOUT
   // ==========================================
   static Future<List<dynamic>> getPesanan({String? idUser}) async {
     try {
       String url = "$baseUrl/api_pesanan.php";
       if (idUser != null && idUser.isNotEmpty) url += "?id_user=$idUser";
       var response = await http.get(Uri.parse(url));
-      return _safeDecodeList(response.body); // ← diganti
+      return _safeDecodeList(response.body);
     } catch (e) {
       return [];
     }
@@ -181,14 +160,14 @@ class ApiService {
           "items": items,
         }),
       );
-      return _safeDecodeMap(response.body); // ← diganti
+      return _safeDecodeMap(response.body);
     } catch (e) {
-      return {"status": "error", "pesan": "Gagal terhubung ke server: $e"};
+      return {"status": "error", "pesan": "Gagal checkout: $e"};
     }
   }
 
   // ==========================================
-  // 5. FUNGSI PROFIL PENGGUNA
+  // 5. PROFIL PENGGUNA
   // ==========================================
   static Future<Map<String, dynamic>> getProfil(String idUser) async {
     try {
@@ -196,9 +175,9 @@ class ApiService {
         Uri.parse('$baseUrl/get_profil.php'),
         body: {'id_user': idUser},
       );
-      return _safeDecodeMap(response.body); // ← diganti
+      return _safeDecodeMap(response.body);
     } catch (e) {
-      return {'status': 'error', 'pesan': 'Gagal koneksi ke server: $e'};
+      return {'status': 'error', 'pesan': 'Gagal koneksi profil: $e'};
     }
   }
 }
