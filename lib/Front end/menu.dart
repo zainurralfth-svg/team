@@ -3,9 +3,7 @@ import 'product_detail.dart';
 import '../Backend/api_service.dart';
 import 'halaman_profil.dart';
 
-// =====================================================================
 // Helper: Animasi Instagram-style
-// =====================================================================
 PageRoute instagramSlideRoute(Widget page) {
   return PageRouteBuilder(
     transitionDuration: const Duration(milliseconds: 420),
@@ -19,16 +17,13 @@ PageRoute instagramSlideRoute(Widget page) {
         parent: animation,
         curve: Curves.easeOutCubic,
       ));
-
       final fade = CurvedAnimation(
         parent: animation,
         curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
       );
-
       final scaleBack = Tween<double>(begin: 1.0, end: 0.93).animate(
         CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut),
       );
-
       return ScaleTransition(
         scale: scaleBack,
         child: SlideTransition(
@@ -58,7 +53,6 @@ class _MenuPageState extends State<MenuPage> {
   final List<String> _categories = ['Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
   final List<String> _banners = ['banner pudding.png', 'banner dessert.png', 'banner cake.png', 'banner brownies.png', 'banner cookies.png'];
 
-  // Anggap saja ini adalah ID User yang sedang login
   final String currentUserId = "1"; 
 
   @override
@@ -83,9 +77,6 @@ class _MenuPageState extends State<MenuPage> {
     setState(() => _selectedIndex = index);
   }
 
-  // =====================================================================
-  // PERBAIKAN: Menambahkan parameter "description" untuk dikirim ke Detail
-  // =====================================================================
   void _goToDetail(BuildContext context, String idMenu, String name, String price, String imgUrl, String description) {
     Navigator.of(context).push(
       instagramSlideRoute(ProductDetailPage(
@@ -93,7 +84,7 @@ class _MenuPageState extends State<MenuPage> {
         name: name, 
         price: price, 
         image: imgUrl,
-        description: description // <- Ini dia data yang ditunggu-tunggu Product Detail!
+        description: description 
       )),
     );
   }
@@ -204,15 +195,11 @@ class _MenuPageState extends State<MenuPage> {
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.85, crossAxisSpacing: 12, mainAxisSpacing: 12),
                     itemBuilder: (context, index) {
                       final product = produkFilter[index];
-                      String idMenu = product['id_menu']?.toString() ?? ''; 
+                      String idMenu = product['id_produk']?.toString() ?? '';
                       String namaDB = product['nama_produk'] ?? 'Tanpa Nama';
                       String hargaDB = 'Rp ${product['harga']}';
                       String namaFileGambar = product['gambar'] ?? '';
                       String urlGambarLengkap = Uri.encodeFull("${ApiService.baseUrl}/uploads/$namaFileGambar");
-                      
-                      // =======================================================
-                      // PERBAIKAN: Ambil deskripsi dari database
-                      // =======================================================
                       String deskripsiDB = product['deskripsi'] ?? 'Deskripsi tidak tersedia.';
 
                       return _buildProductCard(context, idMenu, namaDB, hargaDB, urlGambarLengkap, deskripsiDB, colorCard, colorBorder, colorText, colorPrimary);
@@ -233,26 +220,16 @@ class _MenuPageState extends State<MenuPage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/cek_pesanan');
-              },
-              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan'),
+              onTap: () { Navigator.pushNamed(context, '/cek_pesanan'); },
+              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, colorPrimary),
             ),
             GestureDetector(
-              onTap: () {
-                // Biarkan kosong karena kita sedang ada di halaman Produk (Menu)
-              },
-              child: _buildBottomNavItem(Icons.cake, 'Produk'),
+              onTap: () {},
+              child: _buildBottomNavItem(Icons.cake, 'Produk', true, colorPrimary),
             ),
-            // ==========================================
-            // TAMBAHAN TOMBOL PROFIL DI SINI
-            // ==========================================
             GestureDetector(
-              onTap: () {
-                // Pakai animasi slide Instagram buatan lo buat pindah ke Profil!
-                Navigator.of(context).push(instagramSlideRoute(const HalamanProfil()));
-              },
-              child: _buildBottomNavItem(Icons.person, 'Profil'),
+              onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfil())); },
+              child: _buildBottomNavItem(Icons.person, 'Profil', false, colorPrimary),
             ),
           ],
         ),
@@ -260,7 +237,6 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  // PERBAIKAN: Tambahkan parameter description di sini
   Widget _buildProductCard(BuildContext context, String idMenu, String name, String price, String imgUrl, String description, Color cardColor, Color borderColor, Color textColor, Color btnColor) {
     return Container(
       decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(15), border: Border.all(color: borderColor, width: 1), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 3))]),
@@ -269,7 +245,6 @@ class _MenuPageState extends State<MenuPage> {
         children: [
           Expanded(
             child: GestureDetector(
-              // PERBAIKAN: Lempar description ke halaman detail
               onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description),
               child: Hero(
                 tag: 'product-$name',
@@ -293,21 +268,32 @@ class _MenuPageState extends State<MenuPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
-                      // PERBAIKAN: Lempar description ke halaman detail
                       onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description),
                       child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: Color(0xFF7A4A21), fontWeight: FontWeight.w600)),
                     ),
+                    // ==========================================
+                    // FITUR TAMBAH KERANJANG DISINI
+                    // ==========================================
                     GestureDetector(
                       onTap: () async {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Memasukkan ke keranjang...'), duration: Duration(milliseconds: 500)),
+                          const SnackBar(content: Text('Menambahkan ke keranjang...'), duration: Duration(milliseconds: 500)),
                         );
 
+                        // Panggil ApiService
                         var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
 
                         if (response['status'] == 'sukses') {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$name berhasil ditambahkan! 🛒'), backgroundColor: Colors.green),
+                            SnackBar(
+                              content: Text('$name masuk keranjang! 🛒'), 
+                              backgroundColor: Colors.green,
+                              action: SnackBarAction(
+                                label: 'LIHAT', 
+                                textColor: Colors.white,
+                                onPressed: () => Navigator.pushNamed(context, '/keranjang')
+                              ),
+                            ),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -331,16 +317,20 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  Widget _buildBottomNavItem(IconData icon, String label) {
+  Widget _buildBottomNavItem(IconData icon, String label, bool isSelected, Color activeColor) {
     return Container(
       color: Colors.transparent,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Column(
         mainAxisSize: MainAxisSize.min, 
         children: [
-          Icon(icon, color: Colors.white), 
-          const SizedBox(height: 4),
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12))
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(color: isSelected ? Colors.white : Colors.transparent, shape: BoxShape.circle),
+            child: Icon(icon, color: isSelected ? activeColor : Colors.white, size: 24),
+          ),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))
         ]
       ),
     );

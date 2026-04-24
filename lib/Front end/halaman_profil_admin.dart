@@ -83,6 +83,8 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
       appBar: AppBar(
         backgroundColor: AppColors.adminPrimary,
         elevation: 0,
+        // INI DIA TAMBAHANNYA BIAR TEKSNYA KE TENGAH
+        centerTitle: true, 
         title: const Text('Profil Admin', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: AppColors.textWhite),
       ),
