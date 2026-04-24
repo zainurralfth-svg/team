@@ -278,9 +278,9 @@ class HalamanRiwayat extends StatelessWidget {
                         color: const Color(0xFFFDF0D5),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           Icon(Icons.circle, color: Colors.green, size: 10),
                           SizedBox(width: 4),
                           Text('Selesai', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),

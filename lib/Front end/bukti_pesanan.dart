@@ -136,9 +136,9 @@ class BuktiPemesanan extends StatelessWidget {
                         const SizedBox(height: 10),
 
                         // Total Harga
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
+                          children: [
                             Text(
                               'Total',
                               style: TextStyle(

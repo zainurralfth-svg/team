@@ -9,9 +9,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const ProductPage(),
+      home: ProductPage(),
     );
   }
 }
@@ -44,7 +44,7 @@ class ProductPage extends StatelessWidget {
                 ),
 
                 // Back Button
-                Positioned(
+                const Positioned(
                   top: 40,
                   left: 20,
                   child: CircleAvatar(
@@ -54,7 +54,7 @@ class ProductPage extends StatelessWidget {
                 ),
 
                 // Favorite Button
-                Positioned(
+                const Positioned(
                   top: 40,
                   right: 20,
                   child: CircleAvatar(

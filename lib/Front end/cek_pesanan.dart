@@ -40,9 +40,9 @@ class _CekPesananPageState extends State<CekPesananPage> {
                     border: Border.all(color: Colors.white, width: 1.5),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Row(
+                  child: const Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Icon(Icons.arrow_back, color: Colors.white, size: 16),
                       SizedBox(width: 4),
                       Text('Kembali', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
@@ -134,9 +134,9 @@ class _CekPesananPageState extends State<CekPesananPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Hasil Input Sementara (Sesuai Desain Figma)
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text('#e1234', style: TextStyle(color: colorPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
                       Text('Joko', style: TextStyle(color: colorPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
                     ],

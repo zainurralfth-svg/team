@@ -192,7 +192,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text('$_totalItem Item', style: const TextStyle(color: Colors.black, fontSize: 14)),
-                                const Text('Subtotal', style: const TextStyle(color: Colors.black, fontSize: 14)),
+                                const Text('Subtotal', style: TextStyle(color: Colors.black, fontSize: 14)),
                               ],
                             ),
                             const SizedBox(height: 10),
@@ -251,9 +251,9 @@ class _KeranjangPageState extends State<KeranjangPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Column(
+            const Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Icon(Icons.shopping_bag, color: Colors.white, size: 28),
                 SizedBox(height: 5),
                 Text('Pesanan', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
@@ -261,9 +261,9 @@ class _KeranjangPageState extends State<KeranjangPage> {
             ),
             GestureDetector(
               onTap: () => Navigator.pop(context),
-              child: Column(
+              child: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Icon(Icons.menu, color: Colors.white, size: 28),
                   SizedBox(height: 5),
                   Text('Produk', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),

@@ -76,11 +76,11 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
-                        const Icon(Icons.receipt_long, color: Color(0xFF270C0C)),
-                        const SizedBox(width: 10),
-                        const Text(
+                        Icon(Icons.receipt_long, color: Color(0xFF270C0C)),
+                        SizedBox(width: 10),
+                        Text(
                           'Ringkasan Pemesanan',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF270C0C)),
                         ),
@@ -110,7 +110,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                           height: 40,
                           decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          image: DecorationImage(
+                          image: const DecorationImage(
                             image: AssetImage('assets/images/Brownie Burn Cheesecake.png'),
                             fit: BoxFit.cover,
                                 ),
@@ -123,22 +123,22 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                             padding: EdgeInsets.symmetric(vertical: 10),
                             child: Divider(color: Colors.black, thickness: 1.5), 
                           ),
-                          Row(
+                          const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Total', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black)),
-                              const Text('Rp 54.000', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFD27F30))),
+                              Text('Total', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black)),
+                              Text('Rp 54.000', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFD27F30))),
                             ],
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 25),
-                    Row(
+                    const Row(
                       children: [
-                        const Icon(Icons.person, color: Color(0xFFD27F30)),
-                        const SizedBox(width: 10),
-                        const Text(
+                        Icon(Icons.person, color: Color(0xFFD27F30)),
+                        SizedBox(width: 10),
+                        Text(
                           'Data Diri',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF270C0C)),
                         ),

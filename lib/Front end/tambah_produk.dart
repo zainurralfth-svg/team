@@ -174,9 +174,9 @@ class _TambahProdukPageState extends State<TambahProdukPage> {
               decoration: BoxDecoration(
                 color: Colors.white, borderRadius: BorderRadius.circular(30),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Text('Pendapatan',
                       style: TextStyle(color: AppColors.primaryOrange, fontSize: 16, fontWeight: FontWeight.bold)),
                   Text('570.000',
