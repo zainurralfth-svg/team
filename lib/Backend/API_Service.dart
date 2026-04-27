@@ -166,9 +166,6 @@ class ApiService {
     }
   }
 
-  // =====================================================================
-  // FUNGSI BARU: CHECKOUT PESANAN (MENGHUBUNGKAN KE checkout.php)
-  // =====================================================================
   static Future<Map<String, dynamic>> checkoutPesanan(String idUser, String nama, String noTelp) async {
     try {
       var url = Uri.parse('$baseUrl/checkout.php');
@@ -178,7 +175,6 @@ class ApiService {
         'no_telp': noTelp,
       });
 
-      // PERBAIKAN: Gunakan fungsi anti-crash agar pesan dari XAMPP terbaca jelas!
       return _safeDecodeMap(response.body);
 
     } catch (e) {
@@ -200,4 +196,23 @@ class ApiService {
       return {'status': 'error', 'pesan': 'Gagal koneksi profil: $e'};
     }
   }
-}
+
+  // ==========================================
+  // 6. UPDATE STATUS PESANAN (UNTUK ADMIN)
+  // ==========================================
+  static Future<Map<String, dynamic>> updateStatusPesanan(String idPesanan, String status) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$baseUrl/update_status_pesanan.php"),
+        body: {
+          "id_pesanan": idPesanan,
+          "status": status,
+        },
+      );
+      return _safeDecodeMap(response.body);
+    } catch (e) {
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
+  }
+
+} // <--- INI ADALAH KURUNG PENUTUP UTAMA CLASS APISERVICE

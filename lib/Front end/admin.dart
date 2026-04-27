@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; 
-import '../Backend/api_service.dart'; // <-- JANGAN LUPA IMPORT API SERVICE-NYA
+import '../Backend/Api_service.dart'; // <-- JANGAN LUPA IMPORT API SERVICE-NYA
 import 'tambah_produk.dart'; 
 import 'halaman_produk.dart';
 import 'halaman_riwayat.dart';
@@ -39,6 +39,29 @@ class _HomeAdminState extends State<HomeAdmin> {
         _isLoading = false;
       });
       print("Error fetching pesanan: $e");
+    }
+  }// FUNGSI UNTUK MENGUBAH STATUS PESANAN
+  Future<void> _ubahStatusPesanan(String idPesanan, String statusBaru) async {
+    setState(() => _isLoading = true);
+
+    try {
+      // Memanggil fungsi dari ApiService (Pastikan kamu sudah buat fungsinya di ApiService.dart)
+      final response = await ApiService.updateStatusPesanan(idPesanan, statusBaru);
+      
+      if (response['status'] == 'sukses') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Status berhasil diubah menjadi $statusBaru'), backgroundColor: Colors.green),
+        );
+        await _fetchDataPesanan(); // Refresh data setelah status berubah
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal: ${response['pesan']}')),
+        );
+      }
+    } catch (e) {
+      print("Error update status: $e");
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -226,17 +249,24 @@ class _HomeAdminState extends State<HomeAdmin> {
   // KARTU PESANAN YANG SUDAH DINAMIS
   // =====================================
   Widget _buildOrderItem(Map<String, dynamic> item) {
+    // Ambil ID Pesanan (pastikan sesuai nama kolom di database kamu)
+    String idPesanan = item['id_pesanan']?.toString() ?? '';
+    
     String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
     String hurufAwal = namaPemesan.isNotEmpty ? namaPemesan[0].toUpperCase() : '?';
     String ringkasan = item['ringkasan_pesanan'] ?? 'Detail Kosong';
     String harga = 'Rp ${item['total_harga'] ?? 0}';
-    String status = item['status_pesanan'] ?? 'PROSES';
+    String status = item['status_pesanan'] ?? 'MENUNGGU'; // Default status
     
-    // Format Waktu singkat
     String waktuLengkap = item['tanggal_pesan'] ?? '';
     String waktuSingkat = waktuLengkap.length > 16 ? waktuLengkap.substring(0, 16) : waktuLengkap;
 
-    Color statusColor = status == 'SELESAI' ? Colors.green : (status == 'DIBATALKAN' ? Colors.red : Colors.blue);
+    // Warna dinamis sesuai status
+    Color statusColor;
+    if (status == 'SELESAI') statusColor = Colors.green;
+    else if (status == 'DIBATALKAN') statusColor = Colors.red;
+    else if (status == 'PROSES') statusColor = Colors.orange;
+    else statusColor = Colors.blue; // MENUNGGU
 
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
@@ -274,15 +304,39 @@ class _HomeAdminState extends State<HomeAdmin> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: AppColors.adminBg, borderRadius: BorderRadius.circular(5)),
-                child: Row(
-                  children: [
-                    Icon(Icons.circle, size: 6, color: statusColor),
-                    const SizedBox(width: 4),
-                    Text(status, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                  ],
+              // =====================================
+              // TOMBOL GANTI STATUS (POPUP MENU)
+              // =====================================
+              PopupMenuButton<String>(
+                initialValue: status,
+                onSelected: (String newValue) {
+                  // Cek agar tidak update jika statusnya sama
+                  if (newValue != status && idPesanan.isNotEmpty) {
+                    _ubahStatusPesanan(idPesanan, newValue);
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(value: 'MENUNGGU', child: Text('MENUNGGU')),
+                  const PopupMenuItem<String>(value: 'PROSES', child: Text('PROSES')),
+                  const PopupMenuItem<String>(value: 'SELESAI', child: Text('SELESAI')),
+                  const PopupMenuItem<String>(value: 'DIBATALKAN', child: Text('DIBATALKAN')),
+                ],
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.adminBg, 
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: statusColor, width: 0.5),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.circle, size: 8, color: statusColor),
+                      const SizedBox(width: 4),
+                      Text(status, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_drop_down, size: 14, color: Colors.black54),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 25),
