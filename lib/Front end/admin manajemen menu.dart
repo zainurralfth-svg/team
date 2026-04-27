@@ -167,9 +167,9 @@ class ManajemenMenuPage extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(30), // Pill shape
       ),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: const [
+        children: [
           Text(
             'Pendapatan',
             style: TextStyle(

@@ -180,9 +180,9 @@ class _HalamanProdukState extends State<HalamanProduk> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
       ),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: const [
+        children: [
           Text(
             'Pendapatan',
             style: TextStyle(

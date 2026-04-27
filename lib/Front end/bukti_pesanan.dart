@@ -99,12 +99,26 @@ class BuktiPemesanan extends StatelessWidget {
                         const Divider(color: Colors.black54, thickness: 1),
                         const SizedBox(height: 10),
 
-                        // Total Harga (DINAMIS)
+                        // Total Harga
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Total', style: TextStyle(color: Color(0xFFD27F30), fontSize: 16, fontWeight: FontWeight.bold)),
-                            Text('Rp $totalHarga', style: const TextStyle(color: Color(0xFFD27F30), fontSize: 16, fontWeight: FontWeight.bold)),
+                          children: const [
+                            Text(
+                              'Total',
+                              style: TextStyle(
+                                color: Color(0xFFD27F30),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '54.000',
+                              style: TextStyle(
+                                color: Color(0xFFD27F30),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ],
                         ),
                       ],
