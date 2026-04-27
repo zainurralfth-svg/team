@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; // Sesuaikan folder lo
+import '../Core/Colour.dart'; 
+import '../Backend/api_service.dart'; // <-- JANGAN LUPA IMPORT API SERVICE-NYA
 import 'tambah_produk.dart'; 
 import 'halaman_produk.dart';
 import 'halaman_riwayat.dart';
@@ -8,8 +9,38 @@ import 'halaman_pengguna.dart';
 import 'halaman_pesanan.dart';
 import 'halaman_profil_admin.dart';
 
-class HomeAdmin extends StatelessWidget {
+class HomeAdmin extends StatefulWidget {
   const HomeAdmin({super.key});
+
+  @override
+  State<HomeAdmin> createState() => _HomeAdminState();
+}
+
+class _HomeAdminState extends State<HomeAdmin> {
+  List<dynamic> _listPesanan = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDataPesanan(); 
+  }
+
+  // FUNGSI MENYEDOT DATA PESANAN DARI DATABASE
+  Future<void> _fetchDataPesanan() async {
+    try {
+      final data = await ApiService.getPesanan();
+      setState(() {
+        _listPesanan = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print("Error fetching pesanan: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +65,26 @@ class HomeAdmin extends StatelessWidget {
                 const SizedBox(height: 15),
                 _buildSectionTitle(),
                 const SizedBox(height: 10),
+                
+                // =====================================
+                // BAGIAN LIST PESANAN YANG SUDAH DINAMIS
+                // =====================================
                 Expanded(
-                  child: _buildOrderList(),
+                  child: _isLoading 
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.textWhite)) 
+                    : _listPesanan.isEmpty 
+                      ? const Center(child: Text("Belum ada pesanan masuk", style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)))
+                      : RefreshIndicator(
+                          color: AppColors.adminPrimary,
+                          onRefresh: _fetchDataPesanan,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                            itemCount: _listPesanan.length,
+                            itemBuilder: (context, index) {
+                              return _buildOrderItem(_listPesanan[index]);
+                            },
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -151,7 +200,7 @@ class HomeAdmin extends StatelessWidget {
             style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold),
           ),
           Text(
-            '570.000',
+            'Rp -', // Nanti bisa didinamiskan kalau API pendapatannya udah ada
             style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ],
@@ -173,72 +222,81 @@ class HomeAdmin extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderList() {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      itemCount: 4, 
-      itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 15),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.textWhite,
-            borderRadius: BorderRadius.circular(20),
+  // =====================================
+  // KARTU PESANAN YANG SUDAH DINAMIS
+  // =====================================
+  Widget _buildOrderItem(Map<String, dynamic> item) {
+    String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
+    String hurufAwal = namaPemesan.isNotEmpty ? namaPemesan[0].toUpperCase() : '?';
+    String ringkasan = item['ringkasan_pesanan'] ?? 'Detail Kosong';
+    String harga = 'Rp ${item['total_harga'] ?? 0}';
+    String status = item['status_pesanan'] ?? 'PROSES';
+    
+    // Format Waktu singkat
+    String waktuLengkap = item['tanggal_pesan'] ?? '';
+    String waktuSingkat = waktuLengkap.length > 16 ? waktuLengkap.substring(0, 16) : waktuLengkap;
+
+    Color statusColor = status == 'SELESAI' ? Colors.green : (status == 'DIBATALKAN' ? Colors.red : Colors.blue);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.textWhite,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.adminCardLight,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Text(hurufAwal, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.adminPrimary)),
+            ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(namaPemesan, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(ringkasan, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                const SizedBox(height: 8),
+                Text(harga, style: const TextStyle(color: AppColors.adminPrimary, fontSize: 14, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                width: 40, height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.adminCardLight,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Center(
-                  child: Text('A', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.adminPrimary)),
-                ),
-              ),
-              const SizedBox(width: 15),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: AppColors.adminBg, borderRadius: BorderRadius.circular(5)),
+                child: Row(
                   children: [
-                    Text('Mr.A', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 4),
-                    Text('Taro pudding 1x, Browkies 1x', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    SizedBox(height: 8),
-                    Text('Rp 25.000', style: TextStyle(color: AppColors.adminPrimary, fontSize: 14, fontWeight: FontWeight.bold)),
+                    Icon(Icons.circle, size: 6, color: statusColor),
+                    const SizedBox(width: 4),
+                    Text(status, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              const SizedBox(height: 25),
+              Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: AppColors.adminBg, borderRadius: BorderRadius.circular(5)),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.circle, size: 6, color: Colors.blue),
-                        SizedBox(width: 4),
-                        Text('PROSES', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 25),
-                  const Row(
-                    children: [
-                      Icon(Icons.alarm, size: 12, color: Colors.grey),
-                      SizedBox(width: 4),
-                      Text('15 menit lalu', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                    ],
-                  ),
+                  const Icon(Icons.alarm, size: 12, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(waktuSingkat, style: const TextStyle(fontSize: 10, color: Colors.grey)),
                 ],
               ),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
