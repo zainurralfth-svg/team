@@ -1,19 +1,44 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart';
+import '../Backend/api_service.dart'; // Pastikan path ini benar sesuai struktur foldermu
 
-class HalamanRiwayat extends StatelessWidget {
+class HalamanRiwayat extends StatefulWidget {
   const HalamanRiwayat({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Data dummy untuk list riwayat pesanan
-    final List<Map<String, dynamic>> dataRiwayat = [
-      {'huruf': 'A', 'nama': 'Mr.A', 'pesanan': 'Taro pudding 1x, Browkies 1x', 'harga': 'Rp 25.000', 'waktu': '1 hari lalu'},
-      {'huruf': 'P', 'nama': 'Mr.P', 'pesanan': 'Taro pudding 1x, Browkies 1x', 'harga': 'Rp 25.000', 'waktu': '2 hari lalu'},
-      {'huruf': 'A', 'nama': 'Mr.A', 'pesanan': 'Taro pudding 1x, milk bun 1x', 'harga': 'Rp 25.000', 'waktu': '3 hari lalu'},
-      {'huruf': 'P', 'nama': 'pandu', 'pesanan': 'manggo pudding 1x, Browkies 1x', 'harga': 'Rp 25.000', 'waktu': '3 hari lalu'},
-    ];
+  State<HalamanRiwayat> createState() => _HalamanRiwayatState();
+}
 
+class _HalamanRiwayatState extends State<HalamanRiwayat> {
+  List<dynamic> _listPesanan = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDataPesanan(); // Panggil fungsi ambil data saat halaman pertama kali dibuka
+  }
+
+  // ============================================================
+  // FUNGSI MENYEDOT DATA DARI DATABASE (API)
+  // ============================================================
+  Future<void> _fetchDataPesanan() async {
+    try {
+      // Mengambil semua data pesanan (tanpa filter id_user karena ini Admin)
+      final data = await ApiService.getPesanan();
+      setState(() {
+        _listPesanan = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print("Error fetching pesanan: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFD27F30), // Warna oranye utama
       body: SafeArea(
@@ -58,7 +83,6 @@ class HalamanRiwayat extends StatelessWidget {
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
-                    // Ganti dengan aset gambar avatar-mu nanti
                     child: const Icon(Icons.person, color: Color(0xFFD27F30), size: 30),
                   ),
                 ],
@@ -74,7 +98,6 @@ class HalamanRiwayat extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildStatCard('12\nProduk', Icons.inventory_2_outlined),
-                  // Kartu "Riwayat Pesanan" bisa dibedakan warnanya sedikit jika sedang aktif
                   _buildStatCard('Riwayat\npesanan', Icons.shopping_bag, isActive: true),
                   _buildStatCard('Laporan', Icons.bar_chart),
                 ],
@@ -82,6 +105,7 @@ class HalamanRiwayat extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
+            // (Nantinya total pendapatan ini bisa di-dinamiskan juga)
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20.0),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -94,19 +118,11 @@ class HalamanRiwayat extends StatelessWidget {
                 children: [
                   Text(
                     'Pendapatan',
-                    style: TextStyle(
-                      color: Color(0xFFD27F30),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(color: Color(0xFFD27F30), fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '570.000',
-                    style: TextStyle(
-                      color: Color(0xFFD27F30),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Rp -', // Disembunyikan sementara sampai kita buat API Pendapatan
+                    style: TextStyle(color: Color(0xFFD27F30), fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -124,7 +140,7 @@ class HalamanRiwayat extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // Judul "Riwayat pesanan" berbentuk pil melayang
+                    // Judul berbentuk pil melayang
                     Transform.translate(
                       offset: const Offset(0, -15),
                       child: Container(
@@ -132,31 +148,34 @@ class HalamanRiwayat extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: const Color(0xFFD27F30),
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
-                          ],
+                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
                         ),
                         child: const Text(
-                          'Riwayat pesanan',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          'Daftar Pesanan',
+                          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
                     
-                    // List Data Pesanan
+                    // ============================================================
+                    // LIST VIEW BUILDER (DINAMIS DARI DATABASE)
+                    // ============================================================
                     Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                        itemCount: dataRiwayat.length,
-                        itemBuilder: (context, index) {
-                          final item = dataRiwayat[index];
-                          return _buildOrderCard(item);
-                        },
-                      ),
+                      child: _isLoading 
+                        ? const Center(child: CircularProgressIndicator(color: Color(0xFFD27F30))) // Efek Loading
+                        : _listPesanan.isEmpty 
+                          ? const Center(child: Text("Belum ada pesanan masuk", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)))
+                          : RefreshIndicator(
+                              color: const Color(0xFFD27F30),
+                              onRefresh: _fetchDataPesanan, // Tarik ke bawah untuk refresh data
+                              child: ListView.builder(
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                                itemCount: _listPesanan.length,
+                                itemBuilder: (context, index) {
+                                  return _buildOrderCard(_listPesanan[index]);
+                                },
+                              ),
+                            ),
                     ),
                   ],
                 ),
@@ -189,7 +208,6 @@ class HalamanRiwayat extends StatelessWidget {
   // WIDGET BANTUAN (Helper)
   // ----------------------------------------------------
 
-  // Fungsi pembuat Kartu Statistik transparan di atas
   Widget _buildStatCard(String title, IconData icon, {bool isActive = false}) {
     return Container(
       width: 105,
@@ -207,32 +225,38 @@ class HalamanRiwayat extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ],
       ),
     );
   }
 
-  // Fungsi pembuat desain satu Kartu Riwayat Pesanan
+  // ============================================================
+  // FUNGSI PEMBUAT DESAIN KARTU PESANAN (MAPPING DARI DATABASE)
+  // ============================================================
   Widget _buildOrderCard(Map<String, dynamic> item) {
+    // Membongkar data dari Database
+    String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
+    String hurufAwal = namaPemesan.isNotEmpty ? namaPemesan[0].toUpperCase() : '?';
+    String ringkasan = item['ringkasan_pesanan'] ?? 'Detail Kosong';
+    String harga = 'Rp ${item['total_harga'] ?? 0}';
+    String status = item['status_pesanan'] ?? 'PROSES';
+    
+    // Format Waktu sederhana (ambil jam/tanggal dari datetime)
+    String waktuLengkap = item['tanggal_pesan'] ?? '';
+    String waktuSingkat = waktuLengkap.length > 16 ? waktuLengkap.substring(0, 16) : waktuLengkap;
+
+    // Menentukan warna label status
+    Color statusColor = status == 'SELESAI' ? Colors.green : (status == 'DIBATALKAN' ? Colors.red : Colors.blue);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          )
-        ],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3))],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,12 +272,8 @@ class HalamanRiwayat extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                item['huruf'],
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFD27F30),
-                ),
+                hurufAwal,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFD27F30)),
               ),
             ),
           ),
@@ -264,12 +284,12 @@ class HalamanRiwayat extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Baris Nama & Label Selesai
+                // Baris Nama & Label Status
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      item['nama'],
+                      namaPemesan,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     Container(
@@ -280,10 +300,10 @@ class HalamanRiwayat extends StatelessWidget {
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.circle, color: Colors.green, size: 10),
-                          SizedBox(width: 4),
-                          Text('Selesai', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                        children: [
+                          Icon(Icons.circle, color: statusColor, size: 10),
+                          const SizedBox(width: 4),
+                          Text(status, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -293,7 +313,7 @@ class HalamanRiwayat extends StatelessWidget {
                 
                 // Teks Detail Produk
                 Text(
-                  item['pesanan'],
+                  ringkasan,
                   style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 10),
@@ -303,19 +323,15 @@ class HalamanRiwayat extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      item['harga'],
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFD27F30),
-                      ),
+                      harga,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFD27F30)),
                     ),
                     Row(
                       children: [
                         const Icon(Icons.access_time, size: 14, color: Colors.black45),
                         const SizedBox(width: 4),
                         Text(
-                          item['waktu'],
+                          waktuSingkat,
                           style: const TextStyle(fontSize: 11, color: Colors.black45),
                         ),
                       ],
@@ -330,32 +346,17 @@ class HalamanRiwayat extends StatelessWidget {
     );
   }
 
-  // Fungsi pembuat ikon di Bottom Navigation Bar
   Widget _buildNavItem(IconData icon, String label, {bool isActive = false}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(
-            color: Colors.transparent, // Background putih dihapus / dibuat transparan
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: Colors.white, // Warna ikon tetap putih agar menyatu dengan baik di background
-            size: 28,
-          ),
+          decoration: const BoxDecoration(color: Colors.transparent, shape: BoxShape.circle),
+          child: Icon(icon, color: Colors.white, size: 28),
         ),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
       ],
     );
   }

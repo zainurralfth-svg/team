@@ -84,8 +84,7 @@ class ApiService {
     }
   }
 
-  // Cari bagian ini di API_Service.dart dan pastikan isinya begini:
-static Future<Map<String, dynamic>> tambahMenu(
+  static Future<Map<String, dynamic>> tambahMenu(
       String nama, String kategori, int harga, int stok, String deskripsi, var imageFile) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse("$baseUrl/api_menu.php"));
@@ -104,6 +103,7 @@ static Future<Map<String, dynamic>> tambahMenu(
       return _safeDecodeMap(res.body);
     } catch (e) { return {"status": "error", "pesan": e.toString()}; }
   }
+
   // ==========================================
   // 3. KERANJANG (CUSTOMER)
   // ==========================================
@@ -163,6 +163,26 @@ static Future<Map<String, dynamic>> tambahMenu(
       return _safeDecodeMap(response.body);
     } catch (e) {
       return {"status": "error", "pesan": "Gagal checkout: $e"};
+    }
+  }
+
+  // =====================================================================
+  // FUNGSI BARU: CHECKOUT PESANAN (MENGHUBUNGKAN KE checkout.php)
+  // =====================================================================
+  static Future<Map<String, dynamic>> checkoutPesanan(String idUser, String nama, String noTelp) async {
+    try {
+      var url = Uri.parse('$baseUrl/checkout.php');
+      var response = await http.post(url, body: {
+        'id_user': idUser,
+        'nama_pemesan': nama,
+        'no_telp': noTelp,
+      });
+
+      // PERBAIKAN: Gunakan fungsi anti-crash agar pesan dari XAMPP terbaca jelas!
+      return _safeDecodeMap(response.body);
+
+    } catch (e) {
+      return {'status': 'error', 'pesan': 'Terjadi kesalahan jaringan: $e'};
     }
   }
 

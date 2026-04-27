@@ -14,6 +14,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
   final TextEditingController _telpController = TextEditingController();
   
   bool _isLoadingProfile = true;
+  bool _isProcessing = false; // Tambahan untuk efek loading tombol
   final String currentUserId = "1"; // Sesuai session login
 
   @override
@@ -46,6 +47,52 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
     _namaController.dispose();
     _telpController.dispose();
     super.dispose();
+  }
+
+  // ============================================================
+  // FUNGSI PROSES PESANAN KE DATABASE & PINDAH HALAMAN
+  // ============================================================
+  Future<void> _prosesPesanan(List<dynamic> cartItems, int totalHarga) async {
+    if (_namaController.text.isEmpty || _telpController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Lengkapi Nama dan Nomor Telepon!")),
+      );
+      return;
+    }
+
+    setState(() => _isProcessing = true);
+
+    // Memanggil API Checkout
+    var response = await ApiService.checkoutPesanan(
+      currentUserId, 
+      _namaController.text, 
+      _telpController.text
+    );
+
+    setState(() => _isProcessing = false);
+
+    if (response['status'] == 'sukses') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Pesanan Berhasil Dibuat! 🚀"), backgroundColor: Colors.green),
+      );
+      
+      // Pindah ke halaman Bukti Pesanan dan bawa SEMUA datanya
+      Navigator.pushReplacementNamed(
+        context, 
+        '/bukti_pemesanan',
+        arguments: {
+          'kode_resi': response['kode_resi'],
+          'nama': _namaController.text,
+          'telp': _telpController.text,
+          'items': cartItems,
+          'total': totalHarga,
+        }
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal: ${response['pesan']}"), backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override
@@ -200,24 +247,22 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                           ),
                           elevation: 3,
                         ),
-                        onPressed: () {
-                          if (_namaController.text.isEmpty || _telpController.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Lengkapi Nama dan Nomor Telepon!")),
-                            );
-                            return;
-                          }
-                          // Lanjut ke Proses Database
-                          print("Konfirmasi Pesanan Berhasil");
-                        },
-                        child: const Text(
-                          "Pesan Sekarang",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
+                        // PERUBAHAN: Memanggil _prosesPesanan dan mencegah double click
+                        onPressed: _isProcessing ? null : () => _prosesPesanan(cartItems, totalHarga),
+                        child: _isProcessing 
+                          ? const SizedBox(
+                              width: 20, 
+                              height: 20, 
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                            )
+                          : const Text(
+                              "Pesan Sekarang",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
                       ),
                     ),
                     const SizedBox(height: 20),
