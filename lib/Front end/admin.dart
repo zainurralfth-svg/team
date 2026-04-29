@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; 
+import '../Core/Colour.dart';
 import '../Backend/Api_service.dart'; // <-- JANGAN LUPA IMPORT API SERVICE-NYA
-import 'tambah_produk.dart'; 
+import 'tambah_produk.dart';
 import 'halaman_produk.dart';
 import 'halaman_riwayat.dart';
 import 'halaman_laporan.dart';
@@ -23,7 +23,7 @@ class _HomeAdminState extends State<HomeAdmin> {
   @override
   void initState() {
     super.initState();
-    _fetchDataPesanan(); 
+    _fetchDataPesanan();
   }
 
   // FUNGSI MENYEDOT DATA PESANAN DARI DATABASE
@@ -31,7 +31,11 @@ class _HomeAdminState extends State<HomeAdmin> {
     try {
       final data = await ApiService.getPesanan();
       setState(() {
-        _listPesanan = data;
+       _listPesanan = data.where((item) {
+          String status = item['status_pesanan'] ?? '';
+          return status != 'SELESAI' && status != 'DIBATALKAN';
+        }).toList();
+        
         _isLoading = false;
       });
     } catch (e) {
@@ -40,23 +44,29 @@ class _HomeAdminState extends State<HomeAdmin> {
       });
       print("Error fetching pesanan: $e");
     }
-  }// FUNGSI UNTUK MENGUBAH STATUS PESANAN
+  }
   Future<void> _ubahStatusPesanan(String idPesanan, String statusBaru) async {
     setState(() => _isLoading = true);
 
     try {
       // Memanggil fungsi dari ApiService (Pastikan kamu sudah buat fungsinya di ApiService.dart)
-      final response = await ApiService.updateStatusPesanan(idPesanan, statusBaru);
-      
+      final response = await ApiService.updateStatusPesanan(
+        idPesanan,
+        statusBaru,
+      );
+
       if (response['status'] == 'sukses') {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Status berhasil diubah menjadi $statusBaru'), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text('Status berhasil diubah menjadi $statusBaru'),
+            backgroundColor: Colors.green,
+          ),
         );
         await _fetchDataPesanan(); // Refresh data setelah status berubah
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal: ${response['pesan']}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal: ${response['pesan']}')));
       }
     } catch (e) {
       print("Error update status: $e");
@@ -68,40 +78,53 @@ class _HomeAdminState extends State<HomeAdmin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.adminBg, 
+      backgroundColor: AppColors.adminBg,
       body: Stack(
         children: [
           Container(
             height: 330,
-            decoration: const BoxDecoration(
-              color: AppColors.adminPrimary,
-            ),
+            decoration: const BoxDecoration(color: AppColors.adminPrimary),
           ),
           SafeArea(
             child: Column(
               children: [
                 _buildHeader(),
                 const SizedBox(height: 25),
-                _buildStatCards(context), 
+                _buildStatCards(context),
                 const SizedBox(height: 25),
                 _buildIncomeCard(),
                 const SizedBox(height: 15),
                 _buildSectionTitle(),
                 const SizedBox(height: 10),
-                
+
                 // =====================================
                 // BAGIAN LIST PESANAN YANG SUDAH DINAMIS
                 // =====================================
                 Expanded(
-                  child: _isLoading 
-                    ? const Center(child: CircularProgressIndicator(color: AppColors.textWhite)) 
-                    : _listPesanan.isEmpty 
-                      ? const Center(child: Text("Belum ada pesanan masuk", style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)))
+                  child: _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.textWhite,
+                          ),
+                        )
+                      : _listPesanan.isEmpty
+                      ? const Center(
+                          child: Text(
+                            "Belum ada pesanan masuk",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
                       : RefreshIndicator(
                           color: AppColors.adminPrimary,
                           onRefresh: _fetchDataPesanan,
                           child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 5,
+                            ),
                             itemCount: _listPesanan.length,
                             itemBuilder: (context, index) {
                               return _buildOrderItem(_listPesanan[index]);
@@ -131,17 +154,30 @@ class _HomeAdminState extends State<HomeAdmin> {
                 children: [
                   Text(
                     'Selamat Datang',
-                    style: TextStyle(color: AppColors.textWhite, fontSize: 26, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: AppColors.textWhite,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     'Dashboard Admin',
-                    style: TextStyle(color: AppColors.textWhite, fontSize: 26, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: AppColors.textWhite,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfilAdmin()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HalamanProfilAdmin(),
+                    ),
+                  );
                 },
                 child: Container(
                   width: 50,
@@ -150,13 +186,17 @@ class _HomeAdminState extends State<HomeAdmin> {
                     color: AppColors.textWhite,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.person, color: AppColors.adminPrimary, size: 30),
+                  child: const Icon(
+                    Icons.person,
+                    color: AppColors.adminPrimary,
+                    size: 30,
+                  ),
                 ),
               ),
             ],
           ),
         );
-      }
+      },
     );
   }
 
@@ -167,13 +207,22 @@ class _HomeAdminState extends State<HomeAdmin> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _statCard('12\nProduk', Icons.pie_chart, () {
-             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanProduk()),
+            );
           }),
           _statCard('Riwayat\nPesanan', Icons.shopping_bag, () {
-             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanRiwayat()),
+            );
           }),
           _statCard('Laporan', Icons.assignment, () {
-             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanLaporan()),
+            );
           }),
         ],
       ),
@@ -188,7 +237,7 @@ class _HomeAdminState extends State<HomeAdmin> {
         height: 105,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.adminStatCard, 
+          color: AppColors.adminStatCard,
           borderRadius: BorderRadius.circular(22),
         ),
         child: Column(
@@ -199,7 +248,11 @@ class _HomeAdminState extends State<HomeAdmin> {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                color: AppColors.textWhite,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -220,11 +273,19 @@ class _HomeAdminState extends State<HomeAdmin> {
         children: [
           Text(
             'Pendapatan',
-            style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: AppColors.adminPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           Text(
             'Rp -', // Nanti bisa didinamiskan kalau API pendapatannya udah ada
-            style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: AppColors.adminPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -240,7 +301,11 @@ class _HomeAdminState extends State<HomeAdmin> {
       ),
       child: const Text(
         'Daftar Pesanan',
-        style: TextStyle(color: AppColors.textWhite, fontSize: 20, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: AppColors.textWhite,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -251,22 +316,30 @@ class _HomeAdminState extends State<HomeAdmin> {
   Widget _buildOrderItem(Map<String, dynamic> item) {
     // Ambil ID Pesanan (pastikan sesuai nama kolom di database kamu)
     String idPesanan = item['id_pesanan']?.toString() ?? '';
-    
+
     String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
-    String hurufAwal = namaPemesan.isNotEmpty ? namaPemesan[0].toUpperCase() : '?';
+    String hurufAwal = namaPemesan.isNotEmpty
+        ? namaPemesan[0].toUpperCase()
+        : '?';
     String ringkasan = item['ringkasan_pesanan'] ?? 'Detail Kosong';
     String harga = 'Rp ${item['total_harga'] ?? 0}';
     String status = item['status_pesanan'] ?? 'MENUNGGU'; // Default status
-    
+
     String waktuLengkap = item['tanggal_pesan'] ?? '';
-    String waktuSingkat = waktuLengkap.length > 16 ? waktuLengkap.substring(0, 16) : waktuLengkap;
+    String waktuSingkat = waktuLengkap.length > 16
+        ? waktuLengkap.substring(0, 16)
+        : waktuLengkap;
 
     // Warna dinamis sesuai status
     Color statusColor;
-    if (status == 'SELESAI') statusColor = Colors.green;
-    else if (status == 'DIBATALKAN') statusColor = Colors.red;
-    else if (status == 'PROSES') statusColor = Colors.orange;
-    else statusColor = Colors.blue; // MENUNGGU
+    if (status == 'SELESAI')
+      statusColor = Colors.green;
+    else if (status == 'DIBATALKAN')
+      statusColor = Colors.red;
+    else if (status == 'PROSES')
+      statusColor = Colors.orange;
+    else
+      statusColor = Colors.blue; // MENUNGGU
 
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
@@ -279,13 +352,21 @@ class _HomeAdminState extends State<HomeAdmin> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40, height: 40,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: AppColors.adminCardLight,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Center(
-              child: Text(hurufAwal, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.adminPrimary)),
+              child: Text(
+                hurufAwal,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.adminPrimary,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 15),
@@ -293,11 +374,27 @@ class _HomeAdminState extends State<HomeAdmin> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(namaPemesan, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  namaPemesan,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(ringkasan, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(
+                  ringkasan,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
                 const SizedBox(height: 8),
-                Text(harga, style: const TextStyle(color: AppColors.adminPrimary, fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  harga,
+                  style: const TextStyle(
+                    color: AppColors.adminPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ),
@@ -316,15 +413,30 @@ class _HomeAdminState extends State<HomeAdmin> {
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(value: 'MENUNGGU', child: Text('MENUNGGU')),
-                  const PopupMenuItem<String>(value: 'PROSES', child: Text('PROSES')),
-                  const PopupMenuItem<String>(value: 'SELESAI', child: Text('SELESAI')),
-                  const PopupMenuItem<String>(value: 'DIBATALKAN', child: Text('DIBATALKAN')),
+                  const PopupMenuItem<String>(
+                    value: 'MENUNGGU',
+                    child: Text('MENUNGGU'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'PROSES',
+                    child: Text('PROSES'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'SELESAI',
+                    child: Text('SELESAI'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'DIBATALKAN',
+                    child: Text('DIBATALKAN'),
+                  ),
                 ],
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppColors.adminBg, 
+                    color: AppColors.adminBg,
                     borderRadius: BorderRadius.circular(5),
                     border: Border.all(color: statusColor, width: 0.5),
                   ),
@@ -332,9 +444,19 @@ class _HomeAdminState extends State<HomeAdmin> {
                     children: [
                       Icon(Icons.circle, size: 8, color: statusColor),
                       const SizedBox(width: 4),
-                      Text(status, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                      Text(
+                        status,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.arrow_drop_down, size: 14, color: Colors.black54),
+                      const Icon(
+                        Icons.arrow_drop_down,
+                        size: 14,
+                        color: Colors.black54,
+                      ),
                     ],
                   ),
                 ),
@@ -344,7 +466,10 @@ class _HomeAdminState extends State<HomeAdmin> {
                 children: [
                   const Icon(Icons.alarm, size: 12, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Text(waktuSingkat, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                  Text(
+                    waktuSingkat,
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
                 ],
               ),
             ],
@@ -363,20 +488,34 @@ class _HomeAdminState extends State<HomeAdmin> {
         children: [
           _bottomNavItem(Icons.home, 'BERANDA', true, () {}),
           _bottomNavItem(Icons.person, 'PENGGUNA', false, () {
-             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanPengguna()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanPengguna()),
+            );
           }),
           _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const TambahProdukPage())); 
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TambahProdukPage()),
+            );
           }),
           _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
-             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanPesanan()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanPesanan()),
+            );
           }),
         ],
       ),
     );
   }
 
-  Widget _bottomNavItem(IconData icon, String label, bool isSelected, VoidCallback onTap) {
+  Widget _bottomNavItem(
+    IconData icon,
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -390,10 +529,23 @@ class _HomeAdminState extends State<HomeAdmin> {
                 color: isSelected ? AppColors.textWhite : Colors.transparent,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: isSelected ? AppColors.adminPrimary : AppColors.textWhite, size: 24),
+              child: Icon(
+                icon,
+                color: isSelected
+                    ? AppColors.adminPrimary
+                    : AppColors.textWhite,
+                size: 24,
+              ),
             ),
             const SizedBox(height: 4),
-            Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold)),
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textWhite,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),

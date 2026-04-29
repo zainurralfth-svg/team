@@ -23,10 +23,16 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   // ============================================================
   Future<void> _fetchDataPesanan() async {
     try {
-      // Mengambil semua data pesanan (tanpa filter id_user karena ini Admin)
       final data = await ApiService.getPesanan();
       setState(() {
-        _listPesanan = data;
+        // ========================================================
+        // KODE FILTER: HANYA Tampilkan status SELESAI & DIBATALKAN
+        // ========================================================
+        _listPesanan = data.where((item) {
+          String status = item['status_pesanan'] ?? '';
+          return status == 'SELESAI' || status == 'DIBATALKAN';
+        }).toList();
+        
         _isLoading = false;
       });
     } catch (e) {
@@ -36,7 +42,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
       print("Error fetching pesanan: $e");
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
