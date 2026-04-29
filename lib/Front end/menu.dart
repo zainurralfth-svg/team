@@ -5,8 +5,6 @@ import 'halaman_profil.dart';
 
 // =============================================
 // ANIMASI TRANSISI HALAMAN — gaya Instagram
-// Halaman baru muncul dari bawah ke atas (slide up)
-// Halaman lama mengecil sedikit (scale back)
 // =============================================
 PageRoute instagramSlideRoute(Widget page) {
   return PageRouteBuilder(
@@ -14,7 +12,6 @@ PageRoute instagramSlideRoute(Widget page) {
     reverseTransitionDuration: const Duration(milliseconds: 350),
     pageBuilder: (context, animation, secondaryAnimation) => page,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      // Slide: halaman baru gerak dari bawah (Offset y=1) ke posisi normal (y=0)
       final slide = Tween<Offset>(
         begin: const Offset(0, 1),
         end: Offset.zero,
@@ -23,13 +20,11 @@ PageRoute instagramSlideRoute(Widget page) {
         curve: Curves.easeOutCubic,
       ));
 
-      // Fade: halaman baru muncul dari transparan di 60% pertama animasi
       final fade = CurvedAnimation(
         parent: animation,
         curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
       );
 
-      // Scale: halaman lama mengecil sedikit saat halaman baru muncul
       final scaleBack = Tween<double>(begin: 1.0, end: 0.93).animate(
         CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut),
       );
@@ -53,19 +48,14 @@ class MenuPage extends StatefulWidget {
 }
 
 class _MenuPageState extends State<MenuPage> {
-  // Index kategori yang sedang aktif (0=Pudding, 1=Dessert, dst)
   int _selectedIndex = 0;
-
-  // Data produk yang diambil dari API
   List<dynamic> _menuDariDatabase = [];
-
-  // Status loading saat pertama kali ambil data
   bool _isLoading = true;
 
-  // Daftar kategori produk
-  final List<String> _categories = ['Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
+  // VARIABEL BARU: Menyimpan jumlah item di keranjang
+  int _cartItemCount = 0; 
 
-  // Banner gambar untuk setiap kategori
+  final List<String> _categories = ['Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
   final List<String> _banners = [
     'banner pudding.png',
     'banner dessert.png',
@@ -74,14 +64,13 @@ class _MenuPageState extends State<MenuPage> {
     'banner cookies.png',
   ];
 
-  // ID user yang sedang login (sementara hardcode)
   final String currentUserId = "1";
 
   @override
   void initState() {
     super.initState();
-    // Ambil data menu dari API saat halaman pertama dibuka
     _ambilDataMenu();
+    _ambilDataKeranjang(); // Ambil jumlah keranjang saat start
   }
 
   // Fungsi ambil semua data menu dari API
@@ -93,18 +82,27 @@ class _MenuPageState extends State<MenuPage> {
         _isLoading = false;
       });
     } catch (e) {
-      // Jika gagal, tetap set loading false agar halaman tidak stuck
       setState(() => _isLoading = false);
     }
   }
 
-  // Fungsi saat user tap salah satu kategori
+  // FUNGSI BARU: Mengambil jumlah item yang ada di keranjang dari database
+  Future<void> _ambilDataKeranjang() async {
+    try {
+      // Pastikan method getKeranjang tersedia di ApiService Anda
+      final data = await ApiService.getKeranjang(currentUserId);
+      setState(() {
+        _cartItemCount = data.length;
+      });
+    } catch (e) {
+      debugPrint("Gagal mengambil data keranjang: $e");
+    }
+  }
+
   void _onCategoryTap(int index) {
     setState(() => _selectedIndex = index);
   }
 
-  // Fungsi navigasi ke halaman detail produk
-  // Mengirim semua data produk termasuk stok
   void _goToDetail(BuildContext context, String idMenu, String name, String price, String imgUrl, String description, String stok) {
     Navigator.of(context).push(
       instagramSlideRoute(ProductDetailPage(
@@ -115,25 +113,20 @@ class _MenuPageState extends State<MenuPage> {
         description: description,
         stok: stok,
       )),
-    );
+    ).then((_) => _ambilDataKeranjang()); // Update angka saat kembali dari detail
   }
 
   @override
   Widget build(BuildContext context) {
-    // Warna utama halaman menu
-    const Color colorBg = Color(0xFFF2D7A6);      // Latar krem
-    const Color colorPrimary = Color(0xFFC9792B);  // Oranye coklat
-    const Color colorCard = Color(0xFFF7E6C4);     // Kartu produk
-    const Color colorBorder = Color(0xFF7A4A21);   // Border coklat
-    const Color colorText = Color(0xFF3A1F0F);     // Teks gelap
+    const Color colorBg = Color(0xFFF2D7A6);
+    const Color colorPrimary = Color(0xFFC9792B);
+    const Color colorCard = Color(0xFFF7E6C4);
+    const Color colorBorder = Color(0xFF7A4A21);
+    const Color colorText = Color(0xFF3A1F0F);
 
-    // Banner dan nama kategori yang aktif sesuai tab dipilih
     final String activeBanner = _banners[_selectedIndex];
     final String activeName = _categories[_selectedIndex];
-
     final double screenWidth = MediaQuery.of(context).size.width;
-
-    // Hitung lebar tombol kategori agar pas 5 tombol dalam 1 baris
     final double categoryBtnWidth = (screenWidth - 32 - 32) / 5;
 
     return Scaffold(
@@ -151,15 +144,40 @@ class _MenuPageState extends State<MenuPage> {
           ),
         ),
         actions: [
-          // Tombol keranjang di pojok kanan atas
+          // =============================================
+          // IKON KERANJANG DENGAN BADGE NOTIFIKASI
+          // =============================================
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: colorCard,
-              child: IconButton(
-                icon: const Icon(Icons.shopping_cart, color: colorPrimary),
-                onPressed: () => Navigator.pushNamed(context, '/keranjang'),
-              ),
+            padding: const EdgeInsets.only(right: 16.0, top: 5),
+            child: Stack(
+              alignment: Alignment.topRight,
+              children: [
+                CircleAvatar(
+                  backgroundColor: colorCard,
+                  child: IconButton(
+                    icon: const Icon(Icons.shopping_cart, color: colorPrimary),
+                    onPressed: () => Navigator.pushNamed(context, '/keranjang').then((_) => _ambilDataKeranjang()),
+                  ),
+                ),
+                if (_cartItemCount > 0)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.red, // Warna merah notifikasi
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                      child: Text(
+                        '$_cartItemCount',
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
@@ -170,11 +188,7 @@ class _MenuPageState extends State<MenuPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              // =============================================
-              // BANNER KATEGORI — gambar berubah sesuai
-              // kategori yang dipilih user
-              // =============================================
+              // Banner Kategori
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: Image.asset(
@@ -182,48 +196,27 @@ class _MenuPageState extends State<MenuPage> {
                   width: double.infinity, height: 180, fit: BoxFit.cover,
                   errorBuilder: (c, e, s) => Container(
                     width: double.infinity, height: 180,
-                    decoration: BoxDecoration(
-                      color: colorPrimary.withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Banner $activeName',
-                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                    decoration: BoxDecoration(color: colorPrimary.withOpacity(0.4), borderRadius: BorderRadius.circular(20)),
+                    child: Center(child: Text('Banner $activeName', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
 
-              // =============================================
-              // SEARCH BAR — untuk mencari produk
-              // (fungsi filter belum aktif, bisa dikembangkan)
-              // =============================================
+              // Search Bar
               TextField(
                 decoration: InputDecoration(
                   hintText: 'Search Produk',
                   prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   filled: true, fillColor: Colors.white,
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(color: colorBorder, width: 0.5),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(color: colorBorder, width: 0.5),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: colorBorder, width: 0.5)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: colorBorder, width: 0.5)),
                 ),
               ),
               const SizedBox(height: 16),
 
-              // =============================================
-              // TAB KATEGORI — 5 tombol (Pudding, Dessert, dll)
-              // Tombol aktif berubah warna jadi oranye
-              // Tap tombol → banner & grid produk berubah
-              // =============================================
+              // Tab Kategori
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(_categories.length, (index) {
@@ -233,24 +226,16 @@ class _MenuPageState extends State<MenuPage> {
                     child: SizedBox(
                       width: categoryBtnWidth, height: 42,
                       child: AnimatedContainer(
-                        // Animasi perubahan warna saat ganti kategori
                         duration: const Duration(milliseconds: 250),
                         decoration: BoxDecoration(
                           color: isActive ? colorPrimary : colorCard,
                           borderRadius: BorderRadius.circular(25),
                           border: Border.all(color: colorBorder, width: isActive ? 2 : 1),
-                          boxShadow: isActive
-                              ? [BoxShadow(color: colorPrimary.withOpacity(0.5), blurRadius: 8, offset: const Offset(0, 3))]
-                              : [],
                         ),
                         child: Center(
                           child: Text(
                             _categories[index],
-                            style: TextStyle(
-                              color: isActive ? Colors.white : colorBorder,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
+                            style: TextStyle(color: isActive ? Colors.white : colorBorder, fontWeight: FontWeight.bold, fontSize: 13),
                           ),
                         ),
                       ),
@@ -260,7 +245,6 @@ class _MenuPageState extends State<MenuPage> {
               ),
               const SizedBox(height: 24),
 
-              // Judul kategori aktif
               Center(
                 child: Text(
                   activeName.toUpperCase(),
@@ -269,55 +253,38 @@ class _MenuPageState extends State<MenuPage> {
               ),
               const SizedBox(height: 16),
 
-              // =============================================
-              // GRID PRODUK — menampilkan produk sesuai
-              // kategori yang dipilih, 2 kolom per baris
-              // Data diambil dari API dan difilter by kategori
-              // =============================================
+              // Grid Produk
               Builder(
                 builder: (context) {
-                  // Tampilkan loading spinner saat data belum siap
                   if (_isLoading) return const Center(child: CircularProgressIndicator(color: colorPrimary));
 
-                  // Filter produk sesuai kategori aktif
                   final produkFilter = _menuDariDatabase
                       .where((produk) => produk['kategori'] == activeName)
                       .toList();
 
-                  // Tampilkan pesan jika tidak ada produk di kategori ini
                   if (produkFilter.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Text(
-                          "Belum ada produk di kategori $activeName.",
-                          style: const TextStyle(color: colorText, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    );
+                    return Center(child: Padding(padding: const EdgeInsets.all(20.0), child: Text("Belum ada produk di kategori $activeName.", style: const TextStyle(color: colorText, fontWeight: FontWeight.bold))));
                   }
 
                   return GridView.builder(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(), // scroll dihandle parent
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: produkFilter.length,
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,        // 2 kolom
-                      childAspectRatio: 0.85,   // rasio tinggi:lebar kartu
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.85,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
                     itemBuilder: (context, index) {
                       final product = produkFilter[index];
-
-                      // Ambil data dari API dan siapkan untuk dikirim ke detail
                       String idMenu = product['id_produk']?.toString() ?? '';
                       String namaDB = product['nama_produk'] ?? 'Tanpa Nama';
                       String hargaDB = 'Rp ${product['harga']}';
                       String namaFileGambar = product['gambar'] ?? '';
                       String urlGambarLengkap = Uri.encodeFull("${ApiService.baseUrl}/uploads/$namaFileGambar");
                       String deskripsiDB = product['deskripsi'] ?? 'Deskripsi tidak tersedia.';
-                      String stokDB = product['stok']?.toString() ?? '0'; // stok dari database
+                      String stokDB = product['stok']?.toString() ?? '0';
 
                       return _buildProductCard(
                         context, idMenu, namaDB, hargaDB,
@@ -333,19 +300,11 @@ class _MenuPageState extends State<MenuPage> {
           ),
         ),
       ),
-
-      // =============================================
-      // BOTTOM NAVIGATION — 3 menu utama
-      // Pesanan | Produk (aktif) | Profil
-      // =============================================
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
           color: colorPrimary,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -368,12 +327,6 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  // =============================================
-  // WIDGET KARTU PRODUK — tampilan 1 produk di grid
-  // Berisi: gambar, nama, harga, tombol Details & Order
-  // Tap gambar atau Details → buka halaman detail
-  // Tap Order → langsung tambah ke keranjang
-  // =============================================
   Widget _buildProductCard(BuildContext context, String idMenu, String name, String price,
       String imgUrl, String description, String stok,
       Color cardColor, Color borderColor, Color textColor, Color btnColor) {
@@ -387,66 +340,53 @@ class _MenuPageState extends State<MenuPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Gambar produk — tap untuk buka detail
           Expanded(
             child: GestureDetector(
               onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description, stok),
               child: Hero(
-                // Tag unik untuk animasi Hero transisi ke halaman detail
                 tag: 'product-$name',
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
                   child: Image.network(
                     imgUrl,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (c, e, s) => Container(
-                      color: btnColor.withOpacity(0.2),
-                      child: Center(child: Icon(Icons.fastfood, color: btnColor, size: 40)),
-                    ),
+                    width: double.infinity, fit: BoxFit.cover,
+                    errorBuilder: (c, e, s) => Container(color: btnColor.withOpacity(0.2), child: Center(child: Icon(Icons.fastfood, color: btnColor, size: 40))),
                   ),
                 ),
               ),
             ),
           ),
 
-          // Info produk: nama, harga, tombol
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nama produk (max 1 baris, sisanya dipotong)
                 Text(name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
-
-                // Harga produk
                 Text(price, style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 12)),
                 const SizedBox(height: 8),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Tombol Details → buka halaman detail produk
                     GestureDetector(
                       onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description, stok),
-                      child: const Text(
-                        'Details',
-                        style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: Color(0xFF7A4A21), fontWeight: FontWeight.w600),
-                      ),
+                      child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: Color(0xFF7A4A21), fontWeight: FontWeight.w600)),
                     ),
-
-                    // Tombol Order → langsung tambah ke keranjang tanpa buka detail
                     GestureDetector(
                       onTap: () async {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Menambahkan ke keranjang...'), duration: Duration(milliseconds: 500)),
                         );
 
-                        // Kirim request tambah keranjang ke API
                         var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
 
                         if (response['status'] == 'sukses') {
+                          // UPDATE: Menambah angka notifikasi secara langsung
+                          setState(() {
+                            _cartItemCount++; 
+                          });
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('$name masuk keranjang! 🛒'),
@@ -454,15 +394,12 @@ class _MenuPageState extends State<MenuPage> {
                               action: SnackBarAction(
                                 label: 'LIHAT',
                                 textColor: Colors.white,
-                                // Tap LIHAT → langsung ke halaman keranjang
-                                onPressed: () => Navigator.pushNamed(context, '/keranjang'),
+                                onPressed: () => Navigator.pushNamed(context, '/keranjang').then((_) => _ambilDataKeranjang()),
                               ),
                             ),
                           );
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Gagal: ${response['pesan']}')),
-                          );
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal: ${response['pesan']}')));
                         }
                       },
                       child: Container(
@@ -481,8 +418,6 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  // Widget item navigasi bawah
-  // isSelected: true = tampil lingkaran putih di belakang icon
   Widget _buildBottomNavItem(IconData icon, String label, bool isSelected, Color activeColor) {
     return Container(
       color: Colors.transparent,
@@ -492,11 +427,7 @@ class _MenuPageState extends State<MenuPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              // Background putih hanya untuk menu yang aktif
-              color: isSelected ? Colors.white : Colors.transparent,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: isSelected ? Colors.white : Colors.transparent, shape: BoxShape.circle),
             child: Icon(icon, color: isSelected ? activeColor : Colors.white, size: 24),
           ),
           const SizedBox(height: 2),
