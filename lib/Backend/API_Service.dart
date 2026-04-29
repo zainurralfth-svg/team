@@ -215,4 +215,38 @@ class ApiService {
     }
   }
 
-} // <--- INI ADALAH KURUNG PENUTUP UTAMA CLASS APISERVICE
+  // ==========================================
+  // 7. AMBIL DATA PENGGUNA (UNTUK ADMIN)
+  // ==========================================
+  static Future<List<dynamic>> getPengguna() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/get_pengguna.php'));
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        if (jsonResponse['status'] == 'sukses') {
+          return jsonResponse['data'];
+        }
+      }
+      return []; 
+    } catch (e) {
+      print('Error getPengguna: $e');
+      return [];
+    }
+  }
+
+  // ==========================================
+  // 8. HAPUS PENGGUNA (UNTUK ADMIN)
+  // ==========================================
+  static Future<Map<String, dynamic>> hapusPengguna(String id) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$baseUrl/hapus_pengguna.php"),
+        body: {"id": id}, // Kirim ID user yang mau dihapus
+      );
+      return _safeDecodeMap(response.body);
+    } catch (e) {
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
+  }
+
+} // <--- SEKARANG SEMUANYA AMAN DI DALAM KANDANG (CLASS)
