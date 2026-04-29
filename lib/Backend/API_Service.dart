@@ -88,7 +88,6 @@ class ApiService {
       String nama, String kategori, int harga, int stok, String deskripsi, var imageFile) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse("$baseUrl/api_menu.php"));
-      // Sesuaikan nama field dengan database kamu
       request.fields['nama_produk'] = nama;
       request.fields['kategori'] = kategori;
       request.fields['harga'] = harga.toString();
@@ -102,6 +101,26 @@ class ApiService {
       var res = await http.Response.fromStream(await request.send());
       return _safeDecodeMap(res.body);
     } catch (e) { return {"status": "error", "pesan": e.toString()}; }
+  }
+
+  // ==========================================
+  // 2b. EDIT MENU (BARU) ✅
+  // ==========================================
+  static Future<Map<String, dynamic>> editMenu(
+      String idMenu, String nama, String harga) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$baseUrl/edit_menu.php"),
+        body: {
+          "id_menu": idMenu,
+          "nama_produk": nama,
+          "harga": harga,
+        },
+      );
+      return _safeDecodeMap(response.body);
+    } catch (e) {
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
   }
 
   // ==========================================
@@ -174,9 +193,7 @@ class ApiService {
         'nama_pemesan': nama,
         'no_telp': noTelp,
       });
-
       return _safeDecodeMap(response.body);
-
     } catch (e) {
       return {'status': 'error', 'pesan': 'Terjadi kesalahan jaringan: $e'};
     }

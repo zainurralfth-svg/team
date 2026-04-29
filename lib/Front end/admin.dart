@@ -167,7 +167,7 @@ class _HomeAdminState extends State<HomeAdmin> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _statCard('12\nProduk', Icons.pie_chart, () {
-             Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => HalamanProduk()));
           }),
           _statCard('Riwayat\nPesanan', Icons.shopping_bag, () {
              Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()));

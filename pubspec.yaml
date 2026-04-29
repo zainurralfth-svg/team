@@ -45,3 +45,6 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/images/logo_baru.jpeg"
+
+  dependencies:
+  shared_preferences: ^2.2.2
