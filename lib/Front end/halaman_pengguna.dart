@@ -1,54 +1,82 @@
 import 'package:flutter/material.dart';
+import '../Backend/API_Service.dart'; 
+import 'admin.dart'; 
+import 'tambah_produk.dart'; 
+import 'halaman_pesanan.dart'; 
 
-class HalamanPengguna extends StatelessWidget {
+class HalamanPengguna extends StatefulWidget {
   const HalamanPengguna({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Data dummy untuk list daftar pengguna
-    final List<Map<String, dynamic>> dataPengguna = [
-      {
-        'huruf': 'A', 
-        'nama': 'ANDA', 
-        'telepon': '0812-3456-7890', 
-        'email': 'hamba allah@gmail.com', 
-        'status': 'Baru', 
-        'warnaStatus': Colors.blue
-      },
-      {
-        'huruf': 'P', 
-        'nama': 'Pria solo', 
-        'telepon': '0812-3456-7890', 
-        'email': 'hamba allah@gmail.com', 
-        'status': 'AKTIF', 
-        'warnaStatus': Colors.green
-      },
-      {
-        'huruf': 'A', 
-        'nama': 'AKU', 
-        'telepon': '0812-3456-7890', 
-        'email': 'hamba allah@gmail.com', 
-        'status': 'AKTIF', 
-        'warnaStatus': Colors.green
-      },
-      {
-        'huruf': 'A', 
-        'nama': 'AKU', 
-        'telepon': '0812-3456-7890', 
-        'email': 'hamba allah@gmail.com', 
-        'status': 'AKTIF', 
-        'warnaStatus': Colors.green
-      },
-    ];
+  State<HalamanPengguna> createState() => _HalamanPenggunaState();
+}
 
+class _HalamanPenggunaState extends State<HalamanPengguna> {
+  List<dynamic> _dataPengguna = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDataPengguna();
+  }
+
+  Future<void> _fetchDataPengguna() async {
+    try {
+      final data = await ApiService.getPengguna();
+      final hanyaUser = data.where((item) {
+        String roleDB = item['role']?.toString().toLowerCase() ?? 'user';
+        return roleDB == 'user'; 
+      }).toList();
+
+      setState(() {
+        _dataPengguna = hanyaUser; 
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      print("Gagal fetch data pengguna: $e");
+    }
+  }
+
+  void _konfirmasiHapus(String idUser, String namaUser) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Pengguna', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('Apakah Anda Yakin ingin Menghapus Akun "$namaUser"?\n\nBatalkan Jika Tidak Ingin Menghapus Akun.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context); 
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Menghapus $namaUser...')));
+              final response = await ApiService.hapusPengguna(idUser);
+              if (response['status'] == 'sukses') {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Berhasil dihapus! ✅'), backgroundColor: Colors.green));
+                setState(() => _isLoading = true);
+                _fetchDataPengguna();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menghapus: ${response['pesan'] ?? 'Error'}'), backgroundColor: Colors.red));
+              }
+            },
+            child: const Text('Hapus', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD27F30), // Warna oranye utama
+      backgroundColor: const Color(0xFFD27F30), 
       body: SafeArea(
         child: Column(
           children: [
-            // ==========================================
-            // 1. HEADER (Teks Selamat Datang & Avatar)
-            // ==========================================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
               child: Row(
@@ -58,43 +86,18 @@ class HalamanPengguna extends StatelessWidget {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Selamat Datang',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontFamily: 'Tai Heritage Pro',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Dashboard Admin',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontFamily: 'Tai Heritage Pro',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text('Selamat Datang', style: TextStyle(color: Colors.white, fontSize: 26, fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
+                      Text('Dashboard Admin', style: TextStyle(color: Colors.white, fontSize: 26, fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
                     ],
                   ),
                   Container(
-                    width: 50,
-                    height: 50,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    // Ganti dengan aset gambar avatar-mu nanti
+                    width: 50, height: 50,
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                     child: const Icon(Icons.person, color: Color(0xFFD27F30), size: 30),
                   ),
                 ],
               ),
             ),
-
-            // ==========================================
-            // 2. KARTU STATISTIK & PENDAPATAN
-            // ==========================================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
@@ -107,82 +110,49 @@ class HalamanPengguna extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20.0),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-              ),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Pendapatan',
-                    style: TextStyle(
-                      color: Color(0xFFD27F30),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '570.000',
-                    style: TextStyle(
-                      color: Color(0xFFD27F30),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Text('Pendapatan', style: TextStyle(color: Color(0xFFD27F30), fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text('570.000', style: TextStyle(color: Color(0xFFD27F30), fontSize: 16, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
             const SizedBox(height: 20),
-
-            // ==========================================
-            // 3. AREA DAFTAR PENGGUNA (Beige Background)
-            // ==========================================
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFDF0D5), // Warna krem/beige terang
-                ),
+                decoration: const BoxDecoration(color: Color(0xFFFDF0D5)),
                 child: Column(
                   children: [
-                    // Judul "Daftar Pengguna" berbentuk pil melayang
                     Transform.translate(
                       offset: const Offset(0, -15),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD27F30),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
-                          ],
+                          color: const Color(0xFFD27F30), borderRadius: BorderRadius.circular(20),
+                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
                         ),
-                        child: const Text(
-                          'Daftar Pengguna',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        child: const Text('Daftar Pengguna', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                       ),
                     ),
-                    
-                    // List Data Pengguna
                     Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                        itemCount: dataPengguna.length,
-                        itemBuilder: (context, index) {
-                          final item = dataPengguna[index];
-                          return _buildUserCard(item);
-                        },
-                      ),
+                      child: _isLoading 
+                        ? const Center(child: CircularProgressIndicator(color: Color(0xFFD27F30)))
+                        : _dataPengguna.isEmpty
+                          ? const Center(child: Text("Belum ada pengguna terdaftar.", style: TextStyle(fontWeight: FontWeight.bold)))
+                          : ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                              itemCount: _dataPengguna.length,
+                              itemBuilder: (context, index) {
+                                final user = _dataPengguna[index];
+                                return _buildUserCard(user);
+                              },
+                            ),
                     ),
                   ],
                 ),
@@ -193,178 +163,127 @@ class HalamanPengguna extends StatelessWidget {
       ),
       
       // ==========================================
-      // 4. BOTTOM NAVIGATION BAR
+      // FOOTER BAWAAN ADMIN (KEMBAR IDENTIK)
       // ==========================================
       bottomNavigationBar: Container(
+        height: 70,
         color: const Color(0xFFD27F30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildNavItem(Icons.home, 'BERANDA'),
-            _buildNavItem(Icons.person, 'PENGGUNA', isActive: true), // Aktif di Pengguna
-            _buildNavItem(Icons.add_box, 'PRODUK BARU'),
-            _buildNavItem(Icons.list_alt, 'PESANAN'),
+            _bottomNavItem(Icons.home, 'BERANDA', false, () {
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeAdmin()));
+            }),
+            _bottomNavItem(Icons.person, 'PENGGUNA', true, () {
+              // Udah di halaman pengguna
+            }),
+            _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const TambahProdukPage()));
+            }),
+            _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanPesanan()));
+            }),
           ],
         ),
       ),
     );
   }
 
-  // ----------------------------------------------------
-  // WIDGET BANTUAN (Helper)
-  // ----------------------------------------------------
-
-  // Fungsi pembuat Kartu Statistik transparan di atas
   Widget _buildStatCard(String title, IconData icon) {
     return Container(
-      width: 105,
-      height: 105,
+      width: 105, height: 105,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.24),
-        borderRadius: BorderRadius.circular(22),
-      ),
+      decoration: BoxDecoration(color: Colors.white.withOpacity(0.24), borderRadius: BorderRadius.circular(22)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: Colors.white, size: 30),
           const SizedBox(height: 8),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
         ],
       ),
     );
   }
 
-  // Fungsi pembuat desain satu Kartu Daftar Pengguna
-  Widget _buildUserCard(Map<String, dynamic> item) {
+  Widget _buildUserCard(dynamic item) {
+    String idUser = item['id']?.toString() ?? '';
+    String namaLengkap = item['nama'] ?? 'Tanpa Nama';
+    String hurufDepan = namaLengkap.isNotEmpty ? namaLengkap[0].toUpperCase() : '?';
+    String telepon = item['phone'] ?? 'Tidak ada no HP';
+    String username = item['username'] ?? 'Tidak ada username';
+    String roleDB = item['role'] ?? 'user';
+    String status = roleDB.toUpperCase(); 
+    Color warnaStatus = Colors.green; 
+
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          )
-        ],
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3))]),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ikon Huruf di sebelah kiri
           Container(
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFDF0D5),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.black12),
-            ),
-            child: Center(
-              child: Text(
-                item['huruf'],
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFD27F30),
-                ),
-              ),
-            ),
+            width: 45, height: 45,
+            decoration: BoxDecoration(color: const Color(0xFFFDF0D5), borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.black12)),
+            child: Center(child: Text(hurufDepan, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFD27F30)))),
           ),
           const SizedBox(width: 15),
-          
-          // Detail Informasi Pengguna
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Baris Nama & Label Status
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      item['nama'],
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                    Expanded(child: Text(namaLengkap, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFDF0D5),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      decoration: BoxDecoration(color: const Color(0xFFFDF0D5), borderRadius: BorderRadius.circular(10)),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.circle, color: item['warnaStatus'], size: 10),
+                          Icon(Icons.circle, color: warnaStatus, size: 10),
                           const SizedBox(width: 4),
-                          Text(
-                            item['status'], 
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)
-                          ),
+                          Text(status, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                
-                // Baris Telepon
                 Row(
                   children: [
                     const Icon(Icons.phone, color: Colors.green, size: 16),
                     const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        item['telepon'],
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54),
-                      ),
+                      decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(10)),
+                      child: Text(telepon, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                
-                // Baris Email & Ikon Hapus (Trash)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.mail, color: Colors.red, size: 16),
+                        const Icon(Icons.person_outline, color: Color(0xFFD27F30), size: 16),
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            item['email'],
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54),
-                          ),
+                          decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(10)),
+                          child: Text(username, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
                         ),
                       ],
                     ),
-                    // Ikon Tempat Sampah
                     GestureDetector(
                       onTap: () {
-                        // Tambahkan logika hapus pengguna di sini
+                        if(idUser.isNotEmpty) {
+                          _konfirmasiHapus(idUser, namaLengkap);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gagal: ID Pengguna tidak ditemukan')));
+                        }
                       },
                       child: const Icon(Icons.delete_outline, color: Colors.black54, size: 24),
                     ),
@@ -378,33 +297,34 @@ class HalamanPengguna extends StatelessWidget {
     );
   }
 
-  // Fungsi pembuat ikon di Bottom Navigation Bar
-  Widget _buildNavItem(IconData icon, String label, {bool isActive = false}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(
-            color: Colors.transparent, // Background tetap transparan seperti permintaan sebelumnya
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: Colors.white, // Warna ikon putih
-            size: 28,
-          ),
+  // ==============================================================
+  // HELPER BOTTOM ITEM (100% KEMBAR KAYA ADMIN.DART)
+  // ==============================================================
+  Widget _bottomNavItem(IconData icon, String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon, 
+                color: isSelected ? const Color(0xFFD27F30) : Colors.white, 
+                size: 24
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(label, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
