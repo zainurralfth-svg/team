@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../Backend/api_service.dart';
 
 class ProductDetailPage extends StatefulWidget {
   // Parameter yang diterima dari halaman menu
@@ -33,9 +32,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
 
   // Animasi slide: konten bergerak dari bawah ke posisi normal
   late Animation<Offset> _slideAnim;
-
-  // ID user yang sedang login (sementara hardcode, nanti bisa diganti dinamis)
-  final String currentUserId = "1";
 
   @override
   void initState() {
@@ -71,37 +67,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
     // Bersihkan controller saat halaman ditutup agar tidak memory leak
     _controller.dispose();
     super.dispose();
-  }
-
-  // Fungsi untuk menambahkan produk ke keranjang via API
-  Future<void> _masukkanKeKeranjang() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Memasukkan pesanan...'),
-        duration: Duration(milliseconds: 500),
-      ),
-    );
-
-    // Kirim request ke API dengan jumlah default 1
-    var response = await ApiService.tambahKeranjang(currentUserId, widget.idMenu, 1);
-
-    if (response['status'] == 'sukses') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${widget.name} berhasil ditambah! 🛒'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      // Kembali ke halaman menu setelah berhasil
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal: ${response['pesan']}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   @override
