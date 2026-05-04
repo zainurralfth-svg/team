@@ -107,21 +107,22 @@ class ApiService {
   // 2b. EDIT MENU (BARU) ✅
   // ==========================================
   static Future<Map<String, dynamic>> editMenu(
-      String idMenu, String nama, String harga) async {
-    try {
-      var response = await http.post(
-        Uri.parse("$baseUrl/edit_menu.php"),
-        body: {
-          "id_menu": idMenu,
-          "nama_produk": nama,
-          "harga": harga,
-        },
-      );
-      return _safeDecodeMap(response.body);
-    } catch (e) {
-      return {"status": "error", "pesan": "Koneksi gagal: $e"};
-    }
+    String idMenu, String nama, String harga, {String deskripsi = ''}) async {
+  try {
+    var response = await http.post(
+      Uri.parse("$baseUrl/edit_menu.php"),
+      body: {
+        "id_menu"     : idMenu,
+        "nama_produk" : nama,
+        "harga"       : harga,
+        "deskripsi"   : deskripsi, // ← tambahan ini
+      },
+    );
+    return _safeDecodeMap(response.body);
+  } catch (e) {
+    return {"status": "error", "pesan": "Koneksi gagal: $e"};
   }
+}
 
   // ==========================================
   // 3. KERANJANG (CUSTOMER)
@@ -266,4 +267,17 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> hapusMenu(String idMenu) async {
+  try {
+    var response = await http.post(
+      Uri.parse("$baseUrl/hapus_menu.php"),
+      body: {
+        "id_menu": idMenu,
+      },
+    );
+    return _safeDecodeMap(response.body);
+  } catch (e) {
+    return {"status": "error", "pesan": "Koneksi gagal: $e"};
+  }
+}
 } // <--- SEKARANG SEMUANYA AMAN DI DALAM KANDANG (CLASS)

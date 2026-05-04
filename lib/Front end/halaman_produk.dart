@@ -3,7 +3,6 @@ import '../Backend/Api_service.dart';
 
 class HalamanProduk extends StatefulWidget {
   const HalamanProduk({super.key});
-
   @override
   State<HalamanProduk> createState() => _HalamanProdukState();
 }
@@ -34,7 +33,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
     _fetchMenu();
   }
 
-  // ── FETCH DATA DARI DATABASE ──────────────────────────────
+  // ── FETCH ─────────────────────────────────────────────────
   Future<void> _fetchMenu() async {
     setState(() => _isLoading = true);
     try {
@@ -45,23 +44,16 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memuat data: $e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
-      }
+      _snackbar('Gagal memuat data: $e', Colors.red);
     }
   }
 
-  // ── EDIT ─────────────────────────────────────────────────────
+  // ── EDIT ─────────────────────────────────────────────────
   void bukaSHeetEdit(int i) {
-    final nameCtrl  = TextEditingController(text: menuItems[i]['nama_produk']?.toString() ?? '');
-    final priceCtrl = TextEditingController(text: menuItems[i]['harga']?.toString() ?? '');
+    final item      = menuItems[i];
+    final nameCtrl  = TextEditingController(text: item['nama_produk']?.toString() ?? '');
+    final priceCtrl = TextEditingController(text: item['harga']?.toString() ?? '');
+    final descCtrl  = TextEditingController(text: item['deskripsi']?.toString() ?? '');
     final formKey   = GlobalKey<FormState>();
 
     showModalBottomSheet(
@@ -78,94 +70,127 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
           ),
           child: Form(
             key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Edit Menu',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,
-                        color: orange, fontFamily: 'Signika Negative')),
-                const SizedBox(height: 16),
-                const Text('Nama Menu',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: nameCtrl,
-                  textCapitalization: TextCapitalization.characters,
-                  decoration: InputDecoration(
-                    hintText: 'Nama menu...',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: orange, width: 1.5)),
-                  ),
-                  validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null,
-                ),
-                const SizedBox(height: 14),
-                const Text('Harga (Rp)',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: priceCtrl,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'Contoh: 35000',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: orange, width: 1.5)),
-                  ),
-                  validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null,
-                ),
-                const SizedBox(height: 24),
-                Row(children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Handle bar
+                  Center(
+                    child: Container(
+                      width: 40, height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2)),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: orange,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
+                  const Text('Edit Menu',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,
+                          color: orange, fontFamily: 'Signika Negative')),
+                  const SizedBox(height: 16),
+
+                  // Nama
+                  _label('Nama Menu'),
+                  TextFormField(
+                    controller: nameCtrl,
+                    textCapitalization: TextCapitalization.characters,
+                    decoration: _inputDeco('Nama menu...'),
+                    validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null,
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Harga
+                  _label('Harga (Rp)'),
+                  TextFormField(
+                    controller: priceCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: _inputDeco('Contoh: 35000'),
+                    validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null,
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Deskripsi
+                  _label('Deskripsi'),
+                  TextFormField(
+                    controller: descCtrl,
+                    maxLines: 3,
+                    decoration: _inputDeco('Deskripsi produk...'),
+                  ),
+                  const SizedBox(height: 24),
+
+                  Row(children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('Batal',
+                            style: TextStyle(color: Colors.grey)),
                       ),
-                      onPressed: () async {
-                        if (formKey.currentState!.validate()) {
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: orange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        onPressed: () async {
+                          if (!formKey.currentState!.validate()) return;
+
+                          final idProduk  = item['id_produk']?.toString() ?? '';
+                          final namaBaru  = nameCtrl.text.trim().toUpperCase();
+                          final hargaBaru = priceCtrl.text.trim();
+                          final descBaru  = descCtrl.text.trim();
+
+                          // Tutup sheet
                           Navigator.pop(ctx);
-                          // Update lokal dulu (optimistic update)
+
+                          // Simpan data lama untuk rollback
+                          final namaLama  = menuItems[i]['nama_produk'];
+                          final hargaLama = menuItems[i]['harga'];
+                          final descLama  = menuItems[i]['deskripsi'];
+
+                          // Update tampilan langsung (optimistic)
                           setState(() {
-                            menuItems[i]['nama_produk'] = nameCtrl.text.trim().toUpperCase();
-                            menuItems[i]['harga'] = priceCtrl.text.trim();
+                            menuItems[i]['nama_produk'] = namaBaru;
+                            menuItems[i]['harga']       = hargaBaru;
+                            menuItems[i]['deskripsi']   = descBaru;
                           });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text('Menu berhasil diperbarui ✓'),
-                              backgroundColor: orange,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                            ),
+
+                          // Kirim ke database
+                          final hasil = await ApiService.editMenu(
+                            idProduk, namaBaru, hargaBaru,
+                            deskripsi: descBaru,
                           );
-                        }
-                      },
-                      child: const Text('Simpan',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+
+                          if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
+                            _snackbar('Menu berhasil diperbarui ✓', orange);
+                          } else {
+                            // Gagal — kembalikan data lama
+                            setState(() {
+                              menuItems[i]['nama_produk'] = namaLama;
+                              menuItems[i]['harga']       = hargaLama;
+                              menuItems[i]['deskripsi']   = descLama;
+                            });
+                            _snackbar('Gagal: ${hasil['pesan'] ?? 'Error server'}', Colors.red);
+                          }
+                        },
+                        child: const Text('Simpan',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      ),
                     ),
-                  ),
-                ]),
-              ],
+                  ]),
+                ],
+              ),
             ),
           ),
         ),
@@ -173,7 +198,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
     );
   }
 
-  // ── HAPUS ────────────────────────────────────────────────────
+  // ── HAPUS ─────────────────────────────────────────────────
   void bukaDialogHapus(int i) {
     showDialog(
       context: context,
@@ -198,30 +223,75 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
               elevation: 0,
             ),
-            onPressed: () {
-              final nama = menuItems[i]['nama_produk']?.toString() ?? '';
-              setState(() => menuItems.removeAt(i));
+            onPressed: () async {
+              final idProduk = menuItems[i]['id_produk']?.toString() ?? '';
+              final nama     = menuItems[i]['nama_produk']?.toString() ?? '';
+              final backup   = Map<String, dynamic>.from(menuItems[i]);
+
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('"$nama" dihapus'),
-                  backgroundColor: Colors.red,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              );
+              setState(() => menuItems.removeAt(i));
+
+              final hasil = await ApiService.hapusMenu(idProduk);
+              if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
+                _snackbar('"$nama" berhasil dihapus', Colors.red);
+              } else {
+                setState(() => menuItems.insert(i, backup));
+                _snackbar('Gagal: ${hasil['pesan'] ?? 'Error server'}', Colors.red);
+              }
             },
-            child: const Text('Hapus', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text('Hapus',
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  // ── BUILD ─────────────────────────────────────────────────────
+  void _snackbar(String msg, Color color) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg, style: const TextStyle(fontFamily: 'Signika Negative')),
+      backgroundColor: color,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ));
+  }
+
+  Widget _label(String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Text(text,
+            style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: Colors.black87)),
+      );
+
+  InputDecoration _inputDeco(String hint) => InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade200)),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade200)),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: orange, width: 1.5)),
+        errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.red, width: 1.5)),
+      );
+
+  // ── BUILD ─────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -265,16 +335,14 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Selamat Datang',
-                    style: TextStyle(color: Colors.white, fontSize: 26,
-                        fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
-                Text('Dashboard Admin',
-                    style: TextStyle(color: Colors.white, fontSize: 26,
-                        fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
-              ]),
+          const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Selamat Datang',
+                style: TextStyle(color: Colors.white, fontSize: 26,
+                    fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
+            Text('Dashboard Admin',
+                style: TextStyle(color: Colors.white, fontSize: 26,
+                    fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
+          ]),
           Container(
             width: 50, height: 50,
             decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
@@ -310,8 +378,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(icon, color: Colors.white, size: 30),
         const SizedBox(height: 8),
-        Text(title,
-            textAlign: TextAlign.center,
+        Text(title, textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white, fontSize: 14,
                 fontFamily: 'Signika Negative', fontWeight: FontWeight.w600)),
       ]),
@@ -322,16 +389,15 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(30)),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('Pendapatan',
-              style: TextStyle(color: orange, fontSize: 16,
-                  fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
-          Text('570.000',
-              style: TextStyle(color: orange, fontSize: 16,
-                  fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
+          Text('Pendapatan', style: TextStyle(color: orange, fontSize: 16,
+              fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
+          Text('570.000', style: TextStyle(color: orange, fontSize: 16,
+              fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -341,7 +407,8 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(color: orange, borderRadius: BorderRadius.circular(15)),
+      decoration: BoxDecoration(
+          color: orange, borderRadius: BorderRadius.circular(15)),
       child: const Center(
         child: Text('Manajemen Menu',
             style: TextStyle(color: Colors.white, fontSize: 20,
@@ -351,14 +418,9 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
   }
 
   Widget _buildMenuList() {
-    // Loading state
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: orange),
-      );
+      return const Center(child: CircularProgressIndicator(color: orange));
     }
-
-    // Empty state
     if (menuItems.isEmpty) {
       return Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -375,7 +437,8 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: orange,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ]),
@@ -389,65 +452,96 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
         itemCount: menuItems.length,
         itemBuilder: (context, index) {
-          final item = menuItems[index];
-
-          // Ambil data dari response API
+          final item      = menuItems[index];
           final namaMenu  = item['nama_produk']?.toString() ?? 'Tanpa Nama';
           final harga     = item['harga']?.toString() ?? '0';
+          final deskripsi = item['deskripsi']?.toString() ?? '';
           final urlGambar = item['gambar']?.toString() ?? '';
-          final baseUrl   = 'http://127.0.0.1/api_puddingku/';
+          const baseUrl   = 'http://127.0.0.1/api_puddingku/';
 
           return Container(
             margin: const EdgeInsets.only(bottom: 15),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
                 color: Colors.white, borderRadius: BorderRadius.circular(20)),
-            child: Row(children: [
-              // Gambar dari database, fallback ke placeholder jika kosong
-              Container(
-                width: 70, height: 70,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF6C6353),
-                  borderRadius: BorderRadius.circular(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Gambar produk
+                Container(
+                  width: 70, height: 70,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6C6353),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: urlGambar.isNotEmpty
+                      ? Image.network(
+                          '$baseUrl$urlGambar',
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.fastfood, color: Colors.white54, size: 30),
+                        )
+                      : const Icon(Icons.fastfood, color: Colors.white54, size: 30),
+                  ),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: urlGambar.isNotEmpty
-                    ? Image.network(
-                        '$baseUrl$urlGambar',
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
-                          Icons.fastfood, color: Colors.white54, size: 30),
-                      )
-                    : const Icon(Icons.fastfood, color: Colors.white54, size: 30),
-                ),
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Column(
+                const SizedBox(width: 12),
+
+                // Nama + harga + deskripsi
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(namaMenu,
-                          style: const TextStyle(fontSize: 13,
+                          style: const TextStyle(
+                              fontSize: 13,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Signika Negative',
                               color: Colors.black)),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text('Rp $harga',
-                          style: const TextStyle(fontSize: 12, color: orange,
+                          style: const TextStyle(
+                              fontSize: 12,
+                              color: orange,
                               fontFamily: 'Signika Negative',
                               fontWeight: FontWeight.w600)),
-                    ]),
-              ),
-              IconButton(
-                icon: const Icon(Icons.edit, color: Colors.green, size: 20),
-                onPressed: () => bukaSHeetEdit(index),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete, color: Colors.orange, size: 20),
-                onPressed: () => bukaDialogHapus(index),
-              ),
-            ]),
+                      if (deskripsi.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          deskripsi,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade600,
+                              fontFamily: 'Signika Negative'),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Tombol edit & hapus
+                Column(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.green, size: 20),
+                      onPressed: () => bukaSHeetEdit(index),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(height: 8),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.orange, size: 20),
+                      onPressed: () => bukaDialogHapus(index),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -474,15 +568,14 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
     return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       Stack(alignment: Alignment.center, children: [
         if (active)
-          Container(
-              width: 40, height: 40,
-              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+          Container(width: 40, height: 40,
+              decoration: const BoxDecoration(
+                  color: Colors.white, shape: BoxShape.circle)),
         Icon(icon, color: active ? orange : Colors.white, size: 24),
       ]),
       const SizedBox(height: 4),
-      Text(label,
-          style: const TextStyle(color: Colors.white, fontSize: 10,
-              fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
+      Text(label, style: const TextStyle(color: Colors.white, fontSize: 10,
+          fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
     ]);
   }
 }
