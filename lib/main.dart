@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'Front end/tampilanawal.dart';
-import 'Front end/masuk.dart';
-import 'Front end/login.dart';
-import 'Front end/menu.dart';
-import 'Front end/keranjang.dart';
-import 'Front end/konfirmasipesanan.dart';
-import 'Front end/lupa_password.dart';
-import 'Front end/admin.dart';
-import 'Front end/bukti_pesanan.dart';
-import 'Front end/product_detail.dart';
-import 'Front end/cek_pesanan.dart'; // Import file Cek Pesanan
+import 'Halaman_Awal/tampilanawal.dart';
+import 'Halaman_Awal/login.dart';
+import 'Halaman_Awal/register.dart';
+import 'halaman_user/menu.dart';
+import 'halaman_user/keranjang.dart';
+import 'halaman_user/konfirmasipesanan.dart';
+import 'Halaman_Awal/lupa_password.dart';
+import 'halaman_admin/admin.dart';
+import 'halaman_user/bukti_pesanan.dart';
+import 'halaman_user/product_detail.dart';
+import 'halaman_user/cek_pesanan.dart'; // Import file Cek Pesanan
 
 void main() {
   runApp(const PuddingkuApp());

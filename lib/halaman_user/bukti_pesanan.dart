@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'halaman_profil.dart'; // Pastikan import halaman profilnya
+import 'profil_pengguna.dart'; // Pastikan import halaman profilnya
 
 class BuktiPemesanan extends StatelessWidget {
   const BuktiPemesanan({super.key});
