@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'halaman_profil.dart'; // Pastikan import halaman profilnya
 
 class BuktiPemesanan extends StatelessWidget {
   const BuktiPemesanan({super.key});
@@ -14,6 +15,8 @@ class BuktiPemesanan extends StatelessWidget {
     final String telpTampil = dataPesanan?['telp'] ?? '-';
     final int totalHarga = dataPesanan?['total'] ?? 0;
     final List<dynamic> items = dataPesanan?['items'] ?? [];
+
+    const Color colorPrimary = Color(0xFFC9792B); // Warna seragam dengan menu.dart
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFE5B9), 
@@ -102,8 +105,8 @@ class BuktiPemesanan extends StatelessWidget {
                         // Total Harga
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text(
+                          children: [
+                            const Text(
                               'Total',
                               style: TextStyle(
                                 color: Color(0xFFD27F30),
@@ -112,8 +115,8 @@ class BuktiPemesanan extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '54.000',
-                              style: TextStyle(
+                              totalHarga.toString(), // Dibuat dinamis dari variabel totalHarga
+                              style: const TextStyle(
                                 color: Color(0xFFD27F30),
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -131,20 +134,29 @@ class BuktiPemesanan extends StatelessWidget {
         ],
       ),
 
-      // BOTTOM NAVIGATION BAR
+      // ==========================================
+      // BOTTOM NAVIGATION BAR (SUDAH DISAMAKAN DENGAN MENU.DART)
+      // ==========================================
       bottomNavigationBar: Container(
-        color: const Color(0xFFD27F30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        height: 70,
+        decoration: const BoxDecoration(
+          color: colorPrimary,
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             GestureDetector(
               onTap: () => Navigator.pushNamed(context, '/cek_pesanan'),
-              child: _buildCustomNavItem('assets/images/icon_pesanan.png', 'Pesanan')
+              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, colorPrimary),
             ),
             GestureDetector(
               onTap: () => Navigator.pushNamed(context, '/menu'), // Balik ke menu utama
-              child: _buildCustomNavItem('assets/images/icon_produk.png', 'Produk')
+              child: _buildBottomNavItem(Icons.cake, 'Produk', false, colorPrimary),
+            ),
+            GestureDetector(
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfil())),
+              child: _buildBottomNavItem(Icons.person, 'Profil', false, colorPrimary),
             ),
           ],
         ),
@@ -152,7 +164,7 @@ class BuktiPemesanan extends StatelessWidget {
     );
   }
 
-  // WIDGET BANTUAN (Sama dengan aslinya, tidak diubah)
+  // WIDGET BANTUAN
   Widget _buildInfoRow(String label, String separator, String value) {
     return Row(
       children: [
@@ -175,18 +187,28 @@ class BuktiPemesanan extends StatelessWidget {
     );
   }
 
-  Widget _buildCustomNavItem(String imagePath, String label) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 45, height: 45,
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-          child: Center(child: Image.asset(imagePath, width: 30, height: 30, errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, color: Colors.grey))),
-        ),
-        const SizedBox(height: 5),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
-      ],
+  // ==========================================
+  // WIDGET ICON FOOTER (DISAMAKAN DENGAN MENU.DART)
+  // ==========================================
+  Widget _buildBottomNavItem(IconData icon, String label, bool isSelected, Color activeColor) {
+    return Container(
+      color: Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.white : Colors.transparent, 
+              shape: BoxShape.circle
+            ),
+            child: Icon(icon, color: isSelected ? activeColor : Colors.white, size: 24),
+          ),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+        ],
+      ),
     );
   }
 }

@@ -375,31 +375,37 @@ class _MenuPageState extends State<MenuPage> {
                     ),
                     GestureDetector(
                       onTap: () async {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Menambahkan ke keranjang...'), duration: Duration(milliseconds: 500)),
-                        );
-
                         var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
 
                         if (response['status'] == 'sukses') {
-                          // UPDATE: Menambah angka notifikasi secara langsung
+                          // UPDATE: Menambah angka notifikasi di ikon keranjang atas
                           setState(() {
                             _cartItemCount++; 
                           });
 
+                          // --- NOTIFIKASI MELAYANG (INFO PRODUK SAJA) ---
+                          ScaffoldMessenger.of(context).clearSnackBars(); 
+                          
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('$name masuk keranjang! 🛒'),
-                              backgroundColor: Colors.green,
-                              action: SnackBarAction(
-                                label: 'LIHAT',
-                                textColor: Colors.white,
-                                onPressed: () => Navigator.pushNamed(context, '/keranjang').then((_) => _ambilDataKeranjang()),
-                              ),
+                              content: Text('$name ditambahkan pada keranjang! 🛒', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                              backgroundColor: Colors.green.shade600,
+                              behavior: SnackBarBehavior.floating, // BIKIN MELAYANG
+                              margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20), // JARAK DARI BAWAH BIAR GAK KETUTUP FOOTER
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), 
+                              duration: const Duration(milliseconds: 1500), // MUNCUL BENTAR AJA
                             ),
                           );
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal: ${response['pesan']}')));
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Gagal: ${response['pesan']}'), 
+                              behavior: SnackBarBehavior.floating,
+                              margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                              duration: const Duration(seconds: 2)
+                            )
+                          );
                         }
                       },
                       child: Container(
