@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'product_detail.dart';
 import '../Backend/api_service.dart';
-import 'halaman_profil.dart';
+import 'profil_pengguna.dart';
 
 // =============================================
 // ANIMASI TRANSISI HALAMAN — gaya Instagram
