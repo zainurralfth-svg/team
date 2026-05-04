@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Backend/api_service.dart';
+import '../Core/Colour.dart'; // Import gudang warna kita
 
 class KonfirmasiPage extends StatefulWidget {
   const KonfirmasiPage({super.key});
@@ -73,7 +74,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
 
     if (response['status'] == 'sukses') {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Pesanan Berhasil Dibuat! 🚀"), backgroundColor: Colors.green),
+        const SnackBar(content: Text("Pesanan Berhasil Dibuat! 🚀"), backgroundColor: AppColors.successGreen),
       );
       
       // Pindah ke halaman Bukti Pesanan dan bawa SEMUA datanya
@@ -90,7 +91,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal: ${response['pesan']}"), backgroundColor: Colors.red),
+        SnackBar(content: Text("Gagal: ${response['pesan']}"), backgroundColor: AppColors.errorRed),
       );
     }
   }
@@ -103,7 +104,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
     final int totalHarga = args?['total'] ?? 0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2D7A6),
+      backgroundColor: AppColors.bgCream, // Disamakan dengan Colour.dart
       body: SafeArea(
         child: Column(
           children: [
@@ -113,7 +114,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               decoration: const BoxDecoration(
-                color: Color(0xFFD27F30),
+                color: AppColors.primaryOrange, // Disamakan dengan Colour.dart
               ),
               child: Row(
                 children: [
@@ -125,12 +126,12 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.white, width: 1.5),
+                            border: Border.all(color: AppColors.textWhite, width: 1.5),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
                             Icons.arrow_back,
-                            color: Colors.white,
+                            color: AppColors.textWhite,
                             size: 20,
                           ),
                         ),
@@ -142,7 +143,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                       child: Text(
                         'Konfirmasi Pesanan',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.textWhite,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Serif',
@@ -157,7 +158,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
 
             Expanded(
               child: _isLoadingProfile 
-              ? const Center(child: CircularProgressIndicator(color: Color(0xFFD27F30)))
+              ? const Center(child: CircularProgressIndicator(color: AppColors.primaryOrange))
               : SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -165,7 +166,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                   children: [
                     const Text(
                       "Detail Pesanan",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
                     ),
                     const SizedBox(height: 10),
 
@@ -173,11 +174,11 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                     Container(
                       padding: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.textWhite,
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: AppColors.shadowCustom, // Disamakan dengan Colour.dart
                             blurRadius: 10,
                           )
                         ],
@@ -206,14 +207,14 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                             children: [
                               const Text(
                                 "Total Pembayaran",
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
                               ),
                               Text(
                                 "Rp $totalHarga",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
-                                  color: Color(0xFFD27F30),
+                                  color: AppColors.primaryOrange,
                                 ),
                               ),
                             ],
@@ -225,14 +226,14 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                     const SizedBox(height: 25),
                     const Text(
                       "Informasi Pengiriman",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
                     ),
                     const SizedBox(height: 10),
 
                     // TEXTFIELD (OTOMATIS SESUAI DATA REGISTRASI)
-                    _buildTextField("Nama Lengkap", Icons.person, const Color(0xFFD27F30), _namaController),
+                    _buildTextField("Nama Lengkap", Icons.person, AppColors.primaryOrange, _namaController),
                     const SizedBox(height: 12),
-                    _buildTextField("Nomor Telepon", Icons.phone, const Color(0xFFD27F30), _telpController),
+                    _buildTextField("Nomor Telepon", Icons.phone, AppColors.primaryOrange, _telpController),
 
                     const SizedBox(height: 40),
 
@@ -240,7 +241,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                     Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD27F30),
+                          backgroundColor: AppColors.primaryOrange,
                           padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25),
@@ -253,12 +254,12 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                           ? const SizedBox(
                               width: 20, 
                               height: 20, 
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                              child: CircularProgressIndicator(color: AppColors.textWhite, strokeWidth: 2)
                             )
                           : const Text(
                               "Pesan Sekarang",
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.textWhite,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
@@ -289,11 +290,11 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark),
               ),
               Text(
                 qty,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
+                style: const TextStyle(color: AppColors.textHint, fontSize: 12), // Menggunakan warna abu dari AppColors
               ),
             ],
           ),
@@ -303,7 +304,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
-            color: Color(0xFFD27F30),
+            color: AppColors.primaryOrange,
           ),
         ),
       ],
@@ -313,24 +314,25 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
   Widget _buildTextField(String hint, IconData icon, Color iconColor, TextEditingController controller) {
     return TextField(
       controller: controller,
+      style: const TextStyle(color: AppColors.textDark),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+        hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 13),
         prefixIcon: Icon(icon, color: iconColor, size: 22),
-        fillColor: const Color(0xFFFEF6E8),
+        fillColor: AppColors.adminCardLight, // Disamakan dengan warna cream terang di AppColors
         filled: true,
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Color(0xFFD27F30)),
+          borderSide: const BorderSide(color: AppColors.primaryOrange),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Color(0xFFD27F30)),
+          borderSide: const BorderSide(color: AppColors.primaryOrange),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Color(0xFFD27F30), width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryOrange, width: 2),
         ),
       ),
     );

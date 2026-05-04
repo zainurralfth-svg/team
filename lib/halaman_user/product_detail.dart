@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Core/Colour.dart'; // IMPORT GUDANG WARNA
 
 class ProductDetailPage extends StatefulWidget {
   // Parameter yang diterima dari halaman menu
@@ -71,13 +72,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    // Warna utama halaman detail
-    const Color colorBg = Color(0xFFF5E6C8);      // Latar krem
-    const Color colorText = Color(0xFF2A1200);     // Teks judul coklat gelap
-    const Color colorSubText = Color(0xFF3A2010);  // Teks isi coklat medium
-
     return Scaffold(
-      backgroundColor: colorBg,
+      backgroundColor: AppColors.detailBg, // Pakai dari AppColors
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -96,9 +92,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                 fit: BoxFit.cover,
                 // Tampilkan icon jika gambar gagal dimuat
                 errorBuilder: (c, e, s) => Container(
-                  color: const Color(0xFFD6B98A),
+                  color: AppColors.detailImgPlaceholder, // Pakai dari AppColors
                   child: const Center(
-                    child: Icon(Icons.cake, size: 80, color: Color(0xFF7A4A21)),
+                    child: Icon(Icons.cake, size: 80, color: AppColors.detailImgIcon), // Pakai dari AppColors
                   ),
                 ),
               ),
@@ -128,7 +124,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
-                          color: colorText,
+                          color: AppColors.detailTextTitle, // Pakai dari AppColors
                           height: 1.2,
                         ),
                       ),
@@ -140,7 +136,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                         textAlign: TextAlign.justify,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: colorSubText,
+                          color: AppColors.detailTextBody, // Pakai dari AppColors
                           height: 1.65,
                         ),
                       ),
@@ -153,7 +149,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
-                          color: colorText,
+                          color: AppColors.detailTextTitle, // Pakai dari AppColors
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -161,7 +157,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                       // Nilai harga dari halaman menu
                       Text(
                         widget.price,
-                        style: const TextStyle(fontSize: 15, color: colorSubText),
+                        style: const TextStyle(fontSize: 15, color: AppColors.detailTextBody), // Pakai dari AppColors
                       ),
                       const SizedBox(height: 14),
 
@@ -172,7 +168,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
-                          color: colorText,
+                          color: AppColors.detailTextTitle, // Pakai dari AppColors
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -182,7 +178,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                       Text.rich(
                         TextSpan(
                           text: '${widget.stok} ',
-                          style: const TextStyle(fontSize: 15, color: colorSubText),
+                          style: const TextStyle(fontSize: 15, color: AppColors.detailTextBody), // Pakai dari AppColors
                           children: [
                             TextSpan(
                               text: (int.tryParse(widget.stok) ?? 0) > 0
@@ -191,8 +187,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                               style: TextStyle(
                                 fontStyle: FontStyle.italic,
                                 color: (int.tryParse(widget.stok) ?? 0) > 0
-                                    ? Colors.green[700]
-                                    : Colors.red,
+                                    ? AppColors.successGreen // Pakai warna hijau seragam
+                                    : AppColors.errorRed,    // Pakai warna merah seragam
                               ),
                             ),
                           ],
@@ -217,8 +213,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
               child: OutlinedButton(
                 onPressed: () => Navigator.pop(context),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: colorText,
-                  side: const BorderSide(color: colorText, width: 1.5),
+                  foregroundColor: AppColors.detailTextTitle, // Pakai dari AppColors
+                  side: const BorderSide(color: AppColors.detailTextTitle, width: 1.5), // Pakai dari AppColors
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                   ),

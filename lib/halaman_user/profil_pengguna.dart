@@ -84,7 +84,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
         backgroundColor: AppColors.profilePrimary,
         elevation: 0,
         centerTitle: true, 
-        title: const Text('Profil Kamu', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold)),
+        title: const Text('Profil Anda', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: AppColors.textWhite),
       ),
       body: _isLoading
