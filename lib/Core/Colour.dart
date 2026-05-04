@@ -63,12 +63,43 @@ class AppColors {
   // ==========================================
   // --- WARNA KHUSUS KERANJANG ---
   // ==========================================
-  static const Color cartBg = Color(0xFFD27F30);          // Krem background keranjang
-  static const Color cartPrimary = Color(0xFFD27F30);     // Oranye header & teks harga
-  static const Color cartBtnQty = Color(0xFFD27F30);      // Background tombol + dan -
-  static const Color cartConfirmBtn = Color(0xFFF1C574);  // Kuning tombol Konfirmasi
-  static const Color cartConfirmStroke = Color(0xFF270C0C); // Garis pinggir tombol konfirmasi
+  static const Color cartBg = Color(0xFFD27F30);          
+  static const Color cartPrimary = Color(0xFFD27F30);     
+  static const Color cartBtnQty = Color(0xFFD27F30);      
+  static const Color cartConfirmBtn = Color(0xFFF1C574);  
+  static const Color cartConfirmStroke = Color(0xFF270C0C); 
 
+  // ==========================================
+  // --- WARNA KHUSUS BUKTI PESANAN ---
+  // ==========================================
+  static const Color buktiBg = Color(0xFFFFE5B9);        
+  static const Color buktiText = Color(0xFFD27F30);      
+  static const Color buktiCheckBg = Color(0xFF8DE88D);   
+
+  // ==========================================
+  // --- WARNA KHUSUS KONFIRMASI PESANAN ---
+  // ==========================================
+  static const Color konfirmasiBg = Color(0xFFF2D7A6);       
+  static const Color konfirmasiCardLight = Color(0xFFFFF3DE); 
+
+  // ==========================================
+  // --- WARNA KHUSUS MENU ---
+  // ==========================================
+  static const Color menuBg = Color(0xFFF2D7A6);
+  static const Color menuPrimary = Color(0xFFC9792B);
+  static const Color menuCard = Color(0xFFF7E6C4);
+  static const Color menuBorder = Color(0xFF7A4A21);
+  static const Color menuText = Color(0xFF3A1F0F);
+
+  // ==========================================
+  // --- WARNA KHUSUS DETAIL PRODUK (BARU!) ---
+  // ==========================================
+  static const Color detailBg = Color(0xFFF5E6C8);           // Latar krem detail
+  static const Color detailTextTitle = Color(0xFF2A1200);    // Teks judul coklat gelap
+  static const Color detailTextBody = Color(0xFF3A2010);     // Teks isi coklat medium
+  static const Color detailImgPlaceholder = Color(0xFFD6B98A); // Latar gambar error
+  static const Color detailImgIcon = Color(0xFF7A4A21);      // Ikon error gambar
+  
   // ==========================================
   // --- WARNA KHUSUS & BAYANGAN ---
   // ==========================================
