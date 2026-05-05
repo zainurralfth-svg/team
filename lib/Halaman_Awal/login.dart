@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; 
-import '../Backend/API_Service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// ==============================================================
+// IMPORT CLASS MODELS OOP
+// ==============================================================
+import '../Models/user.dart';
 
 class MasukPage extends StatefulWidget {
   const MasukPage({super.key});
@@ -26,7 +30,7 @@ class _MasukPageState extends State<MasukPage> {
     super.dispose();
   }
 
-  // FUNGSI UTAMA: Logika Autentikasi Login
+  // FUNGSI UTAMA: Logika Autentikasi Login (MURNI OOP)
   Future<void> _handleLogin() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
@@ -62,11 +66,11 @@ class _MasukPageState extends State<MasukPage> {
       return;
     }
 
-    // 2. Eksekusi API dengan Try-Catch untuk menangani Network Error
+    // 2. Eksekusi API melalui Class Model OOP (Tidak ada fungsi redundan)
     try {
-      var hasil = await ApiService.loginUser(username, password);
+      var hasil = await User.autentikasiOOP(username, password);
 
-      // 3. Evaluasi Respon dari Server
+      // 3. Evaluasi Respon dari Model OOP
       if (hasil['status'] == 'sukses') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -76,27 +80,21 @@ class _MasukPageState extends State<MasukPage> {
           ),
         );
 
-        _usernameController.clear();
-        _passwordController.clear();
-        
         // ==============================================================
-        // INI DIA TAMBAHANNYA: SIMPAN ID KE MEMORI HP!
+        // SIMPAN ID KE MEMORI HP
         // ==============================================================
         SharedPreferences prefs = await SharedPreferences.getInstance();
         
-        // Kita cari angka ID dari balikan XAMPP. 
-        // Bisa di dalam hasil['id'], hasil['data']['id'], atau hasil['id_user']
-        String idUserLogin = hasil['id']?.toString() ?? hasil['data']?['id']?.toString() ?? "";
+        String idUserLoginStr = hasil['id']?.toString() ?? "0";
         
-        if (idUserLogin.isNotEmpty) {
-          await prefs.setString('id_user', idUserLogin);
-          print("Mantap! ID User $idUserLogin berhasil disimpan ke memori!");
-        } else {
-          print("Waduh! ID User nggak ketemu dari balikan PHP.");
+        if (idUserLoginStr.isNotEmpty && idUserLoginStr != "0") {
+          await prefs.setString('id_user', idUserLoginStr);
+          print("Mantap! ID User $idUserLoginStr berhasil disimpan ke memori!");
         }
-        // ==============================================================
 
-        // --- LOGIKA MULTI-ROLE (Routing berdasarkan hak akses) ---
+        // ==============================================================
+        // --- LOGIKA ROUTING BERDASARKAN HASIL OOP ---
+        // ==============================================================
         String roleUser = hasil['role'] ?? 'user'; 
 
         Future.delayed(const Duration(milliseconds: 1000), () {
@@ -110,6 +108,10 @@ class _MasukPageState extends State<MasukPage> {
             }
           }
         });
+
+        _usernameController.clear();
+        _passwordController.clear();
+        
       } else {
         // Tampilkan pesan error jika kredensial salah
         ScaffoldMessenger.of(context).showSnackBar(
@@ -134,29 +136,28 @@ class _MasukPageState extends State<MasukPage> {
   }
   
   // ==============================================================
-  // --- BUILDER UTAMA UI ---
+  // --- BUILDER UTAMA UI (TIDAK ADA YANG DIRUBAH) ---
   // ==============================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Mencegah layout terdorong ke atas saat keyboard aktif
+      resizeToAvoidBottomInset: false, 
       backgroundColor: AppColors.bgCream, 
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
           double contentWidth = isDesktop ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9;
 
-          // Perhatikan bagian ini: Footer udah dimasukin ke dalam Column!
           return Stack(
             children: [
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop),             // Memanggil komponen Header Gambar
+                    _buildHeader(isDesktop),             
                     const SizedBox(height: 20),
-                    _buildForm(contentWidth, isDesktop), // Memanggil komponen Form Utama
-                    const SizedBox(height: 80),          // Jarak antara form dan footer
-                    _buildFooter(),                      // <-- FOOTER SEKARANG IKUT KE-SCROLL DI SINI
+                    _buildForm(contentWidth, isDesktop), 
+                    const SizedBox(height: 80),          
+                    _buildFooter(),                      
                   ],
                 ),
               ),
@@ -171,7 +172,6 @@ class _MasukPageState extends State<MasukPage> {
   // --- KUMPULAN WIDGET KOMPONEN ---
   // ==============================================================
 
-  // KOMPONEN 1: Header Gambar Lurus
   Widget _buildHeader(bool isDesktop) {
     return Stack(
       children: [
@@ -193,7 +193,6 @@ class _MasukPageState extends State<MasukPage> {
     );
   }
 
-  // KOMPONEN 2: Struktur Form Login
   Widget _buildForm(double contentWidth, bool isDesktop) {
     return Center(
       child: Container(
@@ -205,7 +204,6 @@ class _MasukPageState extends State<MasukPage> {
             const Text('Login Untuk Mulai Memesan', style: TextStyle(color: AppColors.textDark, fontSize: 18)),
             const SizedBox(height: 30),
 
-            // Container Background Form (Oranye)
             Container(
               width: isDesktop ? 700 : double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
@@ -228,7 +226,6 @@ class _MasukPageState extends State<MasukPage> {
             ),
             const SizedBox(height: 40),
 
-            // Tombol Login & Register
             Wrap(
               spacing: 20, runSpacing: 15, alignment: WrapAlignment.center,
               children: [
@@ -246,7 +243,7 @@ class _MasukPageState extends State<MasukPage> {
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryOrange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                     onPressed: () {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      Navigator.pushNamed(context, '/login'); // Arahkan ke halaman Register
+                      Navigator.pushNamed(context, '/login'); 
                     },
                     child: const Text('REGISTER', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), 
                   ),
@@ -259,7 +256,6 @@ class _MasukPageState extends State<MasukPage> {
     );
   }
 
-  // KOMPONEN 3: Footer Statis Bawah (Lem Super "Positioned" udah dicabut!)
   Widget _buildFooter() {
     return Container(
       height: 65, width: double.infinity,
@@ -282,7 +278,6 @@ class _MasukPageState extends State<MasukPage> {
     );
   }
 
-  // WIDGET REUSABLE: Cetakan Input Field
   Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, {bool isPassword = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -318,17 +313,11 @@ class _MasukPageState extends State<MasukPage> {
   }
 }
 
-// ==============================================================
-// --- CLASS DEKORASI BENTUK GARIS HITAM LURUS ---
-// ==============================================================
-
-// Class untuk memotong kontainer gambar secara lurus
 class HeaderClipper extends CustomClipper<Path> {
   @override Path getClip(Size size) { Path path = Path(); path.lineTo(0, size.height); path.lineTo(size.width, size.height); path.lineTo(size.width, 0); path.close(); return path; }
   @override bool shouldReclip(oldClipper) => false;
 }
 
-// Class untuk menggambar garis batas dekoratif pada potongan gambar
 class HeaderPainter extends CustomPainter {
   @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); }
   @override bool shouldRepaint(oldDelegate) => false;
