@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // <-- TAMBAHAN INI
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart'; // Import gudang warna kita
 
@@ -16,7 +17,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
   
   bool _isLoadingProfile = true;
   bool _isProcessing = false; // Tambahan untuk efek loading tombol
-  final String currentUserId = "1"; // Sesuai session login
+  String currentUserId = ""; // Sesuai session login
 
   @override
   void initState() {
@@ -25,19 +26,20 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
   }
 
   // FUNGSI PENGISI OTOMATIS BERDASARKAN REGISTRASI
+ // FUNGSI PENGISI OTOMATIS BERDASARKAN DATA LOGIN DI MEMORI HP
   Future<void> _loadUserProfile() async {
     try {
-      final profil = await ApiService.getProfil(currentUserId);
-      if (profil.isNotEmpty && profil['status'] != 'error') {
-        setState(() {
-          // Mengisi field secara otomatis dari database
-          _namaController.text = profil['nama'] ?? ''; 
-          _telpController.text = profil['phone'] ?? '';
-          _isLoadingProfile = false;
-        });
-      } else {
-        setState(() => _isLoadingProfile = false);
-      }
+      // Buka brankas memori HP
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      
+      setState(() {
+        // Ambil data langsung dari memori tanpa perlu loading ke API XAMPP
+        currentUserId = prefs.getString('id_user') ?? "0";
+        _namaController.text = prefs.getString('nama_user') ?? ''; 
+        _telpController.text = prefs.getString('phone_user') ?? '';
+        
+        _isLoadingProfile = false;
+      });
     } catch (e) {
       setState(() => _isLoadingProfile = false);
     }
@@ -53,7 +55,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
   // ============================================================
   // FUNGSI PROSES PESANAN KE DATABASE & PINDAH HALAMAN
   // ============================================================
-  Future<void> _prosesPesanan(List<dynamic> cartItems, int totalHarga) async {
+ Future<void> _prosesPesanan(List<dynamic> cartItems, int totalHarga) async {
     if (_namaController.text.isEmpty || _telpController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Lengkapi Nama dan Nomor Telepon!")),
@@ -61,7 +63,16 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
       return;
     }
 
+    // TAMBAHAN: Validasi keamanan memastikan ID User tidak kosong/nol
+    if (currentUserId.isEmpty || currentUserId == "0") {
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Sesi login tidak valid, silakan login ulang.")),
+      );
+      return;
+    }
+
     setState(() => _isProcessing = true);
+    // ... lanjut panggil API Checkout
 
     // Memanggil API Checkout
     var response = await ApiService.checkoutPesanan(

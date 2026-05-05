@@ -43,7 +43,9 @@ abstract class User {
         'status': 'sukses',
         'pesan': hasil['pesan'],
         'role': roleUser,
-        'id': idUser.toString()
+        'id': idUser.toString(),
+        'nama' : hasil['nama'],
+        'phone' : hasil['phone']
       };
     } else {
       return hasil; // Kembalikan error ke layar UI

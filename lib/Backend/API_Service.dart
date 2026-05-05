@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Gunakan 127.0.0.1 jika running di Edge/Chrome Browser
-  static const String baseUrl = "http://127.0.0.1/api_puddingku";
+  static const String baseUrl = "http://localhost/api_puddingku";
 
   // =========================================================
   // HELPER: Decode JSON aman agar aplikasi tidak crash

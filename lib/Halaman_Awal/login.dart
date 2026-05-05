@@ -83,13 +83,20 @@ class _MasukPageState extends State<MasukPage> {
         // ==============================================================
         // SIMPAN ID KE MEMORI HP
         // ==============================================================
+        // ==============================================================
+        // SIMPAN DATA KE MEMORI HP (Untuk Autofill di Checkout)
+        // ==============================================================
         SharedPreferences prefs = await SharedPreferences.getInstance();
         
         String idUserLoginStr = hasil['id']?.toString() ?? "0";
+        String namaUser = hasil['nama']?.toString() ?? ""; 
+        String phoneUser = hasil['phone']?.toString() ?? ""; 
         
         if (idUserLoginStr.isNotEmpty && idUserLoginStr != "0") {
           await prefs.setString('id_user', idUserLoginStr);
-          print("Mantap! ID User $idUserLoginStr berhasil disimpan ke memori!");
+          await prefs.setString('nama_user', namaUser);   // <-- Simpan Nama ke memori
+          await prefs.setString('phone_user', phoneUser); // <-- Simpan Telp ke memori
+          print("Mantap! Data ID, Nama, dan Telp berhasil disimpan ke memori!");
         }
 
         // ==============================================================
