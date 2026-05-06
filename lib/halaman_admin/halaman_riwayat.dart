@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
-import '../Backend/api_service.dart'; // Pastikan path ini benar sesuai struktur foldermu
+import '../Backend/api_service.dart';
+import '../Core/Colour.dart';
+import 'halaman_pengguna.dart';
+import 'tambah_produk.dart';
+import 'halaman_pesanan.dart';
+import 'admin.dart'; 
+import 'halaman_profil_admin.dart'; 
+import 'halaman_produk.dart'; // <-- BISA KLIK KE PRODUK
+import 'halaman_laporan.dart'; // <-- BISA KLIK KE LAPORAN
 
 class HalamanRiwayat extends StatefulWidget {
   const HalamanRiwayat({super.key});
@@ -15,7 +23,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   @override
   void initState() {
     super.initState();
-    _fetchDataPesanan(); // Panggil fungsi ambil data saat halaman pertama kali dibuka
+    _fetchDataPesanan();
   }
 
   // ============================================================
@@ -46,18 +54,18 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD27F30), // Warna oranye utama
+      backgroundColor: AppColors.adminPrimary,
       body: SafeArea(
         child: Column(
           children: [
             // ==========================================
-            // 1. HEADER (Teks Selamat Datang & Avatar)
+            // 1. HEADER (INTERAKTIF)
             // ==========================================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +73,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       Text(
                         'Selamat Datang',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.textWhite,
                           fontSize: 26,
                           fontFamily: 'Tai Heritage Pro',
                           fontWeight: FontWeight.bold,
@@ -74,7 +82,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       Text(
                         'Dashboard Admin',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.textWhite,
                           fontSize: 26,
                           fontFamily: 'Tai Heritage Pro',
                           fontWeight: FontWeight.bold,
@@ -82,41 +90,65 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       ),
                     ],
                   ),
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
+                  // TOMBOL PROFIL INTERAKTIF
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HalamanProfilAdmin(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: const BoxDecoration(
+                        color: AppColors.textWhite,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        color: AppColors.adminPrimary,
+                        size: 30,
+                      ),
                     ),
-                    child: const Icon(Icons.person, color: Color(0xFFD27F30), size: 30),
                   ),
                 ],
               ),
             ),
 
             // ==========================================
-            // 2. KARTU STATISTIK & PENDAPATAN
+            // 2. KARTU STATISTIK (INTERAKTIF)
             // ==========================================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildStatCard('12\nProduk', Icons.inventory_2_outlined),
-                  _buildStatCard('Riwayat\npesanan', Icons.shopping_bag, isActive: true),
-                  _buildStatCard('Laporan', Icons.bar_chart),
+                  _buildStatCard('12\nProduk', Icons.inventory_2_outlined, onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const HalamanProduk()),
+                    );
+                  }),
+                  _buildStatCard('Riwayat\npesanan', Icons.shopping_bag, isActive: true, onTap: () {}),
+                  _buildStatCard('Laporan', Icons.bar_chart, onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const HalamanLaporan()),
+                    );
+                  }),
                 ],
               ),
             ),
             const SizedBox(height: 20),
 
-            // (Nantinya total pendapatan ini bisa di-dinamiskan juga)
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20.0),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.textWhite,
                 borderRadius: BorderRadius.circular(30),
               ),
               child: const Row(
@@ -124,11 +156,11 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                 children: [
                   Text(
                     'Pendapatan',
-                    style: TextStyle(color: Color(0xFFD27F30), fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Rp -', // Disembunyikan sementara sampai kita buat API Pendapatan
-                    style: TextStyle(color: Color(0xFFD27F30), fontSize: 16, fontWeight: FontWeight.bold),
+                    'Rp -', 
+                    style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -136,44 +168,42 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             const SizedBox(height: 20),
 
             // ==========================================
-            // 3. AREA DAFTAR RIWAYAT PESANAN (Beige Background)
+            // 3. AREA DAFTAR RIWAYAT PESANAN
             // ==========================================
             Expanded(
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFFDF0D5), // Warna krem/beige terang
+                  color: AppColors.adminCardLight, 
                 ),
                 child: Column(
                   children: [
-                    // Judul berbentuk pil melayang
                     Transform.translate(
                       offset: const Offset(0, -15),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD27F30),
+                          color: AppColors.adminPrimary,
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+                          boxShadow: [
+                            BoxShadow(color: AppColors.shadowCustom, blurRadius: 4, offset: const Offset(0, 2))
+                          ],
                         ),
                         child: const Text(
                           'Daftar Pesanan',
-                          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: AppColors.textWhite, fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
                     
-                    // ============================================================
-                    // LIST VIEW BUILDER (DINAMIS DARI DATABASE)
-                    // ============================================================
                     Expanded(
                       child: _isLoading 
-                        ? const Center(child: CircularProgressIndicator(color: Color(0xFFD27F30))) // Efek Loading
+                        ? const Center(child: CircularProgressIndicator(color: AppColors.adminPrimary))
                         : _listPesanan.isEmpty 
                           ? const Center(child: Text("Belum ada pesanan masuk", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)))
                           : RefreshIndicator(
-                              color: const Color(0xFFD27F30),
-                              onRefresh: _fetchDataPesanan, // Tarik ke bawah untuk refresh data
+                              color: AppColors.adminPrimary,
+                              onRefresh: _fetchDataPesanan, 
                               child: ListView.builder(
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                                 itemCount: _listPesanan.length,
@@ -192,21 +222,9 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
       ),
       
       // ==========================================
-      // 4. BOTTOM NAVIGATION BAR
+      // 4. BOTTOM NAVIGATION BAR (DIJAMIN GAK BERUBAH)
       // ==========================================
-      bottomNavigationBar: Container(
-        color: const Color(0xFFD27F30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(Icons.home, 'BERANDA'),
-            _buildNavItem(Icons.person, 'PENGGUNA'),
-            _buildNavItem(Icons.add_box, 'PRODUK BARU'),
-            _buildNavItem(Icons.list_alt, 'PESANAN', isActive: true),
-          ],
-        ),
-      ),
+      bottomNavigationBar: _buildBottomNavigation(context),
     );
   }
 
@@ -214,123 +232,119 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   // WIDGET BANTUAN (Helper)
   // ----------------------------------------------------
 
-  Widget _buildStatCard(String title, IconData icon, {bool isActive = false}) {
-    return Container(
-      width: 105,
-      height: 105,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isActive ? Colors.white.withOpacity(0.4) : Colors.white.withOpacity(0.24),
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white, size: 30),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-        ],
+  // DITAMBAHKAN ONTAP AGAR BISA DI-KLIK
+  Widget _buildStatCard(String title, IconData icon, {bool isActive = false, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 105,
+        height: 105,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white.withOpacity(0.4) : AppColors.adminStatCard,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: AppColors.textWhite, size: 30),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   // ============================================================
-  // FUNGSI PEMBUAT DESAIN KARTU PESANAN (MAPPING DARI DATABASE)
+  // FUNGSI PEMBUAT DESAIN KARTU PESANAN
   // ============================================================
   Widget _buildOrderCard(Map<String, dynamic> item) {
-    // Membongkar data dari Database
     String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
     String hurufAwal = namaPemesan.isNotEmpty ? namaPemesan[0].toUpperCase() : '?';
     String ringkasan = item['ringkasan_pesanan'] ?? 'Detail Kosong';
     String harga = 'Rp ${item['total_harga'] ?? 0}';
     String status = item['status_pesanan'] ?? 'PROSES';
     
-    // Format Waktu sederhana (ambil jam/tanggal dari datetime)
     String waktuLengkap = item['tanggal_pesan'] ?? '';
     String waktuSingkat = waktuLengkap.length > 16 ? waktuLengkap.substring(0, 16) : waktuLengkap;
 
-    // Menentukan warna label status
-    Color statusColor = status == 'SELESAI' ? Colors.green : (status == 'DIBATALKAN' ? Colors.red : Colors.blue);
+    Color statusColor = status == 'SELESAI' ? AppColors.successGreen : (status == 'DIBATALKAN' ? AppColors.errorRed : AppColors.statusProsesBlue);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textWhite,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3))],
+        boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 5, offset: const Offset(0, 3))],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ikon Huruf di sebelah kiri
           Container(
             width: 45,
             height: 45,
             decoration: BoxDecoration(
-              color: const Color(0xFFFDF0D5),
+              color: AppColors.adminCardLight,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: Colors.black12),
             ),
             child: Center(
               child: Text(
                 hurufAwal,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFD27F30)),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.adminPrimary),
               ),
             ),
           ),
           const SizedBox(width: 15),
-          
-          // Detail Informasi Pesanan
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Baris Nama & Label Status
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       namaPemesan,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFDF0D5),
+                        color: AppColors.adminCardLight,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.circle, color: Colors.green, size: 10),
-                          SizedBox(width: 4),
-                          Text('Selesai', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                        children: [
+                          Icon(Icons.circle, color: statusColor, size: 10),
+                          const SizedBox(width: 4),
+                          Text(
+                            status == 'SELESAI' ? 'Selesai' : 'Dibatalkan', 
+                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                
-                // Teks Detail Produk
                 Text(
                   ringkasan,
                   style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 10),
-                
-                // Baris Harga & Waktu
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       harga,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFD27F30)),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.adminPrimary),
                     ),
                     Row(
                       children: [
@@ -352,18 +366,87 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, {bool isActive = false}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(color: Colors.transparent, shape: BoxShape.circle),
-          child: Icon(icon, color: Colors.white, size: 28),
+  // ==========================================
+  // FUNGSI BOTTOM NAVIGATION (100% SESUAI REQUEST)
+  // ==========================================
+  Widget _buildBottomNavigation(BuildContext context) {
+    return Container(
+      height: 70,
+      color: AppColors.adminPrimary,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _bottomNavItem(Icons.home, 'BERANDA', false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeAdmin()),
+            );
+          }),
+          _bottomNavItem(Icons.person, 'PENGGUNA', false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanPengguna()),
+            );
+          }),
+           _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TambahProdukPage(),
+                ),
+              );
+            }),
+          _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanPesanan()),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // WIDGET ITEM NAVIGASI
+  // ==========================================
+  Widget _bottomNavItem(
+    IconData icon,
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.textWhite.withOpacity(0.2) : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: AppColors.textWhite,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textWhite,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-      ],
+      ),
     );
   }
 }

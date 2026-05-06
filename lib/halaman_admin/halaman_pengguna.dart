@@ -4,6 +4,8 @@ import 'admin.dart';
 import 'tambah_produk.dart';
 import 'halaman_pesanan.dart';
 import 'halaman_laporan.dart';
+import 'halaman_riwayat.dart';
+import 'halaman_produk.dart' ;
 
 class HalamanPengguna extends StatefulWidget {
   const HalamanPengguna({super.key});
@@ -148,16 +150,32 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                 ],
               ),
             ),
-            Padding(
+           Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildStatCard('12\nProduk', Icons.inventory_2_outlined),
-                  _buildStatCard(
-                    'Riwayat\nPesanan',
-                    Icons.shopping_bag_outlined,
-                  ),
+                  // TOMBOL PRODUK INTERAKTIF
+                  _buildStatCard('12\nProduk', Icons.inventory_2_outlined, onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HalamanProduk(),
+                      ),
+                    );
+                  }),
+                  
+                  // TOMBOL RIWAYAT PESANAN INTERAKTIF
+                  _buildStatCard('Riwayat\nPesanan', Icons.shopping_bag_outlined, onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HalamanRiwayat(),
+                      ),
+                    );
+                  }),
+                  
+                  // TOMBOL LAPORAN
                   _buildStatCard('Laporan', Icons.bar_chart, onTap: () {
                     Navigator.push(
                       context,

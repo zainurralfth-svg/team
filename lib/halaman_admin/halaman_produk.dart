@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
-import '../Backend/Api_service.dart';
+import '../Backend/api_service.dart';
+import '../Core/Colour.dart'; // IMPORT GUDANG WARNA
+
+// IMPORT HALAMAN LAIN UNTUK NAVIGASI
+import 'admin.dart'; 
+import 'halaman_pengguna.dart';
+import 'tambah_produk.dart';
+import 'halaman_pesanan.dart';
+import 'halaman_riwayat.dart'; 
+import 'halaman_profil_admin.dart';
+import 'halaman_laporan.dart'; 
 
 class HalamanProduk extends StatefulWidget {
   const HalamanProduk({super.key});
@@ -21,9 +31,6 @@ class ManajemenMenuPage extends StatefulWidget {
 }
 
 class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
-  static const Color orange = Color(0xFFD27F30);
-  static const Color beige  = Color(0xFFC7BCA1);
-
   List<Map<String, dynamic>> menuItems = [];
   bool _isLoading = true;
 
@@ -44,7 +51,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      _snackbar('Gagal memuat data: $e', Colors.red);
+      _snackbar('Gagal memuat data: $e', AppColors.errorRed);
     }
   }
 
@@ -65,7 +72,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.textWhite,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Form(
@@ -87,7 +94,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
                   ),
                   const Text('Edit Menu',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,
-                          color: orange, fontFamily: 'Signika Negative')),
+                          color: AppColors.adminPrimary, fontFamily: 'Signika Negative')),
                   const SizedBox(height: 16),
 
                   // Nama
@@ -136,8 +143,8 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: orange,
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.adminPrimary,
+                          foregroundColor: AppColors.textWhite,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
@@ -173,7 +180,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
                           );
 
                           if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
-                            _snackbar('Menu berhasil diperbarui ✓', orange);
+                            _snackbar('Menu berhasil diperbarui ✓', AppColors.successGreen);
                           } else {
                             // Gagal — kembalikan data lama
                             setState(() {
@@ -181,7 +188,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
                               menuItems[i]['harga']       = hargaLama;
                               menuItems[i]['deskripsi']   = descLama;
                             });
-                            _snackbar('Gagal: ${hasil['pesan'] ?? 'Error server'}', Colors.red);
+                            _snackbar('Gagal: ${hasil['pesan'] ?? 'Error server'}', AppColors.errorRed);
                           }
                         },
                         child: const Text('Simpan',
@@ -205,7 +212,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(children: [
-          Icon(Icons.delete_outline, color: Colors.red),
+          Icon(Icons.delete_outline, color: AppColors.errorRed),
           SizedBox(width: 8),
           Text('Hapus Menu?',
               style: TextStyle(fontFamily: 'Signika Negative', fontSize: 18)),
@@ -221,8 +228,8 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.errorRed,
+              foregroundColor: AppColors.textWhite,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
               elevation: 0,
@@ -237,10 +244,10 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
 
               final hasil = await ApiService.hapusMenu(idProduk);
               if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
-                _snackbar('"$nama" berhasil dihapus', Colors.red);
+                _snackbar('"$nama" berhasil dihapus', AppColors.successGreen);
               } else {
                 setState(() => menuItems.insert(i, backup));
-                _snackbar('Gagal: ${hasil['pesan'] ?? 'Error server'}', Colors.red);
+                _snackbar('Gagal: ${hasil['pesan'] ?? 'Error server'}', AppColors.errorRed);
               }
             },
             child: const Text('Hapus',
@@ -254,7 +261,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
   void _snackbar(String msg, Color color) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg, style: const TextStyle(fontFamily: 'Signika Negative')),
+      content: Text(msg, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite)),
       backgroundColor: color,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -285,23 +292,23 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
             borderSide: BorderSide(color: Colors.grey.shade200)),
         focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: orange, width: 1.5)),
+            borderSide: const BorderSide(color: AppColors.adminPrimary, width: 1.5)),
         errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.red, width: 1.5)),
+            borderSide: const BorderSide(color: AppColors.errorRed, width: 1.5)),
       );
 
   // ── BUILD ─────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: beige,
+      backgroundColor: AppColors.adminPrimary, 
       body: Stack(
         children: [
           Container(
             height: 330,
             decoration: const BoxDecoration(
-              color: orange,
+              color: AppColors.adminPrimary,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
@@ -311,92 +318,146 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(),
+                _buildHeader(context),
                 const SizedBox(height: 15),
-                _buildStatCards(),
+                _buildStatCards(context), 
                 const SizedBox(height: 25),
                 _buildIncomeCard(),
                 const SizedBox(height: 15),
-                _buildSectionTitle(),
-                const SizedBox(height: 10),
-                Expanded(child: _buildMenuList()),
+                
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: AppColors.adminCardLight, 
+                    ),
+                    child: Column(
+                      children: [
+                        Transform.translate(
+                          offset: const Offset(0, -15),
+                          child: _buildSectionTitle(),
+                        ),
+                        Expanded(child: _buildMenuList()),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigation(),
+      // ==========================================
+      // PANGGIL BOTTOM NAVIGATION BAR INTERAKTIF
+      // ==========================================
+      bottomNavigationBar: _buildBottomNavigation(context),
     );
   }
 
-  Widget _buildHeader() {
+  // ==========================================
+  // HEADER (Ikon Profil Interaktif)
+  // ==========================================
+  Widget _buildHeader(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0), 
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Selamat Datang',
-                style: TextStyle(color: Colors.white, fontSize: 26,
-                    fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
-            Text('Dashboard Admin',
-                style: TextStyle(color: Colors.white, fontSize: 26,
-                    fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
-          ]),
-          Container(
-            width: 50, height: 50,
-            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-            child: const Icon(Icons.person, color: orange, size: 30),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start, 
+            children: [
+              Text('Selamat Datang',
+                  style: TextStyle(color: AppColors.textWhite, fontSize: 26,
+                      fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
+              Text('Dashboard Admin',
+                  style: TextStyle(color: AppColors.textWhite, fontSize: 26,
+                      fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
+            ]
+          ),
+          
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HalamanProfilAdmin()
+                ),
+              );
+            },
+            child: Container(
+              width: 50, height: 50,
+              decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle),
+              child: const Icon(Icons.person, color: AppColors.adminPrimary, size: 30),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCards() {
+  // ==========================================
+  // STAT CARDS (KARTU ATAS INTERAKTIF)
+  // ==========================================
+  Widget _buildStatCards(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _statCard('${menuItems.length} Produk', Icons.inventory_2_outlined),
-          _statCard('Riwayat\nPesanan', Icons.shopping_bag_outlined),
-          _statCard('Laporan', Icons.bar_chart),
+          _statCard('${menuItems.length}\nProduk', Icons.inventory_2_outlined, isActive: true, onTap: () {}),
+          
+          _statCard('Riwayat\nPesanan', Icons.shopping_bag_outlined, onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanRiwayat()),
+            );
+          }),
+          
+          _statCard('Laporan', Icons.bar_chart, onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanLaporan()),
+            );
+          }),
         ],
       ),
     );
   }
 
-  Widget _statCard(String title, IconData icon) {
-    return Container(
-      width: 105, height: 105,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.24),
-        borderRadius: BorderRadius.circular(22),
+  Widget _statCard(String title, IconData icon, {bool isActive = false, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 105, height: 105,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white.withOpacity(0.4) : AppColors.adminStatCard,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Icon(icon, color: AppColors.textWhite, size: 30),
+          const SizedBox(height: 8),
+          Text(title, textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.textWhite, fontSize: 14,
+                  fontFamily: 'Signika Negative', fontWeight: FontWeight.w600)),
+        ]),
       ),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(icon, color: Colors.white, size: 30),
-        const SizedBox(height: 8),
-        Text(title, textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 14,
-                fontFamily: 'Signika Negative', fontWeight: FontWeight.w600)),
-      ]),
     );
   }
 
   Widget _buildIncomeCard() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      margin: const EdgeInsets.symmetric(horizontal: 20.0), 
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(30)),
+          color: AppColors.textWhite, borderRadius: BorderRadius.circular(30)),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('Pendapatan', style: TextStyle(color: orange, fontSize: 16,
+          Text('Pendapatan', style: TextStyle(color: AppColors.adminPrimary, fontSize: 16,
               fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
-          Text('570.000', style: TextStyle(color: orange, fontSize: 16,
+          Text('Rp -', style: TextStyle(color: AppColors.adminPrimary, fontSize: 16,
               fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
         ],
       ),
@@ -405,38 +466,40 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
 
   Widget _buildSectionTitle() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
       decoration: BoxDecoration(
-          color: orange, borderRadius: BorderRadius.circular(15)),
-      child: const Center(
-        child: Text('Manajemen Menu',
-            style: TextStyle(color: Colors.white, fontSize: 20,
-                fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
+        color: AppColors.adminPrimary, 
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: AppColors.shadowCustom, blurRadius: 4, offset: const Offset(0, 2))
+        ],
       ),
+      child: const Text('Manajemen Menu',
+          style: TextStyle(color: AppColors.textWhite, fontSize: 20,
+              fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
     );
   }
 
   Widget _buildMenuList() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: orange));
+      return const Center(child: CircularProgressIndicator(color: AppColors.adminPrimary));
     }
     if (menuItems.isEmpty) {
       return Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.fastfood_outlined, size: 60, color: Colors.white54),
+          const Icon(Icons.fastfood_outlined, size: 60, color: Colors.grey),
           const SizedBox(height: 12),
           const Text('Belum ada menu',
-              style: TextStyle(color: Colors.white70, fontSize: 16,
-                  fontFamily: 'Signika Negative')),
+              style: TextStyle(color: Colors.grey, fontSize: 16,
+                  fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: _fetchMenu,
             icon: const Icon(Icons.refresh),
             label: const Text('Coba Lagi'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: orange,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.adminPrimary,
+              foregroundColor: AppColors.textWhite,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
@@ -446,10 +509,10 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
     }
 
     return RefreshIndicator(
-      color: orange,
+      color: AppColors.adminPrimary,
       onRefresh: _fetchMenu,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5), 
         itemCount: menuItems.length,
         itemBuilder: (context, index) {
           final item      = menuItems[index];
@@ -457,13 +520,16 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
           final harga     = item['harga']?.toString() ?? '0';
           final deskripsi = item['deskripsi']?.toString() ?? '';
           final urlGambar = item['gambar']?.toString() ?? '';
-          const baseUrl   = 'http://127.0.0.1/api_puddingku/';
+          final baseUrl   = '${ApiService.baseUrl}/uploads/';
 
           return Container(
             margin: const EdgeInsets.only(bottom: 15),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                color: AppColors.textWhite, 
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 5, offset: const Offset(0, 3))] 
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -495,19 +561,19 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
                     children: [
                       Text(namaMenu,
                           style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 14, 
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Signika Negative',
-                              color: Colors.black)),
+                              color: AppColors.textDark)),
                       const SizedBox(height: 3),
                       Text('Rp $harga',
                           style: const TextStyle(
-                              fontSize: 12,
-                              color: orange,
+                              fontSize: 13, 
+                              color: AppColors.adminPrimary,
                               fontFamily: 'Signika Negative',
-                              fontWeight: FontWeight.w600)),
+                              fontWeight: FontWeight.bold)),
                       if (deskripsi.isNotEmpty) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
                           deskripsi,
                           maxLines: 2,
@@ -526,14 +592,14 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
                 Column(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.green, size: 20),
+                      icon: const Icon(Icons.edit, color: AppColors.successGreen, size: 20),
                       onPressed: () => bukaSHeetEdit(index),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
                     const SizedBox(height: 8),
                     IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.orange, size: 20),
+                      icon: const Icon(Icons.delete, color: AppColors.errorRed, size: 20),
                       onPressed: () => bukaDialogHapus(index),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -548,34 +614,90 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
     );
   }
 
-  Widget _buildBottomNavigation() {
+  // ==========================================
+  // FUNGSI BOTTOM NAVIGATION INTERAKTIF
+  // ==========================================
+  Widget _buildBottomNavigation(BuildContext context) {
     return Container(
       height: 70,
-      decoration: const BoxDecoration(color: orange),
+      decoration: const BoxDecoration(color: AppColors.adminPrimary),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _navItem(Icons.home, 'BERANDA', true),
-          _navItem(Icons.person, 'PENGGUNA', false),
-          _navItem(Icons.add_box, 'PRODUK BARU', false),
-          _navItem(Icons.description, 'PESANAN', false),
+          // BERANDA (IsSelected = true agar muncul lingkaran putih)
+          _bottomNavItem(Icons.home, 'BERANDA', false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeAdmin()),
+            );
+          }),
+          
+          _bottomNavItem(Icons.person, 'PENGGUNA', false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanPengguna()),
+            );
+          }),
+          
+          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TambahProdukPage()),
+            );
+          }),
+          
+          // Ikon pakai add_circle_outline sesuai request lu
+          _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
+            Navigator.push( 
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanPesanan()),
+            );
+          }),
         ],
       ),
     );
   }
 
-  Widget _navItem(IconData icon, String label, bool active) {
-    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Stack(alignment: Alignment.center, children: [
-        if (active)
-          Container(width: 40, height: 40,
-              decoration: const BoxDecoration(
-                  color: Colors.white, shape: BoxShape.circle)),
-        Icon(icon, color: active ? orange : Colors.white, size: 24),
-      ]),
-      const SizedBox(height: 4),
-      Text(label, style: const TextStyle(color: Colors.white, fontSize: 10,
-          fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
-    ]);
-  }
-}
+  // ==========================================
+  // WIDGET ITEM NAVIGASI
+  // ==========================================
+  Widget _bottomNavItem(
+    IconData icon,
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8), // Padding disamakan biar ukurannya pas
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.textWhite : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                // Jika aktif warnanya oranye, jika tidak aktif warnanya putih
+                color: isSelected ? AppColors.adminPrimary : AppColors.textWhite,
+                size: 28, // Ukuran diperbesar disamakan dengan desain aslimu
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textWhite,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }}
