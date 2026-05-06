@@ -3,6 +3,7 @@ import '../Backend/api_service.dart';
 import '../Core/Colour.dart';
 import 'profil_pengguna.dart';
 import 'konfirmasipesanan.dart'; // Pastikan file ini sudah ada
+import 'package:shared_preferences/shared_preferences.dart';
 
 class KeranjangPage extends StatefulWidget {
   const KeranjangPage({super.key});
@@ -14,18 +15,28 @@ class KeranjangPage extends StatefulWidget {
 class _KeranjangPageState extends State<KeranjangPage> {
   List<dynamic> _cartItems = [];
   bool _isLoading = true;
-  final String currentUserId = "1";
+  String currentUserId = "0";
 
   @override
   void initState() {
     super.initState();
-    _fetchCartData();
+    _loadUserIdAndFetchCart();
+  }
+
+  // Fungsi untuk mengambil ID dari brankas memori HP
+  Future<void> _loadUserIdAndFetchCart() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        currentUserId = prefs.getString('id_user') ?? "0";
+      });
+    }
+    _fetchCartData(); // Setelah ID dapat, baru ambil data keranjang ke XAMPP
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _fetchCartData();
   }
 
   Future<void> _fetchCartData() async {
