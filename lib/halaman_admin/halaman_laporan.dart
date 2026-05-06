@@ -45,10 +45,14 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
       final Map<String, Map<String, dynamic>> grupBulan = {};
 
       for (var item in pesanan) {
+        // ✅ Hanya masukkan pesanan yang sudah selesai
+        final String status = item['status_pesanan']?.toString().toLowerCase() ?? '';
+        if (status != 'selesai') continue;
+
         // Sesuaikan nama field dengan response API kamu:
         // created_at atau tanggal_pesanan → format "YYYY-MM-DD HH:mm:ss"
         final String rawTanggal =
-    item['created_at'] ?? item['tanggal_pesan'] ?? item['tanggal_pesanan'] ?? '';
+            item['created_at'] ?? item['tanggal_pesan'] ?? item['tanggal_pesanan'] ?? '';
         if (rawTanggal.isEmpty) continue;
 
         final DateTime? tgl = _parseDate(rawTanggal);
@@ -87,7 +91,10 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
       }
 
       // Konversi ke List, urutkan terbaru di atas
-      int totalSemua = 0;
+      final now = DateTime.now();
+      final String keyBulanIni =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}';
+      int totalBulanIni = 0;
       final sortedKeys = grupBulan.keys.toList()..sort();
       final List<Map<String, dynamic>> hasil = [];
 
@@ -106,12 +113,12 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
           'transaksi': bulan['transaksi'],
           'harian': harianList,
         });
-        totalSemua += bulan['total'] as int;
+        if (key == keyBulanIni) totalBulanIni = bulan['total'] as int;
       }
 
       setState(() {
         _dataLaporan = hasil;
-        _totalKeseluruhan = totalSemua;
+        _totalKeseluruhan = totalBulanIni;
         _isLoading = false;
       });
     } catch (e) {
@@ -277,7 +284,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Total Semua Pendapatan',
+          const Text('Total Pendapatan Bulan Ini',
               style: TextStyle(fontSize: 14, color: Colors.black87)),
           Text(
             _formatRupiah(_totalKeseluruhan),
@@ -369,16 +376,16 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
                             fontWeight: FontWeight.bold,
                             fontSize: 12))),
                 Expanded(
-                    flex: 3,
-                    child: Text('Pendapatan',
+                    flex: 2,
+                    child: Text('Transaksi',
                         textAlign: TextAlign.right,
                         style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 12))),
                 Expanded(
-                    flex: 2,
-                    child: Text('Transaksi',
+                    flex: 3,
+                    child: Text('Pendapatan',
                         textAlign: TextAlign.right,
                         style: TextStyle(
                             color: Colors.white,
@@ -414,21 +421,21 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
                     ),
                   ),
                   Expanded(
-                    flex: 3,
-                    child: Text(
-                      _formatRupiah(hari['pendapatan'] as int),
-                      textAlign: TextAlign.right,
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  Expanded(
                     flex: 2,
                     child: Text(
                       '${hari['transaksi']}x',
                       textAlign: TextAlign.right,
                       style: TextStyle(
                           fontSize: 12, color: Colors.grey.shade600),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      _formatRupiah(hari['pendapatan'] as int),
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
@@ -452,18 +459,18 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 12))),
                 Expanded(
-                  flex: 3,
+                  flex: 2,
                   child: Text(
-                    _formatRupiah(total),
+                    '${laporan['transaksi']}x',
                     textAlign: TextAlign.right,
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Text(
-                    '${laporan['transaksi']}x',
+                    _formatRupiah(total),
                     textAlign: TextAlign.right,
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 12),
@@ -487,14 +494,14 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
             value: _formatRupiah(laporan['total'])),
         const SizedBox(width: 8),
         _buildStatBox(
-            icon: Icons.receipt_long,
-            label: 'Transaksi',
-            value: '${laporan['transaksi']}x'),
-        const SizedBox(width: 8),
-        _buildStatBox(
             icon: Icons.trending_up,
             label: 'Rata/Hari',
             value: _formatRupiah(rataHarian.toInt())),
+        const SizedBox(width: 8),
+        _buildStatBox(
+            icon: Icons.receipt_long,
+            label: 'Transaksi',
+            value: '${laporan['transaksi']}x'),
       ],
     );
   }
