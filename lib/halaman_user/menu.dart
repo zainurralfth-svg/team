@@ -3,6 +3,7 @@ import 'product_detail.dart';
 import '../Backend/api_service.dart';
 import '../halaman_user/profil_pengguna.dart';
 import '../Core/Colour.dart'; // IMPORT GUDANG WARNA
+import 'package:shared_preferences/shared_preferences.dart';
 
 // =============================================
 // ANIMASI TRANSISI HALAMAN — gaya Instagram
@@ -65,13 +66,13 @@ class _MenuPageState extends State<MenuPage> {
     'banner cookies.png',
   ];
 
-  final String currentUserId = "1";
+  String currentUserId = "0";
 
   @override
   void initState() {
     super.initState();
     _ambilDataMenu();
-    _ambilDataKeranjang(); // Ambil jumlah keranjang saat start
+    _loadUserId(); // Ambil jumlah keranjang saat start
   }
 
   // Fungsi ambil semua data menu dari API
@@ -84,6 +85,21 @@ class _MenuPageState extends State<MenuPage> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  // FUNGSI BARU: Ambil ID dari memori HP
+  Future<void> _loadUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        currentUserId = prefs.getString('id_user') ?? "0";
+      });
+
+      print("🚨 BUNG! ID USER DI MENU SEKARANG ADALAH: $currentUserId");
+
+      // Setelah dapat ID asli, baru kita hitung keranjangnya
+      _ambilDataKeranjang(); 
     }
   }
 
@@ -372,6 +388,8 @@ class _MenuPageState extends State<MenuPage> {
                     GestureDetector(
                       onTap: () async {
                         var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
+
+                        print("🚨 RESPON DARI XAMPP: $response");
 
                         if (response['status'] == 'sukses') {
                           // UPDATE: Menambah angka notifikasi di ikon keranjang atas
