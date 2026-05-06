@@ -6,6 +6,7 @@ import 'halaman_pesanan.dart';
 import 'halaman_laporan.dart';
 import 'halaman_riwayat.dart';
 import 'halaman_produk.dart' ;
+import 'halaman_profil_admin.dart' ;
 
 class HalamanPengguna extends StatefulWidget {
   const HalamanPengguna({super.key});
@@ -134,7 +135,16 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       ),
                     ],
                   ),
-                  Container(
+                  GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HalamanProfilAdmin(),
+                    ),
+                  );
+                },
+                child: Container(
                     width: 50,
                     height: 50,
                     decoration: const BoxDecoration(
@@ -147,7 +157,8 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       size: 30,
                     ),
                   ),
-                ],
+                 ),
+               ],
               ),
             ),
            Padding(
