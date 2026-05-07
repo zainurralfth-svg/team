@@ -280,4 +280,24 @@ class ApiService {
     return {"status": "error", "pesan": "Koneksi gagal: $e"};
   }
 }
+
+// ==========================================
+// 9. TAMBAH PESANAN MANUAL (UNTUK ADMIN)
+// ==========================================
+static Future<Map<String, dynamic>> tambahPesanan(Map<String, dynamic> dataPesanan) async {
+  try {
+    var response = await http.post(
+      Uri.parse("$baseUrl/tambah_pesanan.php"), // <-- buat file PHP ini di server
+      body: {
+        "nama_pemesan"     : dataPesanan['nama_pemesan'].toString(),
+        "ringkasan_pesanan": dataPesanan['ringkasan_pesanan'].toString(),
+        "total_harga"      : dataPesanan['total_harga'].toString(),
+        "status_pesanan"   : dataPesanan['status_pesanan'].toString(),
+      },
+    );
+    return _safeDecodeMap(response.body);
+  } catch (e) {
+    return {"status": "error", "pesan": "Koneksi gagal: $e"};
+  }
+}
 } // <--- SEKARANG SEMUANYA AMAN DI DALAM KANDANG (CLASS)
