@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart';
 import 'halaman_pengguna.dart';
-import 'tambah_produk.dart';
 import 'halaman_pesanan.dart';
 import 'admin.dart'; 
 import 'halaman_profil_admin.dart'; 
@@ -388,14 +387,6 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
               MaterialPageRoute(builder: (context) => const HalamanPengguna()),
             );
           }),
-           _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TambahProdukPage(),
-                ),
-              );
-            }),
           _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
             Navigator.push(
               context,

@@ -2,7 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Gunakan 127.0.0.1 jika running di Edge/Chrome Browser
+  // =========================================================
+  // BASE URL
+  // Gunakan localhost untuk running di Web/Edge Browser
+  // Gunakan 10.0.2.2 untuk running di Emulator Android
+  // Gunakan IP Address laptop (misal: 192.168.1.5) untuk HP Fisik
+  // =========================================================
   static const String baseUrl = "http://localhost/api_puddingku";
 
   // =========================================================
@@ -85,13 +90,13 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> tambahMenu(
-      String nama, String kategori, int harga, int stok, String deskripsi, var imageFile) async {
+      String nama, String kategori, String harga, String stok, String deskripsi, var imageFile) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse("$baseUrl/api_menu.php"));
       request.fields['nama_produk'] = nama;
       request.fields['kategori'] = kategori;
-      request.fields['harga'] = harga.toString();
-      request.fields['stok'] = stok.toString();
+      request.fields['harga'] = harga;
+      request.fields['stok'] = stok;
       request.fields['deskripsi'] = deskripsi;
 
       if (imageFile != null) {
@@ -103,26 +108,43 @@ class ApiService {
     } catch (e) { return {"status": "error", "pesan": e.toString()}; }
   }
 
-  // ==========================================
-  // 2b. EDIT MENU (BARU) ✅
-  // ==========================================
   static Future<Map<String, dynamic>> editMenu(
-    String idMenu, String nama, String harga, {String deskripsi = ''}) async {
-  try {
-    var response = await http.post(
-      Uri.parse("$baseUrl/edit_menu.php"),
-      body: {
-        "id_menu"     : idMenu,
-        "nama_produk" : nama,
-        "harga"       : harga,
-        "deskripsi"   : deskripsi, // ← tambahan ini
-      },
-    );
-    return _safeDecodeMap(response.body);
-  } catch (e) {
-    return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    String idMenu, String nama, String kategori, String harga, String stok, String deskripsi, [var imageFile]
+  ) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse("$baseUrl/edit_menu.php"));
+      
+      request.fields['id_produk']   = idMenu; 
+      request.fields['nama_produk'] = nama;
+      request.fields['kategori']    = kategori;
+      request.fields['harga']       = harga;
+      request.fields['stok']        = stok;
+      request.fields['deskripsi']   = deskripsi;
+
+      if (imageFile != null) {
+        var bytes = await imageFile.readAsBytes();
+        request.files.add(http.MultipartFile.fromBytes('gambar', bytes, filename: imageFile.name));
+      }
+
+      var res = await http.Response.fromStream(await request.send());
+      return _safeDecodeMap(res.body);
+    } catch (e) {
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
   }
-}
+
+  static Future<Map<String, dynamic>> hapusMenu(String idMenu) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$baseUrl/hapus_menu.php"),
+        // ✅ PERBAIKAN: Diubah menjadi id_produk agar sesuai dengan kolom database
+        body: {"id_produk": idMenu}, 
+      );
+      return _safeDecodeMap(response.body);
+    } catch (e) {
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
+  }
 
   // ==========================================
   // 3. KERANJANG (CUSTOMER)
@@ -259,7 +281,7 @@ class ApiService {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/hapus_pengguna.php"),
-        body: {"id": id}, // Kirim ID user yang mau dihapus
+        body: {"id": id}, 
       );
       return _safeDecodeMap(response.body);
     } catch (e) {
@@ -267,37 +289,23 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> hapusMenu(String idMenu) async {
-  try {
-    var response = await http.post(
-      Uri.parse("$baseUrl/hapus_menu.php"),
-      body: {
-        "id_menu": idMenu,
-      },
-    );
-    return _safeDecodeMap(response.body);
-  } catch (e) {
-    return {"status": "error", "pesan": "Koneksi gagal: $e"};
+  // ==========================================
+  // 9. TAMBAH PESANAN MANUAL (UNTUK ADMIN)
+  // ==========================================
+  static Future<Map<String, dynamic>> tambahPesanan(Map<String, dynamic> dataPesanan) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$baseUrl/tambah_pesanan.php"), 
+        body: {
+          "nama_pemesan"     : dataPesanan['nama_pemesan'].toString(),
+          "ringkasan_pesanan": dataPesanan['ringkasan_pesanan'].toString(),
+          "total_harga"      : dataPesanan['total_harga'].toString(),
+          "status_pesanan"   : dataPesanan['status_pesanan'].toString(),
+        },
+      );
+      return _safeDecodeMap(response.body);
+    } catch (e) {
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
   }
 }
-
-// ==========================================
-// 9. TAMBAH PESANAN MANUAL (UNTUK ADMIN)
-// ==========================================
-static Future<Map<String, dynamic>> tambahPesanan(Map<String, dynamic> dataPesanan) async {
-  try {
-    var response = await http.post(
-      Uri.parse("$baseUrl/tambah_pesanan.php"), // <-- buat file PHP ini di server
-      body: {
-        "nama_pemesan"     : dataPesanan['nama_pemesan'].toString(),
-        "ringkasan_pesanan": dataPesanan['ringkasan_pesanan'].toString(),
-        "total_harga"      : dataPesanan['total_harga'].toString(),
-        "status_pesanan"   : dataPesanan['status_pesanan'].toString(),
-      },
-    );
-    return _safeDecodeMap(response.body);
-  } catch (e) {
-    return {"status": "error", "pesan": "Koneksi gagal: $e"};
-  }
-}
-} // <--- SEKARANG SEMUANYA AMAN DI DALAM KANDANG (CLASS)

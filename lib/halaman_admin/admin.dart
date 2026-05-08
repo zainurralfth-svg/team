@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart';
 import '../Backend/Api_service.dart'; // <-- JANGAN LUPA IMPORT API SERVICE-NYA
-import 'tambah_produk.dart';
 import 'halaman_produk.dart';
 import 'halaman_riwayat.dart';
 import 'halaman_laporan.dart';
@@ -491,12 +490,6 @@ class _HomeAdminState extends State<HomeAdmin> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const HalamanPengguna()),
-            );
-          }),
-          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const TambahProdukPage()),
             );
           }),
           _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
