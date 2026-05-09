@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Core/Colour.dart'; 
+import '../Core/Colour.dart'; // File warna 14 Palet Baru
 import '../Backend/API_Service.dart'; 
 
 class HalamanProfilAdmin extends StatefulWidget {
@@ -21,6 +21,7 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
     _loadAdminId();
   }
 
+  // MENGAMBIL ID ADMIN YANG SEDANG LOGIN DARI SESI
   Future<void> _loadAdminId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedId = prefs.getString('id_user');
@@ -31,10 +32,12 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
       });
       _ambilDataProfil(); 
     } else {
+      // Kalau tidak ada sesi, lempar ke halaman login
       Navigator.pushNamedAndRemoveUntil(context, '/masuk', (route) => false);
     }
   }
 
+  // MENGAMBIL DATA PROFIL DARI DATABASE
   Future<void> _ambilDataProfil() async {
     try {
       final response = await ApiService.getProfil(currentAdminId);
@@ -51,6 +54,7 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
     }
   }
 
+  // POP-UP KONFIRMASI LOGOUT
   void _prosesLogout() {
     showDialog(
       context: context,
@@ -66,10 +70,11 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
             onPressed: () async {
               Navigator.pop(context);
               SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.clear(); // Hapus ingatan sesi
+              await prefs.clear(); // Hapus ingatan sesi login
               Navigator.pushNamedAndRemoveUntil(context, '/masuk', (route) => false);
             },
-            child: const Text('Logout', style: TextStyle(color: AppColors.errorRed, fontWeight: FontWeight.bold)),
+            // Menggunakan AppColors.error (merah) untuk tombol logout
+            child: const Text('Logout', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -79,68 +84,75 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.adminBg,
+      backgroundColor: AppColors.bgUtama, // Background krem utama
       appBar: AppBar(
-        backgroundColor: AppColors.adminPrimary,
+        backgroundColor: AppColors.primary, // AppBar oranye kecoklatan
         elevation: 0,
-        // INI DIA TAMBAHANNYA BIAR TEKSNYA KE TENGAH
         centerTitle: true, 
         title: const Text('Profil Admin', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: AppColors.textWhite),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.adminPrimary))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  // Avatar Admin
+                  // ==========================================
+                  // AVATAR ADMIN
+                  // ==========================================
                   Container(
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
                       color: AppColors.textWhite,
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.adminPrimary, width: 4),
+                      border: Border.all(color: AppColors.primary, width: 4), // Border bulat oranye
                       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
                     ),
-                    child: const Icon(Icons.admin_panel_settings, size: 70, color: AppColors.adminPrimary),
+                    child: const Icon(Icons.admin_panel_settings, size: 70, color: AppColors.primary),
                   ),
                   const SizedBox(height: 10),
                   
-                  // Label Role Admin
+                  // ==========================================
+                  // LABEL ROLE ADMIN
+                  // ==========================================
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    decoration: BoxDecoration(color: AppColors.adminPrimary, borderRadius: BorderRadius.circular(20)),
+                    decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(20)),
                     child: const Text('SUPER ADMIN', style: TextStyle(color: AppColors.textWhite, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
                   ),
                   const SizedBox(height: 30),
                   
-                  // Kotak Data Admin
+                  // ==========================================
+                  // KOTAK DATA ADMIN
+                  // ==========================================
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: AppColors.textWhite,
+                      color: AppColors.textWhite, // Background kotak putih
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow(Icons.badge, 'Nama Admin', _adminData['nama'] ?? '-', AppColors.textDark, AppColors.adminPrimary),
+                        _buildInfoRow(Icons.badge, 'Nama Admin', _adminData['nama'] ?? '-', AppColors.textDark, AppColors.primary),
                         const Divider(height: 30, color: Colors.grey),
-                        _buildInfoRow(Icons.alternate_email, 'Username', _adminData['username'] ?? '-', AppColors.textDark, AppColors.adminPrimary),
+                        _buildInfoRow(Icons.alternate_email, 'Username', _adminData['username'] ?? '-', AppColors.textDark, AppColors.primary),
                         const Divider(height: 30, color: Colors.grey),
-                        _buildInfoRow(Icons.phone_android, 'No. Handphone', _adminData['phone'] ?? '-', AppColors.textDark, AppColors.adminPrimary),
+                        _buildInfoRow(Icons.phone_android, 'No. Handphone', _adminData['phone'] ?? '-', AppColors.textDark, AppColors.primary),
                       ],
                     ),
                   ),
                   
                   const SizedBox(height: 40),
                   
-                  // Tombol Logout
+                  // ==========================================
+                  // TOMBOL LOGOUT UTAMA
+                  // ==========================================
                   SizedBox(
                     width: double.infinity,
                     height: 55,
@@ -149,7 +161,7 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
                       icon: const Icon(Icons.power_settings_new, color: AppColors.textWhite),
                       label: const Text('LOGOUT ADMIN', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite, letterSpacing: 1.5)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.errorRed,
+                        backgroundColor: AppColors.error, // Background merah error
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         elevation: 5,
                       ),
@@ -161,13 +173,16 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
     );
   }
 
+  // ==========================================
+  // WIDGET BANTUAN UNTUK MENAMPILKAN BARIS DATA
+  // ==========================================
   Widget _buildInfoRow(IconData icon, String label, String value, Color textColor, Color iconColor) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.adminBg, 
+            color: AppColors.bgUtama, // Latar belakang ikon memadukan warna bgUtama (krem)
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: iconColor, size: 26),

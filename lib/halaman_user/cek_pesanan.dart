@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; 
+import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import 'profil_pengguna.dart'; 
 
 class CekPesananPage extends StatefulWidget {
@@ -16,10 +16,10 @@ class _CekPesananPageState extends State<CekPesananPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.adminBg,
+      backgroundColor: AppColors.bgUtama, // Menggunakan background krem utama
       
       appBar: AppBar(
-        backgroundColor: AppColors.adminPrimary,
+        backgroundColor: AppColors.primary, // Menggunakan oranye coklat
         elevation: 0,
         toolbarHeight: 80,
         iconTheme: const IconThemeData(color: AppColors.textWhite),
@@ -38,7 +38,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
             const SizedBox(height: 20),
             const Text(
               'Cek dengan kode',
-              style: TextStyle(color: AppColors.adminPrimary, fontSize: 28, fontFamily: 'Oleo Script', fontWeight: FontWeight.bold),
+              style: TextStyle(color: AppColors.primary, fontSize: 28, fontFamily: 'Oleo Script', fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 15),
 
@@ -50,9 +50,10 @@ class _CekPesananPageState extends State<CekPesananPage> {
                     decoration: BoxDecoration(color: AppColors.textWhite, borderRadius: BorderRadius.circular(10)),
                     child: TextField(
                       controller: _kodeController,
+                      style: const TextStyle(color: AppColors.textDark), // Teks input
                       decoration: const InputDecoration(
                         hintText: 'Kode',
-                        hintStyle: TextStyle(color: AppColors.adminPrimary, fontWeight: FontWeight.bold),
+                        hintStyle: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                       ),
@@ -63,12 +64,13 @@ class _CekPesananPageState extends State<CekPesananPage> {
                 Expanded(
                   flex: 1,
                   child: Container(
-                    decoration: BoxDecoration(color: AppColors.cekPesananInputSecondary, borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(10)), // Pakai warna bgInput
                     child: TextField(
                       controller: _namaController,
+                      style: const TextStyle(color: AppColors.textDark), // Teks input
                       decoration: const InputDecoration(
                         hintText: 'Nama',
-                        hintStyle: TextStyle(color: AppColors.adminPrimary, fontWeight: FontWeight.bold),
+                        hintStyle: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                       ),
@@ -84,10 +86,10 @@ class _CekPesananPageState extends State<CekPesananPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.textWhite,
+                color: AppColors.textWhite, // Background kotak putih
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))
+                  BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 5))
                 ],
               ),
               child: Column(
@@ -96,31 +98,31 @@ class _CekPesananPageState extends State<CekPesananPage> {
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('#e1234', style: TextStyle(color: AppColors.adminPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text('Joko', style: TextStyle(color: AppColors.adminPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('#e1234', style: TextStyle(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('Joko', style: TextStyle(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   const Divider(color: Colors.grey, thickness: 1, height: 30),
                   
-                  _buildOrderItem('Brownie Burnt Cheescake', '2x', '36.000', AppColors.adminPrimary),
+                  _buildOrderItem('Brownie Burnt Cheescake', '2x', '36.000', AppColors.primary),
                   const SizedBox(height: 15),
-                  _buildOrderItem('Death By Chocolate', '1x', '18.000', AppColors.adminPrimary),
+                  _buildOrderItem('Death By Chocolate', '1x', '18.000', AppColors.primary),
                   
                   const SizedBox(height: 25),
                   
-                  const Text('Status Pesanan', style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text('Status Pesanan', style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 5),
                   Row(
                     children: [
                       Container(
                         width: 10, height: 10,
-                        decoration: const BoxDecoration(color: AppColors.statusProsesBlue, shape: BoxShape.circle),
+                        decoration: const BoxDecoration(color: AppColors.info, shape: BoxShape.circle), // Pakai warna info (biru)
                       ),
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(color: AppColors.adminBg, borderRadius: BorderRadius.circular(5)),
-                        child: const Text('PROSES', style: TextStyle(color: AppColors.statusText, fontSize: 12, fontWeight: FontWeight.bold)),
+                        decoration: BoxDecoration(color: AppColors.bgUtama, borderRadius: BorderRadius.circular(5)),
+                        child: const Text('PROSES', style: TextStyle(color: AppColors.textDark, fontSize: 12, fontWeight: FontWeight.bold)), // Teks gelap
                       ),
                     ],
                   ),
@@ -137,7 +139,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
-          color: AppColors.adminPrimary,
+          color: AppColors.primary, // Warna oranye utama
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -151,19 +153,19 @@ class _CekPesananPageState extends State<CekPesananPage> {
                 // Biarkan kosong, karena ini sedang di halaman Pesanan
               },
               // TRUE -> Ada bunderan putihnya di tombol Pesanan
-              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', true, AppColors.adminPrimary),
+              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', true, AppColors.primary),
             ),
             GestureDetector(
               onTap: () {
                 Navigator.pop(context); 
               },
-              child: _buildBottomNavItem(Icons.cake, 'Produk', false, AppColors.adminPrimary),
+              child: _buildBottomNavItem(Icons.cake, 'Produk', false, AppColors.primary),
             ),
             GestureDetector(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfil()));
               },
-              child: _buildBottomNavItem(Icons.person, 'Profil', false, AppColors.adminPrimary),
+              child: _buildBottomNavItem(Icons.person, 'Profil', false, AppColors.primary),
             ),
           ],
         ),
