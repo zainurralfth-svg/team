@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../Backend/API_Service.dart';
 import 'admin.dart';
-import 'tambah_produk.dart';
 import 'halaman_pesanan.dart';
 import 'halaman_laporan.dart';
 import 'halaman_riwayat.dart';
 import 'halaman_produk.dart' ;
 import 'halaman_profil_admin.dart' ;
+
 
 class HalamanPengguna extends StatefulWidget {
   const HalamanPengguna({super.key});
@@ -314,14 +314,6 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
             }),
             _bottomNavItem(Icons.person, 'PENGGUNA', true, () {
               // Udah di halaman pengguna
-            }),
-            _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TambahProdukPage(),
-                ),
-              );
             }),
             _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
               Navigator.push(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../halaman_user/profil_pengguna.dart'; // Pastikan import halaman profilnya
-import '../Core/Colour.dart'; // Import AppColors
+import '../Core/Colour.dart'; // Import AppColors (14 Palet Baru)
 
 class BuktiPemesanan extends StatelessWidget {
   const BuktiPemesanan({super.key});
@@ -18,7 +18,7 @@ class BuktiPemesanan extends StatelessWidget {
     final List<dynamic> items = dataPesanan?['items'] ?? [];
 
     return Scaffold(
-      backgroundColor: AppColors.buktiBg, 
+      backgroundColor: AppColors.bgUtama, // Menggunakan background krem utama
       body: Stack(
         children: [
           // ==========================================
@@ -41,9 +41,9 @@ class BuktiPemesanan extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(25.0),
                     decoration: BoxDecoration(
-                      color: AppColors.textWhite,
+                      color: AppColors.textWhite, // Latar struk putih
                       borderRadius: BorderRadius.circular(40),
-                      boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 15, offset: const Offset(0, 10))],
+                      boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 15, offset: const Offset(0, 10))],
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min, 
@@ -51,22 +51,23 @@ class BuktiPemesanan extends StatelessWidget {
                         // Ikon Centang Hijau
                         Container(
                           width: 80, height: 80,
-                          decoration: const BoxDecoration(color: AppColors.buktiCheckBg, shape: BoxShape.circle),
-                          child: const Center(child: Icon(Icons.check, color: AppColors.successGreen, size: 50)),
+                          // Menggunakan warna sukses (hijau) dengan tingkat transparansi 20% untuk background lingkarannya
+                          decoration: BoxDecoration(color: AppColors.success.withOpacity(0.2), shape: BoxShape.circle),
+                          child: const Center(child: Icon(Icons.check, color: AppColors.success, size: 50)),
                         ),
                         const SizedBox(height: 15),
 
                         // ID Pesanan (Dinamis dari Database)
                         Text(
                           kodeResi,
-                          style: const TextStyle(color: AppColors.buktiText, fontSize: 22, fontWeight: FontWeight.bold),
+                          style: const TextStyle(color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 10),
 
                         // Judul Status
                         const Text(
                           'CEK OUT BERHASIL',
-                          style: TextStyle(color: AppColors.buktiText, fontSize: 24, fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.w700),
+                          style: TextStyle(color: AppColors.primary, fontSize: 24, fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 20),
 
@@ -108,7 +109,7 @@ class BuktiPemesanan extends StatelessWidget {
                             const Text(
                               'Total',
                               style: TextStyle(
-                                color: AppColors.buktiText,
+                                color: AppColors.textBrown, // Teks warna coklat tua
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -116,7 +117,7 @@ class BuktiPemesanan extends StatelessWidget {
                             Text(
                               totalHarga.toString(), 
                               style: const TextStyle(
-                                color: AppColors.buktiText,
+                                color: AppColors.primary, // Teks harga warna oranye
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -139,7 +140,7 @@ class BuktiPemesanan extends StatelessWidget {
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
-          color: AppColors.primaryOrange, // Disamakan dengan warna utama
+          color: AppColors.primary, // Menggunakan warna utama oranye coklat
           borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
         ),
         child: Row(
@@ -147,15 +148,15 @@ class BuktiPemesanan extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () => Navigator.pushNamed(context, '/cek_pesanan'),
-              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, AppColors.primaryOrange),
+              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, AppColors.primary),
             ),
             GestureDetector(
               onTap: () => Navigator.pushNamed(context, '/menu'), // Balik ke menu utama
-              child: _buildBottomNavItem(Icons.cake, 'Produk', false, AppColors.primaryOrange),
+              child: _buildBottomNavItem(Icons.cake, 'Produk', false, AppColors.primary),
             ),
             GestureDetector(
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfil())),
-              child: _buildBottomNavItem(Icons.person, 'Profil', false, AppColors.primaryOrange),
+              child: _buildBottomNavItem(Icons.person, 'Profil', false, AppColors.primary),
             ),
           ],
         ),
@@ -167,10 +168,10 @@ class BuktiPemesanan extends StatelessWidget {
   Widget _buildInfoRow(String label, String separator, String value) {
     return Row(
       children: [
-        SizedBox(width: 80, child: Text(label, style: const TextStyle(color: AppColors.buktiText, fontSize: 16, fontWeight: FontWeight.bold))),
-        Text(separator, style: const TextStyle(color: AppColors.buktiText, fontSize: 16, fontWeight: FontWeight.bold)),
+        SizedBox(width: 80, child: Text(label, style: const TextStyle(color: AppColors.textBrown, fontSize: 16, fontWeight: FontWeight.bold))),
+        Text(separator, style: const TextStyle(color: AppColors.textBrown, fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(width: 15),
-        Expanded(child: Text(value, style: const TextStyle(color: AppColors.buktiText, fontSize: 16, fontWeight: FontWeight.bold))),
+        Expanded(child: Text(value, style: const TextStyle(color: AppColors.textBrown, fontSize: 16, fontWeight: FontWeight.bold))),
       ],
     );
   }
@@ -179,9 +180,9 @@ class BuktiPemesanan extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(flex: 5, child: Text(nama, style: const TextStyle(color: AppColors.buktiText, fontSize: 14, fontWeight: FontWeight.bold))),
-        Expanded(flex: 1, child: Text(qty, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.buktiText, fontSize: 14, fontWeight: FontWeight.bold))),
-        Expanded(flex: 2, child: Text(harga, textAlign: TextAlign.right, style: const TextStyle(color: AppColors.buktiText, fontSize: 14, fontWeight: FontWeight.bold))),
+        Expanded(flex: 5, child: Text(nama, style: const TextStyle(color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.bold))),
+        Expanded(flex: 1, child: Text(qty, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.bold))),
+        Expanded(flex: 2, child: Text(harga, textAlign: TextAlign.right, style: const TextStyle(color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.bold))),
       ],
     );
   }

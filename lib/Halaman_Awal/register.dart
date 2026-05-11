@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; 
+import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import '../Backend/API_Service.dart'; 
 
 class LoginPage extends StatefulWidget { 
@@ -47,9 +47,9 @@ class _LoginPageState extends State<LoginPage> {
           content: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.errorRed, // Pakai dari Colour.dart
+              color: AppColors.error, // Menggunakan merah error baru
               borderRadius: BorderRadius.circular(15),
-              boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 8, offset: const Offset(0, 4))],
+              boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: const Offset(0, 4))],
             ),
             child: const Row(
               children: [
@@ -75,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(hasil['pesan']), 
-            backgroundColor: AppColors.successGreen, // Pakai hijau dari Colour.dart
+            backgroundColor: AppColors.success, // Menggunakan hijau sukses baru
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -95,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(hasil['pesan']), 
-            backgroundColor: AppColors.errorRed,
+            backgroundColor: AppColors.error, // Menggunakan merah error baru
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Gagal terhubung ke server! Cek koneksi / XAMPP.'), 
-          backgroundColor: AppColors.errorRed,
+          backgroundColor: AppColors.error, // Menggunakan merah error baru
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -119,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) { 
     return Scaffold(
       resizeToAvoidBottomInset: false, // Mencegah layout terdorong ke atas saat keyboard aktif
-      backgroundColor: AppColors.bgCream, 
+      backgroundColor: AppColors.bgUtama, // Menggunakan krem utama
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
@@ -188,9 +188,9 @@ class _LoginPageState extends State<LoginPage> {
               width: isDesktop ? 700 : double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
               decoration: BoxDecoration(
-                color: AppColors.primaryOrange, 
+                color: AppColors.primary, // Menggunakan oranye utama
                 borderRadius: BorderRadius.circular(30),
-                boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 10, offset: const Offset(0, 5))],
+                boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 5))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               width: isDesktop ? 350 : double.infinity, height: 55,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryOrange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                 onPressed: _prosesRegister,
                 child: const Text('REGISTER', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)),
               ),
@@ -219,12 +219,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // KOMPONEN 3: Footer Statis (Lem Super "Positioned" udah dicabut!)
+  // KOMPONEN 3: Footer Statis
   Widget _buildFooter() {
-    return Container( // <--- Positioned dihapus, jadi langsung Container
+    return Container( 
       height: 65, width: double.infinity,
       decoration: const BoxDecoration(
-        color: AppColors.primaryOrange, 
+        color: AppColors.primary, // Menggunakan oranye utama
         borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
       ),
       child: Row(
@@ -233,7 +233,7 @@ class _LoginPageState extends State<LoginPage> {
           Container(
             padding: const EdgeInsets.all(5),
             decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle),
-            child: const Icon(Icons.cake, color: AppColors.primaryOrange, size: 28), 
+            child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
           const SizedBox(width: 10),
           const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
@@ -252,13 +252,13 @@ class _LoginPageState extends State<LoginPage> {
           Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
           Container(
-            decoration: BoxDecoration(color: AppColors.inputBg, borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(12)), // Background kolom input
             child: TextField(
               controller: controller,
               obscureText: isPassword ? !_passwordVisible : false,
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16, color: AppColors.textDark), // Teks warna gelap biar terbaca
               decoration: InputDecoration(
-                prefixIcon: Icon(icon, color: AppColors.iconOrange, size: 24), 
+                prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24), // Ikon oranye gelap
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: () => setState(() => _passwordVisible = !_passwordVisible),
@@ -288,6 +288,6 @@ class HeaderClipper extends CustomClipper<Path> {
 }
 
 class HeaderPainter extends CustomPainter {
-  @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); }
+  @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.textBrown..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); }
   @override bool shouldRepaint(oldDelegate) => false;
 }

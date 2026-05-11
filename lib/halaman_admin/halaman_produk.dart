@@ -1,12 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../Backend/api_service.dart';
-import '../Core/Colour.dart'; // IMPORT GUDANG WARNA
+import '../Core/Colour.dart'; // File warna 14 Palet Baru
 
 // IMPORT HALAMAN LAIN UNTUK NAVIGASI
 import 'admin.dart'; 
 import 'halaman_pengguna.dart';
-import 'tambah_produk.dart';
-import 'halaman_pesanan.dart';
 import 'halaman_riwayat.dart'; 
 import 'halaman_profil_admin.dart';
 import 'halaman_laporan.dart'; 
@@ -32,7 +32,12 @@ class ManajemenMenuPage extends StatefulWidget {
 
 class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
   List<Map<String, dynamic>> menuItems = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
+
+  // ── DAFTAR KATEGORI ──
+  final List<String> listKategoriFilter = ['Semua', 'Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
+  final List<String> listKategoriInput = ['Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
+  String kategoriTerpilih = 'Semua';
 
   @override
   void initState() {
@@ -40,7 +45,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
     _fetchMenu();
   }
 
-  // ── FETCH ─────────────────────────────────────────────────
+  // ── FETCH DATA DARI DATABASE (XAMPP) ───────────────────────────────────────
   Future<void> _fetchMenu() async {
     setState(() => _isLoading = true);
     try {
@@ -51,560 +56,468 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      _snackbar('Gagal memuat data: $e', AppColors.errorRed);
+      _snackbar('Gagal memuat data: $e', AppColors.error); // Menggunakan palet merah error terbaru
     }
   }
 
-  // ── EDIT ─────────────────────────────────────────────────
+  // ── TAMPILAN POP-UP (BOTTOM SHEET) UNTUK TAMBAH PRODUK ────────────────────
+  void _bukaSheetTambah() {
+    final nameCtrl     = TextEditingController();
+    final priceCtrl    = TextEditingController();
+    final stokCtrl     = TextEditingController(); 
+    final descCtrl     = TextEditingController();
+    final formKey      = GlobalKey<FormState>();
+    
+    String namaFileDipilih = ''; 
+    XFile? fileFoto;
+    String? selectedKat;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, 
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder( 
+        builder: (BuildContext context, StateSetter setSheetState) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            child: Container(
+              height: MediaQuery.of(ctx).size.height * 0.85, 
+              padding: const EdgeInsets.only(top: 24, left: 24, right: 24),
+              decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  children: [
+                    // Garis abu-abu di atas pop up (Handle bar)
+                    Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)))),
+                    // Judul Form
+                    const Align(alignment: Alignment.centerLeft, child: Text('Tambah Produk', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary))), // Pakai primary (Oranye Coklat)
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _label('Nama Produk'),
+                            TextFormField(controller: nameCtrl, textCapitalization: TextCapitalization.characters, decoration: _inputDeco('Ketik nama produk...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            const SizedBox(height: 14),
+                            
+                            _label('Kategori Produk'),
+                            DropdownButtonFormField<String>(
+                              value: selectedKat,
+                              decoration: _inputDeco('Pilih kategori...'),
+                              icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.primary, size: 30), // Ikon dropdown
+                              items: listKategoriInput.map((String k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)))).toList(),
+                              onChanged: (val) => setSheetState(() => selectedKat = val),
+                              validator: (v) => v == null ? 'Kategori wajib dipilih' : null,
+                            ),
+                            const SizedBox(height: 14),
+                            
+                            _label('Harga (Rp)'),
+                            TextFormField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: _inputDeco('Contoh: 35000'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            const SizedBox(height: 14),
+
+                            _label('Stok Produk'),
+                            TextFormField(controller: stokCtrl, keyboardType: TextInputType.number, decoration: _inputDeco('Contoh: 20'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            const SizedBox(height: 14),
+
+                            _label('Deskripsi'),
+                            TextFormField(controller: descCtrl, maxLines: 3, decoration: _inputDeco('Ketik deskripsi produk...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            const SizedBox(height: 14),
+
+                            _label('Foto Produk'),
+                            _buildImagePicker(namaFileDipilih, () async {
+                              final img = await ImagePicker().pickImage(source: ImageSource.gallery);
+                              if (img != null) setSheetState(() { fileFoto = img; namaFileDipilih = img.name; });
+                            }),
+
+                            const SizedBox(height: 30),
+                            // Tombol Batal & Simpan
+                            Row(children: [
+                              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Batal', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey, fontWeight: FontWeight.w900)))),
+                              const SizedBox(width: 12),
+                              Expanded(child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), // Warna tombol utama
+                                onPressed: () async {
+                                  if (!formKey.currentState!.validate()) return;
+                                  
+                                  String hargaBeres = priceCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+                                  String stokBeres = stokCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+                                  Navigator.pop(ctx);
+                                  _snackbar('Sedang menyimpan...', AppColors.primary);
+
+                                  final hasil = await ApiService.tambahMenu(
+                                    nameCtrl.text.trim().toUpperCase(), 
+                                    selectedKat!, 
+                                    hargaBeres, 
+                                    stokBeres, 
+                                    descCtrl.text.trim(), 
+                                    fileFoto
+                                  );
+
+                                  if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
+                                    _snackbar('Produk berhasil ditambahkan ✓', AppColors.success); // Pakai hijau success
+                                    _fetchMenu();
+                                  } else {
+                                    _snackbar('Gagal: ${hasil['pesan']}', AppColors.error);
+                                  }
+                                }, child: const Text('Simpan', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.w900, fontSize: 16)))),
+                            ]),
+                            const SizedBox(height: 30),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+      ),
+    );
+  }
+
+  // ── TAMPILAN POP-UP (BOTTOM SHEET) UNTUK EDIT PRODUK ──────────────────────
   void bukaSHeetEdit(int i) {
-    final item      = menuItems[i];
-    final nameCtrl  = TextEditingController(text: item['nama_produk']?.toString() ?? '');
-    final priceCtrl = TextEditingController(text: item['harga']?.toString() ?? '');
-    final descCtrl  = TextEditingController(text: item['deskripsi']?.toString() ?? '');
-    final formKey   = GlobalKey<FormState>();
+    final item         = menuItems[i];
+    final nameCtrl     = TextEditingController(text: item['nama_produk']?.toString() ?? '');
+    final priceCtrl    = TextEditingController(text: item['harga']?.toString() ?? '');
+    final stokCtrl     = TextEditingController(text: item['stok']?.toString() ?? ''); 
+    final descCtrl     = TextEditingController(text: item['deskripsi']?.toString() ?? '');
+    final formKey      = GlobalKey<FormState>();
+
+    String namaFileDipilih = item['gambar']?.toString().isNotEmpty == true ? 'foto_tersimpan.jpg' : '';
+    XFile? fileFotoUpdate;
+    String? selectedKat = listKategoriInput.contains(item['kategori']) ? item['kategori'] : null;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: AppColors.textWhite,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Handle bar
-                  Center(
-                    child: Container(
-                      width: 40, height: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(2)),
-                    ),
-                  ),
-                  const Text('Edit Menu',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,
-                          color: AppColors.adminPrimary, fontFamily: 'Signika Negative')),
-                  const SizedBox(height: 16),
-
-                  // Nama
-                  _label('Nama Menu'),
-                  TextFormField(
-                    controller: nameCtrl,
-                    textCapitalization: TextCapitalization.characters,
-                    decoration: _inputDeco('Nama menu...'),
-                    validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null,
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Harga
-                  _label('Harga (Rp)'),
-                  TextFormField(
-                    controller: priceCtrl,
-                    keyboardType: TextInputType.number,
-                    decoration: _inputDeco('Contoh: 35000'),
-                    validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null,
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Deskripsi
-                  _label('Deskripsi'),
-                  TextFormField(
-                    controller: descCtrl,
-                    maxLines: 3,
-                    decoration: _inputDeco('Deskripsi produk...'),
-                  ),
-                  const SizedBox(height: 24),
-
-                  Row(children: [
+      builder: (ctx) => StatefulBuilder( 
+        builder: (BuildContext context, StateSetter setSheetState) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            child: Container(
+              height: MediaQuery.of(ctx).size.height * 0.85, 
+              padding: const EdgeInsets.only(top: 24, left: 24, right: 24),
+              decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  children: [
+                    Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)))),
+                    const Align(alignment: Alignment.centerLeft, child: Text('Edit Produk', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary))), // Judul oranye
+                    const SizedBox(height: 20),
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _label('Nama Produk'),
+                            TextFormField(controller: nameCtrl, textCapitalization: TextCapitalization.characters, decoration: _inputDeco('Ketik nama produk...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            const SizedBox(height: 14),
+                            
+                            _label('Kategori Produk'),
+                            DropdownButtonFormField<String>(
+                              value: selectedKat,
+                              decoration: _inputDeco('Pilih kategori...'),
+                              icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.primary, size: 30),
+                              items: listKategoriInput.map((String k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)))).toList(),
+                              onChanged: (val) => setSheetState(() => selectedKat = val),
+                              validator: (v) => v == null ? 'Kategori wajib dipilih' : null,
+                            ),
+                            const SizedBox(height: 14),
+                            
+                            _label('Harga (Rp)'),
+                            TextFormField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: _inputDeco('Contoh: 35000'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            const SizedBox(height: 14),
+
+                            _label('Stok Produk'),
+                            TextFormField(controller: stokCtrl, keyboardType: TextInputType.number, decoration: _inputDeco('Contoh: 20'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            const SizedBox(height: 14),
+
+                            _label('Deskripsi'),
+                            TextFormField(controller: descCtrl, maxLines: 3, decoration: _inputDeco('Ketik deskripsi produk...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            const SizedBox(height: 14),
+
+                            _label('Foto Produk'),
+                            _buildImagePicker(namaFileDipilih, () async {
+                              final img = await ImagePicker().pickImage(source: ImageSource.gallery);
+                              if (img != null) setSheetState(() { fileFotoUpdate = img; namaFileDipilih = img.name; });
+                            }),
+
+                            const SizedBox(height: 30),
+                            Row(children: [
+                              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Batal', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey, fontWeight: FontWeight.w900)))),
+                              const SizedBox(width: 12),
+                              Expanded(child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), 
+                                onPressed: () async {
+                                  if (!formKey.currentState!.validate()) return;
+                                  
+                                  String hargaBeres = priceCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+                                  String stokBeres = stokCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+                                  String idProduk = item['id_produk']?.toString() ?? '';
+
+                                  Navigator.pop(ctx);
+                                  _snackbar('Memperbarui produk...', AppColors.primary);
+
+                                  final hasil = await ApiService.editMenu(
+                                    idProduk, 
+                                    nameCtrl.text.trim().toUpperCase(), 
+                                    selectedKat!, 
+                                    hargaBeres, 
+                                    stokBeres, 
+                                    descCtrl.text.trim(), 
+                                    fileFotoUpdate
+                                  );
+
+                                  if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
+                                    _snackbar('Produk diperbarui ✓', AppColors.success);
+                                    _fetchMenu();
+                                  } else {
+                                    _snackbar('Gagal: ${hasil['pesan']}', AppColors.error);
+                                  }
+                                }, child: const Text('Simpan', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.w900, fontSize: 16)))),
+                            ]),
+                            const SizedBox(height: 30),
+                          ],
                         ),
-                        child: const Text('Batal',
-                            style: TextStyle(color: Colors.grey)),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.adminPrimary,
-                          foregroundColor: AppColors.textWhite,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                        ),
-                        onPressed: () async {
-                          if (!formKey.currentState!.validate()) return;
-
-                          final idProduk  = item['id_produk']?.toString() ?? '';
-                          final namaBaru  = nameCtrl.text.trim().toUpperCase();
-                          final hargaBaru = priceCtrl.text.trim();
-                          final descBaru  = descCtrl.text.trim();
-
-                          // Tutup sheet
-                          Navigator.pop(ctx);
-
-                          // Simpan data lama untuk rollback
-                          final namaLama  = menuItems[i]['nama_produk'];
-                          final hargaLama = menuItems[i]['harga'];
-                          final descLama  = menuItems[i]['deskripsi'];
-
-                          // Update tampilan langsung (optimistic)
-                          setState(() {
-                            menuItems[i]['nama_produk'] = namaBaru;
-                            menuItems[i]['harga']       = hargaBaru;
-                            menuItems[i]['deskripsi']   = descBaru;
-                          });
-
-                          // Kirim ke database
-                          final hasil = await ApiService.editMenu(
-                            idProduk, namaBaru, hargaBaru,
-                            deskripsi: descBaru,
-                          );
-
-                          if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
-                            _snackbar('Menu berhasil diperbarui ✓', AppColors.successGreen);
-                          } else {
-                            // Gagal — kembalikan data lama
-                            setState(() {
-                              menuItems[i]['nama_produk'] = namaLama;
-                              menuItems[i]['harga']       = hargaLama;
-                              menuItems[i]['deskripsi']   = descLama;
-                            });
-                            _snackbar('Gagal: ${hasil['pesan'] ?? 'Error server'}', AppColors.errorRed);
-                          }
-                        },
-                        child: const Text('Simpan',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                      ),
-                    ),
-                  ]),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        }
       ),
     );
   }
 
-  // ── HAPUS ─────────────────────────────────────────────────
+  // ── DIALOG KONFIRMASI HAPUS PRODUK ────────────────────────────────────────
   void bukaDialogHapus(int i) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(children: [
-          Icon(Icons.delete_outline, color: AppColors.errorRed),
-          SizedBox(width: 8),
-          Text('Hapus Menu?',
-              style: TextStyle(fontFamily: 'Signika Negative', fontSize: 18)),
-        ]),
-        content: Text(
-          'Yakin ingin menghapus\n"${menuItems[i]['nama_produk']}"?',
-          style: const TextStyle(fontFamily: 'Signika Negative'),
-        ),
+        title: const Row(children: [Icon(Icons.delete_outline, color: AppColors.error), SizedBox(width: 8), Text('Hapus Produk?', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold))]), // Ikon peringatan merah
+        content: Text('Yakin ingin menghapus\n"${menuItems[i]['nama_produk']}"?', style: const TextStyle(fontFamily: 'Signika Negative')),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.errorRed,
-              foregroundColor: AppColors.textWhite,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              elevation: 0,
-            ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey))),
+          ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))), // Tombol eksekusi merah
             onPressed: () async {
               final idProduk = menuItems[i]['id_produk']?.toString() ?? '';
-              final nama     = menuItems[i]['nama_produk']?.toString() ?? '';
-              final backup   = Map<String, dynamic>.from(menuItems[i]);
-
               Navigator.pop(ctx);
-              setState(() => menuItems.removeAt(i));
-
               final hasil = await ApiService.hapusMenu(idProduk);
               if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
-                _snackbar('"$nama" berhasil dihapus', AppColors.successGreen);
+                _snackbar('Produk dihapus', AppColors.success);
+                _fetchMenu();
               } else {
-                setState(() => menuItems.insert(i, backup));
-                _snackbar('Gagal: ${hasil['pesan'] ?? 'Error server'}', AppColors.errorRed);
+                _snackbar('Gagal: ${hasil['pesan']}', AppColors.error);
               }
-            },
-            child: const Text('Hapus',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
+            }, child: const Text('Hapus', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold))),
         ],
       ),
     );
   }
 
+  // ── WIDGET-WIDGET BANTUAN (HELPER) ────────────────────────────────────────
+  
+  // Fungsi memunculkan notifikasi (Snackbar)
   void _snackbar(String msg, Color color) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite)),
-      backgroundColor: color,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg, style: const TextStyle(fontFamily: 'Signika Negative', color: Colors.white)), backgroundColor: color, behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))));
   }
 
-  Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Text(text,
-            style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-                color: Colors.black87)),
-      );
+  // Fungsi teks judul form
+  Widget _label(String text) => Padding(padding: const EdgeInsets.only(bottom: 6), child: Text(text, style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.w900, fontSize: 15, color: AppColors.textDark)));
 
-  InputDecoration _inputDeco(String hint) => InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-        filled: true,
-        fillColor: Colors.grey.shade50,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade200)),
-        enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade200)),
-        focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.adminPrimary, width: 1.5)),
-        errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.errorRed, width: 1.5)),
-      );
+  // Fungsi desain kolom input (Border dan background)
+  InputDecoration _inputDeco(String hint) => InputDecoration(hintText: hint, hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint), filled: true, fillColor: AppColors.bgInput, contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14), border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade200)), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade200)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.primary, width: 2)));
 
-  // ── BUILD ─────────────────────────────────────────────────
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.adminPrimary, 
-      body: Stack(
-        children: [
-          Container(
-            height: 330,
-            decoration: const BoxDecoration(
-              color: AppColors.adminPrimary,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(context),
-                const SizedBox(height: 15),
-                _buildStatCards(context), 
-                const SizedBox(height: 25),
-                _buildIncomeCard(),
-                const SizedBox(height: 15),
-                
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: AppColors.adminCardLight, 
-                    ),
-                    child: Column(
-                      children: [
-                        Transform.translate(
-                          offset: const Offset(0, -15),
-                          child: _buildSectionTitle(),
-                        ),
-                        Expanded(child: _buildMenuList()),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      // ==========================================
-      // PANGGIL BOTTOM NAVIGATION BAR INTERAKTIF
-      // ==========================================
-      bottomNavigationBar: _buildBottomNavigation(context),
-    );
-  }
-
-  // ==========================================
-  // HEADER (Ikon Profil Interaktif)
-  // ==========================================
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0), 
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start, 
+  // Fungsi kotak untuk milih foto produk dari galeri
+  Widget _buildImagePicker(String fileName, VoidCallback onTap) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(color: fileName.isNotEmpty ? AppColors.success.withOpacity(0.1) : AppColors.bgInput, borderRadius: BorderRadius.circular(12), border: Border.all(color: fileName.isNotEmpty ? AppColors.success : Colors.grey.shade200)),
+          child: Row(
             children: [
-              Text('Selamat Datang',
-                  style: TextStyle(color: AppColors.textWhite, fontSize: 26,
-                      fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
-              Text('Dashboard Admin',
-                  style: TextStyle(color: AppColors.textWhite, fontSize: 26,
-                      fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.bold)),
-            ]
+              Icon(fileName.isNotEmpty ? Icons.check_circle : Icons.image_outlined, color: fileName.isNotEmpty ? AppColors.success : AppColors.textHint, size: 28),
+              const SizedBox(width: 10),
+              Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300)), child: const Text('Pilih File', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 12, color: AppColors.textDark, fontWeight: FontWeight.bold))),
+              const SizedBox(width: 10),
+              Expanded(child: Text(fileName.isNotEmpty ? fileName : 'Belum ada file dipilih', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 12, color: fileName.isNotEmpty ? AppColors.success : Colors.grey, fontWeight: fileName.isNotEmpty ? FontWeight.bold : FontWeight.normal), overflow: TextOverflow.ellipsis)),
+            ],
           ),
-          
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HalamanProfilAdmin()
-                ),
-              );
-            },
-            child: Container(
-              width: 50, height: 50,
-              decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle),
-              child: const Icon(Icons.person, color: AppColors.adminPrimary, size: 30),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  // ==========================================
-  // STAT CARDS (KARTU ATAS INTERAKTIF)
-  // ==========================================
-  Widget _buildStatCards(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _statCard('${menuItems.length}\nProduk', Icons.inventory_2_outlined, isActive: true, onTap: () {}),
-          
-          _statCard('Riwayat\nPesanan', Icons.shopping_bag_outlined, onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanRiwayat()),
-            );
-          }),
-          
-          _statCard('Laporan', Icons.bar_chart, onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanLaporan()),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _statCard(String title, IconData icon, {bool isActive = false, VoidCallback? onTap}) {
+  // Tombol kecil untuk fungsi 'Edit' atau 'Hapus'
+  Widget _smallBtn(String title, IconData icon, Color iconColor, Color textColor, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 105, height: 105,
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive ? Colors.white.withOpacity(0.4) : AppColors.adminStatCard,
-          borderRadius: BorderRadius.circular(22),
+          color: AppColors.bgInput, // Background krem abu
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(icon, color: AppColors.textWhite, size: 30),
-          const SizedBox(height: 8),
-          Text(title, textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textWhite, fontSize: 14,
-                  fontFamily: 'Signika Negative', fontWeight: FontWeight.w600)),
-        ]),
+        child: Row(
+          children: [
+            Icon(icon, size: 14, color: iconColor),
+            const SizedBox(width: 4),
+            Text(title, style: TextStyle(fontFamily: 'Signika Negative', fontSize: 11, fontWeight: FontWeight.w900, color: textColor)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildIncomeCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20.0), 
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-          color: AppColors.textWhite, borderRadius: BorderRadius.circular(30)),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('Pendapatan', style: TextStyle(color: AppColors.adminPrimary, fontSize: 16,
-              fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
-          Text('Rp -', style: TextStyle(color: AppColors.adminPrimary, fontSize: 16,
-              fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.adminPrimary, 
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(color: AppColors.shadowCustom, blurRadius: 4, offset: const Offset(0, 2))
-        ],
-      ),
-      child: const Text('Manajemen Menu',
-          style: TextStyle(color: AppColors.textWhite, fontSize: 20,
-              fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
-    );
-  }
-
-  Widget _buildMenuList() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.adminPrimary));
-    }
-    if (menuItems.isEmpty) {
-      return Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.fastfood_outlined, size: 60, color: Colors.grey),
-          const SizedBox(height: 12),
-          const Text('Belum ada menu',
-              style: TextStyle(color: Colors.grey, fontSize: 16,
-                  fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: _fetchMenu,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Coba Lagi'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.adminPrimary,
-              foregroundColor: AppColors.textWhite,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+  // ── DESAIN HALAMAN UTAMA MANAJEMEN PRODUK ─────────────────────────────────
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bgUtama, // Warna krem hangat utama
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header: Judul aplikasi dan foto profil admin
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4), 
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 30, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      SizedBox(height: 2),
+                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfilAdmin())),
+                    child: const CircleAvatar(radius: 26, backgroundColor: Colors.transparent, backgroundImage: AssetImage('assets/images/profil admin.png')), // Hati-hati ada spasi di nama file gambarnya
+                  )
+                ],
+              ),
             ),
-          ),
-        ]),
-      );
+            const Divider(color: Colors.white70, thickness: 1.5, height: 12),
+            
+            // Judul Halaman
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 4, 20, 8),
+              child: Text('Manajemen Produk', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+            ),
+            
+            // Tombol Lebar "Tambah Produk"
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: ElevatedButton.icon(
+                onPressed: _bukaSheetTambah, 
+                icon: const Icon(Icons.add, color: Colors.white, size: 36),
+                label: const Text('Tambah Produk', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)), 
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, minimumSize: const Size(double.infinity, 60), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            // Teks "Daftar Menu" dan Filter Dropdown Kategori
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Daftar Menu', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                  Container(
+                    height: 40, padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.primary, width: 2)),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: kategoriTerpilih,
+                        icon: const Icon(Icons.filter_list_rounded, color: AppColors.primary, size: 22),
+                        style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.primary),
+                        onChanged: (val) { if (val != null) setState(() => kategoriTerpilih = val); },
+                        items: listKategoriFilter.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            
+            // Memanggil fungsi untuk nampilin produk dalam bentuk Grid
+            Expanded(child: _buildProductGrid()),
+          ],
+        ),
+      ),
+      bottomNavigationBar: _buildNewBottomNavigation(context),
+    );
+  }
+
+  // WIDGET ISI PRODUK (FOTO BENTUK KOTAK-KOTAK)
+  Widget _buildProductGrid() {
+    if (_isLoading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+
+    // Logika Filter Kategori
+    final menuTampil = kategoriTerpilih == 'Semua' 
+        ? menuItems 
+        : menuItems.where((item) => item['kategori']?.toString().toLowerCase() == kategoriTerpilih.toLowerCase()).toList();
+
+    // Jika database kosong / tidak ada puding di kategori tersebut
+    if (menuTampil.isEmpty) {
+      return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Icon(Icons.fastfood_rounded, size: 60, color: Colors.grey.shade400),
+        const SizedBox(height: 12),
+        const Text('Belum ada menu', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey, fontSize: 16, fontWeight: FontWeight.bold)),
+      ]));
     }
 
     return RefreshIndicator(
-      color: AppColors.adminPrimary,
+      color: AppColors.primary,
       onRefresh: _fetchMenu,
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5), 
-        itemCount: menuItems.length,
+      child: GridView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        physics: const BouncingScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 15, mainAxisSpacing: 15, childAspectRatio: 0.68),
+        itemCount: menuTampil.length, 
         itemBuilder: (context, index) {
-          final item      = menuItems[index];
-          final namaMenu  = item['nama_produk']?.toString() ?? 'Tanpa Nama';
-          final harga     = item['harga']?.toString() ?? '0';
-          final deskripsi = item['deskripsi']?.toString() ?? '';
-          final urlGambar = item['gambar']?.toString() ?? '';
-          final baseUrl   = '${ApiService.baseUrl}/uploads/';
-
+          final item = menuTampil[index];
+          final baseUrl = '${ApiService.baseUrl}/uploads/'; // Ngambil path gambar dari XAMPP
           return Container(
-            margin: const EdgeInsets.only(bottom: 15),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-                color: AppColors.textWhite, 
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 5, offset: const Offset(0, 3))] 
-            ),
-            child: Row(
+            decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 4))]),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Gambar produk
-                Container(
-                  width: 70, height: 70,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF6C6353),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: urlGambar.isNotEmpty
-                      ? Image.network(
-                          '$baseUrl$urlGambar',
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              const Icon(Icons.fastfood, color: Colors.white54, size: 30),
-                        )
-                      : const Icon(Icons.fastfood, color: Colors.white54, size: 30),
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Nama + harga + deskripsi
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(namaMenu,
-                          style: const TextStyle(
-                              fontSize: 14, 
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Signika Negative',
-                              color: AppColors.textDark)),
-                      const SizedBox(height: 3),
-                      Text('Rp $harga',
-                          style: const TextStyle(
-                              fontSize: 13, 
-                              color: AppColors.adminPrimary,
-                              fontFamily: 'Signika Negative',
-                              fontWeight: FontWeight.bold)),
-                      if (deskripsi.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          deskripsi,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey.shade600,
-                              fontFamily: 'Signika Negative'),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-
-                // Tombol edit & hapus
-                Column(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: AppColors.successGreen, size: 20),
-                      onPressed: () => bukaSHeetEdit(index),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                    const SizedBox(height: 8),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: AppColors.errorRed, size: 20),
-                      onPressed: () => bukaDialogHapus(index),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
+                // Gambar Produk
+                Expanded(child: ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(24)), child: item['gambar'] != null ? Image.network('$baseUrl${item['gambar']}', fit: BoxFit.cover, width: double.infinity, errorBuilder: (_,__,___) => const Icon(Icons.fastfood, size: 50)) : const Icon(Icons.fastfood, size: 50))),
+                // Data Produk
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(item['nama_produk'].toString().toUpperCase(), maxLines: 2, style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.textBrown)),
+                    Text('Rp ${item['harga']}', style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textDark)),
+                    Text('Stok : ${item['stok'] ?? 0} pcs', style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey)),
+                    const SizedBox(height: 12),
+                    // Tombol Edit dan Hapus (Menggunakan fungsi kecil yang sudah dibuat)
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      _smallBtn('Edit', Icons.edit, Colors.green.shade700, AppColors.textBrown, () => bukaSHeetEdit(menuItems.indexOf(item))),
+                      _smallBtn('Hapus', Icons.delete, Colors.orange.shade700, AppColors.textBrown, () => bukaDialogHapus(menuItems.indexOf(item))),
+                    ]),
+                  ]),
                 ),
               ],
             ),
@@ -614,90 +527,24 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
     );
   }
 
-  // ==========================================
-  // FUNGSI BOTTOM NAVIGATION INTERAKTIF
-  // ==========================================
-  Widget _buildBottomNavigation(BuildContext context) {
+  // ── NAVIGASI BAWAH (BOTTOM NAVBAR) ─────────────────────────────────────────
+  Widget _buildNewBottomNavigation(BuildContext context) {
     return Container(
-      height: 70,
-      decoration: const BoxDecoration(color: AppColors.adminPrimary),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // BERANDA (IsSelected = true agar muncul lingkaran putih)
-          _bottomNavItem(Icons.home, 'BERANDA', false, () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeAdmin()),
-            );
-          }),
-          
-          _bottomNavItem(Icons.person, 'PENGGUNA', false, () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanPengguna()),
-            );
-          }),
-          
-          _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const TambahProdukPage()),
-            );
-          }),
-          
-          // Ikon pakai add_circle_outline sesuai request lu
-          _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
-            Navigator.push( 
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanPesanan()),
-            );
-          }),
-        ],
-      ),
+      height: 75, decoration: const BoxDecoration(color: AppColors.primary),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        _navItem(Icons.assignment_outlined, 'Laporan', false, () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()))),
+        _navItem(Icons.cake_outlined, 'Produk', true, () {}),
+        _navItem(Icons.home_outlined, 'Beranda', false, () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeAdmin()))),
+        _navItem(Icons.history, 'Riwayat', false, () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()))),
+        _navItem(Icons.person_outline, 'Pengguna', false, () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanPengguna()))),
+      ]),
     );
   }
 
-  // ==========================================
-  // WIDGET ITEM NAVIGASI
-  // ==========================================
-  Widget _bottomNavItem(
-    IconData icon,
-    String label,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        color: Colors.transparent,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8), // Padding disamakan biar ukurannya pas
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.textWhite : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                // Jika aktif warnanya oranye, jika tidak aktif warnanya putih
-                color: isSelected ? AppColors.adminPrimary : AppColors.textWhite,
-                size: 28, // Ukuran diperbesar disamakan dengan desain aslimu
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: AppColors.textWhite,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }}
+  Widget _navItem(IconData icon, String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(onTap: onTap, behavior: HitTestBehavior.opaque, child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: isSelected ? AppColors.primaryDark : Colors.transparent, shape: BoxShape.circle), child: Icon(icon, color: Colors.white, size: 30)), // Lingkaran oranye gelap pas menu dipilih
+      Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
+    ]));
+  }
+}

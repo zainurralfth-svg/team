@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; 
+import '../Core/Colour.dart'; // Palet 14 Warna Baru
 
 class TampilanAwal extends StatelessWidget {
   const TampilanAwal({super.key});
@@ -12,7 +12,7 @@ class TampilanAwal extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. WARNA BACKGROUND GRADASI MENGGUNAKAN APPCOLORS
+          // 1. WARNA BACKGROUND GRADASI MENGGUNAKAN PALET BARU
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -21,8 +21,8 @@ class TampilanAwal extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  AppColors.gradasiAtas,  // <-- Panggil dari AppColors
-                  AppColors.gradasiBawah, // <-- Panggil dari AppColors
+                  AppColors.bgUtama, // Krem dari atas
+                  AppColors.primary, // Mengarah ke Oranye Coklat di bawah
                 ],
               ),
             ),
@@ -110,7 +110,8 @@ class TampilanAwal extends StatelessWidget {
                             width: screenWidth * 0.85, 
                             height: 60, 
                             decoration: BoxDecoration(
-                              color: AppColors.tombolGetStarted, // <-- Panggil dari AppColors
+                              // Menggunakan warna utama untuk tombol
+                              color: AppColors.primary, 
                               borderRadius: BorderRadius.circular(20), 
                               boxShadow: [
                                 BoxShadow(
@@ -124,7 +125,7 @@ class TampilanAwal extends StatelessWidget {
                               child: Text(
                                 'Get Started',
                                 style: TextStyle(
-                                  color: Colors.white, 
+                                  color: AppColors.textWhite, // Teks putih
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold, 
                                 ),

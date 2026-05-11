@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import '../Core/Colour.dart'; 
+import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import '../Backend/API_Service.dart'; 
 
 class LupaPasswordPage extends StatefulWidget {
@@ -46,7 +46,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
       title: 'Berhasil!',
       desc: 'Password kamu sudah diperbarui. Silakan login kembali!',
       btnOkText: "Siap, Login!",
-      btnOkColor: AppColors.primaryOrange, 
+      btnOkColor: AppColors.primary, // Pakai primary (Oranye Coklat)
       btnOkOnPress: () => Navigator.pop(context), // Kembali ke halaman sebelumnya (Login)
     ).show();
   }
@@ -94,7 +94,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false, // Mencegah layout terdorong ke atas saat keyboard aktif
-      backgroundColor: AppColors.bgCream, 
+      backgroundColor: AppColors.bgUtama, // Pakai bgUtama (krem)
       body: LayoutBuilder(
         builder: (context, constraints) {
           // Konfigurasi ukuran responsif untuk layar Desktop vs Mobile
@@ -110,7 +110,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                     _buildErrorBanner(),                 // Memanggil komponen Banner Error
                     _buildForm(contentWidth, isDesktop), // Memanggil komponen Form Utama
                     const SizedBox(height: 120),         // Spacer agar konten tidak tertutup Footer
-                    _buildFooter(),                      // 4. Footer SEKARANG IKUT KE-SCROLL DI SINI!
+                    _buildFooter(),                      // Footer
                   ],
                 ),
               ),
@@ -153,9 +153,9 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.errorRed,
+          color: AppColors.error, // Menggunakan merah error baru
           borderRadius: BorderRadius.circular(15),
-          boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 5)], 
+          boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 5)], 
         ),
         child: Row(
           children: [
@@ -176,9 +176,9 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            Text(_isPhoneVerified ? 'BUAT PASSWORD BARU' : 'RESET PASSWORD', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.strokeDark, fontSize: 28, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+            Text(_isPhoneVerified ? 'BUAT PASSWORD BARU' : 'RESET PASSWORD', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textDark, fontSize: 28, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
             const SizedBox(height: 10),
-            Text(_isPhoneVerified ? 'Nomor terverifikasi! Masukkan Password Baru Anda.' : 'Masukkan Nomor Telepon Yang Terdaftar Di Akun Anda.', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.strokeDark, fontSize: 16)),
+            Text(_isPhoneVerified ? 'Nomor terverifikasi! Masukkan Password Baru Anda.' : 'Masukkan Nomor Telepon Yang Terdaftar Di Akun Anda.', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textDark, fontSize: 16)),
             const SizedBox(height: 30),
 
             // Container Background Form (Warna Oranye)
@@ -186,9 +186,9 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
               width: isDesktop ? 700 : double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
               decoration: BoxDecoration(
-                color: AppColors.primaryOrange,
+                color: AppColors.primary, // Menggunakan oranye utama
                 borderRadius: BorderRadius.circular(30),
-                boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 10, offset: const Offset(0, 5))], 
+                boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 5))], 
               ),
               child: Column(
                 children: [
@@ -206,7 +206,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             SizedBox(
               width: isDesktop ? 350 : double.infinity, height: 55,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryOrange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                 onPressed: _prosesReset, 
                 child: Text(_isPhoneVerified ? 'SIMPAN PASSWORD' : 'CEK NOMOR TELEPON', style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 18)),
               ),
@@ -219,10 +219,10 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
 
   // KOMPONEN 4: Menampilkan Footer Statis di bagian bawah layar
   Widget _buildFooter() {
-    return Container( // <--- Positioned dihapus, jadi langsung Container
+    return Container( 
       height: 65, width: double.infinity,
       decoration: const BoxDecoration(
-        color: AppColors.primaryOrange, 
+        color: AppColors.primary, // Menggunakan oranye utama
         borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
       ),
       child: Row(
@@ -231,7 +231,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
           Container(
             padding: const EdgeInsets.all(5),
             decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle),
-            child: const Icon(Icons.cake, color: AppColors.primaryOrange, size: 28), 
+            child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
           const SizedBox(width: 10),
           const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
@@ -249,17 +249,17 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
         const SizedBox(height: 10),
         Container(
           // Mengubah warna background menjadi abu-abu jika parameter enabled = false
-          decoration: BoxDecoration(color: enabled ? AppColors.inputBg : AppColors.inputDisabledBg, borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(color: enabled ? AppColors.bgInput : Colors.grey.shade400, borderRadius: BorderRadius.circular(12)),
           child: TextField(
             controller: controller, 
             enabled: enabled, 
             obscureText: isPassword ? _obscureText : false, // Menyembunyikan teks jika ini form password
             keyboardType: isPassword ? TextInputType.text : TextInputType.phone,
-            style: const TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16, color: AppColors.textDark),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: AppColors.iconOrange, size: 24),
+              prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24),
               suffixIcon: isPassword 
-                ? IconButton(icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: AppColors.iconOrange), onPressed: () => setState(() => _obscureText = !_obscureText))
+                ? IconButton(icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: AppColors.primaryDark), onPressed: () => setState(() => _obscureText = !_obscureText))
                 : null,
               hintText: hint, 
               hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 16), 
@@ -285,6 +285,6 @@ class HeaderClipper extends CustomClipper<Path> {
 
 // Class untuk menggambar garis batas dekoratif pada potongan gambar
 class HeaderPainter extends CustomPainter {
-  @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); }
+  @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.textBrown..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); }
   @override bool shouldRepaint(oldDelegate) => false;
 }
