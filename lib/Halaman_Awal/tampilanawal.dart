@@ -104,13 +104,15 @@ class TampilanAwal extends StatelessWidget {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Navigator.pushNamed(context, '/masuk');
+                            // ===============================================
+                            // INI DIA YANG DIGANTI: dari '/masuk' jadi '/login'
+                            // ===============================================
+                            Navigator.pushNamed(context, '/login');
                           },
                           child: Container(
                             width: screenWidth * 0.85, 
                             height: 60, 
                             decoration: BoxDecoration(
-                              // Menggunakan warna utama untuk tombol
                               color: AppColors.primary, 
                               borderRadius: BorderRadius.circular(20), 
                               boxShadow: [
@@ -125,7 +127,7 @@ class TampilanAwal extends StatelessWidget {
                               child: Text(
                                 'Get Started',
                                 style: TextStyle(
-                                  color: AppColors.textWhite, // Teks putih
+                                  color: AppColors.textWhite, 
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold, 
                                 ),

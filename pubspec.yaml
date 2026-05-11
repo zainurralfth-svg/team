@@ -38,7 +38,7 @@ flutter:
   assets:
     - assets/images/
   
-  # --- PENGATURAN FONT SIGNIKA NEGATIVE ---
+  # --- PENGATURAN FONT APLIKASI ---
   fonts:
     - family: Signika Negative
       fonts:
@@ -48,8 +48,14 @@ flutter:
         - asset: assets/fonts/SignikaNegative-Bold.ttf
           weight: 700
 
+    - family: Oleo Script
+      fonts:
+        - asset: assets/fonts/OleoScript-Regular.ttf
+        - asset: assets/fonts/OleoScript-Bold.ttf
+          weight: 700
+
 # --- PENGATURAN LOGO PUDDINGKU ---
-# Pastikan nama file gambar kamu adalah "logo.png"
+# Pastikan nama file gambar kamu adalah "logo puddingku fiks.jpeg"
 # dan sudah ditaruh di dalam folder "assets/images/"
 flutter_launcher_icons:
   android: true

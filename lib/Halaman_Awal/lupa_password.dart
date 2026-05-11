@@ -45,7 +45,10 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
       animType: AnimType.bottomSlide,
       title: 'Berhasil!',
       desc: 'Password kamu sudah diperbarui. Silakan login kembali!',
+      titleTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 20),
+      descTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16),
       btnOkText: "Siap, Login!",
+      buttonsTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: Colors.white),
       btnOkColor: AppColors.primary, // Pakai primary (Oranye Coklat)
       btnOkOnPress: () => Navigator.pop(context), // Kembali ke halaman sebelumnya (Login)
     ).show();
@@ -161,7 +164,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
           children: [
             const Icon(Icons.error_outline, color: AppColors.textWhite),
             const SizedBox(width: 12),
-            Expanded(child: Text(_errorMessage!, style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold))),
+            Expanded(child: Text(_errorMessage!, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold))),
           ],
         ),
       ),
@@ -176,9 +179,25 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            Text(_isPhoneVerified ? 'BUAT PASSWORD BARU' : 'RESET PASSWORD', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textDark, fontSize: 28, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+            // =====================================
+            // INI PERUBAHAN FONT OLEO SCRIPT NYA
+            // =====================================
+            Text(
+              _isPhoneVerified ? 'Buat Password Baru' : 'Reset Password', 
+              textAlign: TextAlign.center, 
+              style: const TextStyle(
+                fontFamily: 'Oleo Script', // Pakai font Oleo Script
+                color: AppColors.textDark, 
+                fontSize: 38, 
+                fontWeight: FontWeight.w900, 
+              )
+            ),
             const SizedBox(height: 10),
-            Text(_isPhoneVerified ? 'Nomor terverifikasi! Masukkan Password Baru Anda.' : 'Masukkan Nomor Telepon Yang Terdaftar Di Akun Anda.', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textDark, fontSize: 16)),
+            Text(
+              _isPhoneVerified ? 'Nomor terverifikasi! Masukkan Password Baru Anda.' : 'Masukkan Nomor Telepon Yang Terdaftar Di Akun Anda.', 
+              textAlign: TextAlign.center, 
+              style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark, fontSize: 16)
+            ),
             const SizedBox(height: 30),
 
             // Container Background Form (Warna Oranye)
@@ -208,7 +227,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                 onPressed: _prosesReset, 
-                child: Text(_isPhoneVerified ? 'SIMPAN PASSWORD' : 'CEK NOMOR TELEPON', style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 18)),
+                child: Text(_isPhoneVerified ? 'SIMPAN PASSWORD' : 'CEK NOMOR TELEPON', style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 18)),
               ),
             ),
           ],
@@ -234,7 +253,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
           const SizedBox(width: 10),
-          const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
+          const Text('Puddingku', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -245,7 +264,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)),
+        Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         Container(
           // Mengubah warna background menjadi abu-abu jika parameter enabled = false
@@ -255,14 +274,14 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             enabled: enabled, 
             obscureText: isPassword ? _obscureText : false, // Menyembunyikan teks jika ini form password
             keyboardType: isPassword ? TextInputType.text : TextInputType.phone,
-            style: const TextStyle(fontSize: 16, color: AppColors.textDark),
+            style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16, color: AppColors.textDark),
             decoration: InputDecoration(
               prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24),
               suffixIcon: isPassword 
                 ? IconButton(icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: AppColors.primaryDark), onPressed: () => setState(() => _obscureText = !_obscureText))
                 : null,
               hintText: hint, 
-              hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 16), 
+              hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 16), 
               border: InputBorder.none, 
               contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
             ),
