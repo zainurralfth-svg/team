@@ -1,285 +1,258 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // <-- TAMBAHAN INI
-import '../Backend/api_service.dart';
-import '../Core/Colour.dart'; // Import gudang 14 warna kita
+import '../Core/Colour.dart'; // Palet 14 Warna Baru
+import 'package:shared_preferences/shared_preferences.dart';
 
-class KonfirmasiPage extends StatefulWidget {
-  const KonfirmasiPage({super.key});
+// ==============================================================
+// IMPORT CLASS MODELS OOP
+// ==============================================================
+import '../Models/user.dart';
+
+class MasukPage extends StatefulWidget {
+  const MasukPage({super.key});
 
   @override
-  State<KonfirmasiPage> createState() => _KonfirmasiPageState();
+  State<MasukPage> createState() => _MasukPageState();
 }
 
-class _KonfirmasiPageState extends State<KonfirmasiPage> {
-  // Controller asli abang
-  final TextEditingController _namaController = TextEditingController();
-  final TextEditingController _telpController = TextEditingController();
+class _MasukPageState extends State<MasukPage> {
+  // Controller untuk membaca data yang diketik oleh user
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   
-  bool _isLoadingProfile = true;
-  bool _isProcessing = false; // Tambahan untuk efek loading tombol
-  String currentUserId = ""; // Sesuai session login
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserProfile(); 
-  }
-
-  // FUNGSI PENGISI OTOMATIS BERDASARKAN DATA LOGIN DI MEMORI HP
-  Future<void> _loadUserProfile() async {
-    try {
-      // Buka brankas memori HP
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      
-      setState(() {
-        // Ambil data langsung dari memori tanpa perlu loading ke API XAMPP
-        currentUserId = prefs.getString('id_user') ?? "0";
-        _namaController.text = prefs.getString('nama_user') ?? ''; 
-        _telpController.text = prefs.getString('phone_user') ?? '';
-        
-        _isLoadingProfile = false;
-      });
-    } catch (e) {
-      setState(() => _isLoadingProfile = false);
-    }
-  }
+  // State untuk visibilitas password
+  bool _passwordVisible = false;
 
   @override
   void dispose() {
-    _namaController.dispose();
-    _telpController.dispose();
+    // Membersihkan memori saat halaman ditutup
+    _usernameController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  // ============================================================
-  // FUNGSI PROSES PESANAN KE DATABASE & PINDAH HALAMAN
-  // ============================================================
- Future<void> _prosesPesanan(List<dynamic> cartItems, int totalHarga) async {
-    if (_namaController.text.isEmpty || _telpController.text.isEmpty) {
+  // FUNGSI UTAMA: Logika Autentikasi Login (MURNI OOP)
+  Future<void> _handleLogin() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // 1. Validasi Input Kosong
+    if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Lengkapi Nama dan Nomor Telepon!")),
+        SnackBar(
+          backgroundColor: Colors.transparent, 
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 150, left: 20, right: 20),
+          content: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.error, // Menggunakan warna merah error baru
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: const Offset(0, 4))],
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.error_outline, color: AppColors.textWhite, size: 24), 
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text('Username dan Password tidak boleh kosong!', style: TextStyle(color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600)),
+                ),
+              ],
+            ),
+          ),
+          duration: const Duration(seconds: 3),
+        ),
       );
       return;
     }
 
-    // TAMBAHAN: Validasi keamanan memastikan ID User tidak kosong/nol
-    if (currentUserId.isEmpty || currentUserId == "0") {
-       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Sesi login tidak valid, silakan login ulang.")),
-      );
-      return;
-    }
+    // 2. Eksekusi API melalui Class Model OOP (Tidak ada fungsi redundan)
+    try {
+      var hasil = await User.autentikasiOOP(username, password);
 
-    setState(() => _isProcessing = true);
-    // ... lanjut panggil API Checkout
+      // 3. Evaluasi Respon dari Model OOP
+      if (hasil['status'] == 'sukses') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(hasil['pesan']), 
+            backgroundColor: AppColors.success, // Menggunakan warna hijau sukses baru
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
 
-    // Memanggil API Checkout
-    var response = await ApiService.checkoutPesanan(
-      currentUserId, 
-      _namaController.text, 
-      _telpController.text
-    );
-
-    setState(() => _isProcessing = false);
-
-    if (response['status'] == 'sukses') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Pesanan Berhasil Dibuat! 🚀"), backgroundColor: AppColors.success), // Pakai warna sukses baru
-      );
-      
-      // Pindah ke halaman Bukti Pesanan dan bawa SEMUA datanya
-      Navigator.pushReplacementNamed(
-        context, 
-        '/bukti_pemesanan',
-        arguments: {
-          'kode_resi': response['kode_resi'],
-          'nama': _namaController.text,
-          'telp': _telpController.text,
-          'items': cartItems,
-          'total': totalHarga,
+        // ==============================================================
+        // SIMPAN DATA KE MEMORI HP (Untuk Autofill di Checkout)
+        // ==============================================================
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        
+        String idUserLoginStr = hasil['id']?.toString() ?? "0";
+        String namaUser = hasil['nama']?.toString() ?? ""; 
+        String phoneUser = hasil['phone']?.toString() ?? ""; 
+        
+        if (idUserLoginStr.isNotEmpty && idUserLoginStr != "0") {
+          await prefs.setString('id_user', idUserLoginStr);
+          await prefs.setString('nama_user', namaUser);   // <-- Simpan Nama ke memori
+          await prefs.setString('phone_user', phoneUser); // <-- Simpan Telp ke memori
+          print("Mantap! Data ID, Nama, dan Telp berhasil disimpan ke memori!");
         }
-      );
-    } else {
+
+        // ==============================================================
+        // --- LOGIKA ROUTING BERDASARKAN HASIL OOP ---
+        // ==============================================================
+        String roleUser = hasil['role'] ?? 'user'; 
+
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          if (mounted) {
+            if (roleUser == 'admin') {
+              print("Login sebagai Admin");
+              Navigator.pushReplacementNamed(context, '/admin_home');
+            } else {
+              print("Login sebagai User");
+              Navigator.pushReplacementNamed(context, '/menu');
+            }
+          }
+        });
+
+        _usernameController.clear();
+        _passwordController.clear();
+        
+      } else {
+        // Tampilkan pesan error jika kredensial salah
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(hasil['pesan'] ?? 'Login Gagal'), 
+            backgroundColor: AppColors.error, // Menggunakan warna merah error baru
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      // Penanganan error jika server XAMPP mati atau IP salah
+      print("Error Server: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal: ${response['pesan']}"), backgroundColor: AppColors.error), // Pakai warna error baru
+        const SnackBar(
+          content: Text('Gagal terhubung ke server! Cek koneksi / XAMPP.'), 
+          backgroundColor: AppColors.error, // Menggunakan warna merah error baru
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
-
+  
+  // ==============================================================
+  // --- BUILDER UTAMA UI ---
+  // ==============================================================
   @override
   Widget build(BuildContext context) {
-    // Menangkap data dari keranjang.dart
-    final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-    final List<dynamic> cartItems = args?['items'] ?? [];
-    final int totalHarga = args?['total'] ?? 0;
-
     return Scaffold(
-      backgroundColor: AppColors.bgUtama, // Disamakan dengan krem Colour.dart baru
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ============================================================
-            // HEADER COKELAT 
-            // ============================================================
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-              decoration: const BoxDecoration(
-                color: AppColors.primary, // Disamakan dengan oranye coklat Colour.dart
-              ),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.textWhite, width: 1.5),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back,
-                            color: AppColors.textWhite,
-                            size: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Expanded(
-                    child: Center(
-                      child: Text(
-                        'Konfirmasi Pesanan',
-                        style: TextStyle(
-                          color: AppColors.textWhite,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Serif',
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 40),
-                ],
-              ),
-            ),
+      resizeToAvoidBottomInset: false, 
+      backgroundColor: AppColors.bgUtama, // Menggunakan krem utama
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isDesktop = constraints.maxWidth > 800;
+          double contentWidth = isDesktop ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9;
 
-            Expanded(
-              child: _isLoadingProfile 
-              ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-              : SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+          return Stack(
+            children: [
+              SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Detail Pesanan",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // CONTAINER ITEM PESANAN (Dinamis dari Keranjang)
-                    Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: AppColors.textWhite,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.shadow, // Disamakan dengan bayangan Colour.dart
-                            blurRadius: 10,
-                          )
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: cartItems.length,
-                            itemBuilder: (context, index) {
-                              final item = cartItems[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: _buildOrderItem(
-                                  item['nama_produk'] ?? '',
-                                  "${item['jumlah']}x",
-                                  "Rp ${item['harga']}",
-                                ),
-                              );
-                            },
-                          ),
-                          const Divider(thickness: 1, height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                "Total Pembayaran",
-                                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
-                              ),
-                              Text(
-                                "Rp $totalHarga",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: AppColors.primary, // Oranye warna utama
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 25),
-                    const Text(
-                      "Informasi Pengiriman",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // TEXTFIELD (OTOMATIS SESUAI DATA REGISTRASI)
-                    _buildTextField("Nama Lengkap", Icons.person, AppColors.primary, _namaController),
-                    const SizedBox(height: 12),
-                    _buildTextField("Nomor Telepon", Icons.phone, AppColors.primary, _telpController),
-
-                    const SizedBox(height: 40),
-
-                    // TOMBOL PESAN SEKARANG (Desain Utuh)
-                    Center(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary, // Warna oranye utama
-                          padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          elevation: 3,
-                        ),
-                        // PERUBAHAN: Memanggil _prosesPesanan dan mencegah double click
-                        onPressed: _isProcessing ? null : () => _prosesPesanan(cartItems, totalHarga),
-                        child: _isProcessing 
-                          ? const SizedBox(
-                              width: 20, 
-                              height: 20, 
-                              child: CircularProgressIndicator(color: AppColors.textWhite, strokeWidth: 2)
-                            )
-                          : const Text(
-                              "Pesan Sekarang",
-                              style: TextStyle(
-                                color: AppColors.textWhite,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                      ),
-                    ),
+                    _buildHeader(isDesktop),             
                     const SizedBox(height: 20),
+                    _buildForm(contentWidth, isDesktop), 
+                    const SizedBox(height: 80),          
+                    _buildFooter(),                      
                   ],
                 ),
               ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // ==============================================================
+  // --- KUMPULAN WIDGET KOMPONEN ---
+  // ==============================================================
+
+  Widget _buildHeader(bool isDesktop) {
+    return Stack(
+      children: [
+        ClipPath(
+          clipper: HeaderClipper(),
+          child: Container(
+            width: double.infinity, height: isDesktop ? 230 : 280,
+            decoration: const BoxDecoration(
+              image: DecorationImage(image: AssetImage('assets/images/iya.jpeg'), fit: BoxFit.cover, alignment: Alignment.center),
+            ),
+          ),
+        ),
+        CustomPaint(size: Size(double.infinity, isDesktop ? 230 : 280), painter: HeaderPainter()),
+        Positioned(
+          left: 10, top: 30,
+          child: IconButton(icon: const Icon(Icons.arrow_back, color: AppColors.textWhite, size: 30), onPressed: () => Navigator.pop(context)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildForm(double contentWidth, bool isDesktop) {
+    return Center(
+      child: Container(
+        width: contentWidth,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          children: [
+            const Text('SELAMAT DATANG', style: TextStyle(color: AppColors.textDark, fontSize: 36, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic)),
+            const Text('Login Untuk Mulai Memesan', style: TextStyle(color: AppColors.textDark, fontSize: 18)),
+            const SizedBox(height: 30),
+
+            Container(
+              width: isDesktop ? 700 : double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
+              decoration: BoxDecoration(
+                color: AppColors.primary, // Menggunakan warna utama oranye coklat
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 5))],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInputField('Username/No Telp', 'Ketik Disini', Icons.person, _usernameController),
+                  _buildInputField('Password', '******', Icons.lock, _passwordController, isPassword: true),
+                  GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/lupa-password'),
+                    child: const Text('Lupa password?', style: TextStyle(color: AppColors.textWhite, fontSize: 14, decoration: TextDecoration.underline)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            Wrap(
+              spacing: 20, runSpacing: 15, alignment: WrapAlignment.center,
+              children: [
+                SizedBox(
+                  width: isDesktop ? 300 : double.infinity, height: 55,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
+                    onPressed: _handleLogin,
+                    child: const Text('LOGIN', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), 
+                  ),
+                ),
+                SizedBox(
+                  width: isDesktop ? 300 : double.infinity, height: 55,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      Navigator.pushNamed(context, '/login'); 
+                    },
+                    child: const Text('REGISTER', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), 
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -287,64 +260,69 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
     );
   }
 
-  // ============================================================
-  // WIDGET HELPER 
-  // ============================================================
-  Widget _buildOrderItem(String title, String qty, String price) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark),
-              ),
-              Text(
-                qty,
-                style: const TextStyle(color: AppColors.textHint, fontSize: 12), // Menggunakan warna abu dari AppColors
-              ),
-            ],
+  Widget _buildFooter() {
+    return Container(
+      height: 65, width: double.infinity,
+      decoration: const BoxDecoration(
+        color: AppColors.primary, // Menggunakan warna utama oranye coklat
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(5),
+            decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle), 
+            child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
-        ),
-        Text(
-          price,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: AppColors.primary, // Warna oranye utama
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextField(String hint, IconData icon, Color iconColor, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      style: const TextStyle(color: AppColors.textDark),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 13),
-        prefixIcon: Icon(icon, color: iconColor, size: 22),
-        fillColor: AppColors.bgCard, // Disamakan dengan warna cream terang di AppColors
-        filled: true,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: AppColors.primary),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: AppColors.primary),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-        ),
+          const SizedBox(width: 10),
+          const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)), 
+        ],
       ),
     );
   }
+
+  Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, {bool isPassword = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)), 
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(12)), // Background kolom form
+            child: TextField(
+              controller: controller,
+              obscureText: isPassword ? !_passwordVisible : false,
+              style: const TextStyle(fontSize: 16, color: AppColors.textDark), // Pastikan teks yang diketik warnanya gelap
+              decoration: InputDecoration(
+                prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24), // Ikon oranye gelap biar kontras dengan krem
+                suffixIcon: isPassword
+                    ? GestureDetector(
+                        onTap: () => setState(() => _passwordVisible = !_passwordVisible),
+                        child: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off, color: AppColors.textHint, size: 24),
+                      )
+                    : null,
+                hintText: hint,
+                hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 16), 
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class HeaderClipper extends CustomClipper<Path> {
+  @override Path getClip(Size size) { Path path = Path(); path.lineTo(0, size.height); path.lineTo(size.width, size.height); path.lineTo(size.width, 0); path.close(); return path; }
+  @override bool shouldReclip(oldClipper) => false;
+}
+
+class HeaderPainter extends CustomPainter {
+  @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.textBrown..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); } // Ganti strokeDark jadi textBrown
+  @override bool shouldRepaint(oldDelegate) => false;
 }
