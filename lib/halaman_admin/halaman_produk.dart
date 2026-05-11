@@ -90,8 +90,8 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
                   children: [
                     // Garis abu-abu di atas pop up (Handle bar)
                     Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)))),
-                    // Judul Form
-                    const Align(alignment: Alignment.centerLeft, child: Text('Tambah Produk', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary))), // Pakai primary (Oranye Coklat)
+                    // Judul Form (Ukuran dinormalkan)
+                    const Align(alignment: Alignment.centerLeft, child: Text('Tambah Produk', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary))), 
                     const SizedBox(height: 20),
                     Expanded(
                       child: SingleChildScrollView(
@@ -157,7 +157,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
                                   );
 
                                   if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
-                                    _snackbar('Produk berhasil ditambahkan ✓', AppColors.success); // Pakai hijau success
+                                    _snackbar('Produk berhasil ditambahkan ✓', AppColors.success); 
                                     _fetchMenu();
                                   } else {
                                     _snackbar('Gagal: ${hasil['pesan']}', AppColors.error);
@@ -209,7 +209,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
                 child: Column(
                   children: [
                     Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)))),
-                    const Align(alignment: Alignment.centerLeft, child: Text('Edit Produk', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary))), // Judul oranye
+                    const Align(alignment: Alignment.centerLeft, child: Text('Edit Produk', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary))), // Judul dinormalkan
                     const SizedBox(height: 20),
                     Expanded(
                       child: SingleChildScrollView(
@@ -402,14 +402,14 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 30, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)), // Ukuran dinormalkan
                       SizedBox(height: 2),
-                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
                   GestureDetector(
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfilAdmin())),
-                    child: const CircleAvatar(radius: 26, backgroundColor: Colors.transparent, backgroundImage: AssetImage('assets/images/profil admin.png')), // Hati-hati ada spasi di nama file gambarnya
+                    child: const CircleAvatar(radius: 20, backgroundColor: Colors.transparent, backgroundImage: AssetImage('assets/images/profil admin.png')), // Radius dikecilkan
                   )
                 ],
               ),
@@ -419,7 +419,7 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
             // Judul Halaman
             const Padding(
               padding: EdgeInsets.fromLTRB(20, 4, 20, 8),
-              child: Text('Manajemen Produk', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+              child: Text('Manajemen Produk', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 0.5)), // Ukuran dinormalkan
             ),
             
             // Tombol Lebar "Tambah Produk"
@@ -427,9 +427,9 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ElevatedButton.icon(
                 onPressed: _bukaSheetTambah, 
-                icon: const Icon(Icons.add, color: Colors.white, size: 36),
-                label: const Text('Tambah Produk', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)), 
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, minimumSize: const Size(double.infinity, 60), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
+                icon: const Icon(Icons.add, color: Colors.white, size: 24), // Ikon dikecilkan
+                label: const Text('Tambah Produk', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)), // Font dikecilkan
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 0), // Tinggi dipangkas jadi 50
               ),
             ),
             const SizedBox(height: 12),
@@ -440,15 +440,15 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Daftar Menu', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                  const Text('Daftar Menu', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary)), // Font dinormalkan
                   Container(
-                    height: 40, padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.primary, width: 2)),
+                    height: 35, padding: const EdgeInsets.symmetric(horizontal: 14), // Tinggi dropdown dipangkas sedikit
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.primary, width: 2)),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: kategoriTerpilih,
-                        icon: const Icon(Icons.filter_list_rounded, color: AppColors.primary, size: 22),
-                        style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.primary),
+                        icon: const Icon(Icons.filter_list_rounded, color: AppColors.primary, size: 20),
+                        style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.primary),
                         onChanged: (val) { if (val != null) setState(() => kategoriTerpilih = val); },
                         items: listKategoriFilter.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
                       ),
@@ -492,27 +492,28 @@ class _ManajemenMenuPageState extends State<ManajemenMenuPage> {
       child: GridView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         physics: const BouncingScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 15, mainAxisSpacing: 15, childAspectRatio: 0.68),
+        // Aspect Ratio diubah ke 0.75 biar kotak fotonya gak terlalu panjang ke bawah
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 15, mainAxisSpacing: 15, childAspectRatio: 0.75),
         itemCount: menuTampil.length, 
         itemBuilder: (context, index) {
           final item = menuTampil[index];
           final baseUrl = '${ApiService.baseUrl}/uploads/'; // Ngambil path gambar dari XAMPP
           return Container(
-            decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 4))]),
+            decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 4))]),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Gambar Produk
-                Expanded(child: ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(24)), child: item['gambar'] != null ? Image.network('$baseUrl${item['gambar']}', fit: BoxFit.cover, width: double.infinity, errorBuilder: (_,__,___) => const Icon(Icons.fastfood, size: 50)) : const Icon(Icons.fastfood, size: 50))),
+                Expanded(child: ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(20)), child: item['gambar'] != null ? Image.network('$baseUrl${item['gambar']}', fit: BoxFit.cover, width: double.infinity, errorBuilder: (_,__,___) => const Icon(Icons.fastfood, size: 50)) : const Icon(Icons.fastfood, size: 50))),
                 // Data Produk
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(10.0), // Padding dalam card dirapatkan sedikit
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(item['nama_produk'].toString().toUpperCase(), maxLines: 2, style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.textBrown)),
-                    Text('Rp ${item['harga']}', style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textDark)),
+                    Text(item['nama_produk'].toString().toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.textBrown)),
+                    Text('Rp ${item['harga']}', style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.textDark)),
                     Text('Stok : ${item['stok'] ?? 0} pcs', style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey)),
-                    const SizedBox(height: 12),
-                    // Tombol Edit dan Hapus (Menggunakan fungsi kecil yang sudah dibuat)
+                    const SizedBox(height: 8),
+                    // Tombol Edit dan Hapus
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                       _smallBtn('Edit', Icons.edit, Colors.green.shade700, AppColors.textBrown, () => bukaSHeetEdit(menuItems.indexOf(item))),
                       _smallBtn('Hapus', Icons.delete, Colors.orange.shade700, AppColors.textBrown, () => bukaDialogHapus(menuItems.indexOf(item))),
