@@ -237,6 +237,24 @@ class ApiService {
     }
   }
 
+// ==========================================
+// 6. UPDATE STATUS PESANAN (UNTUK ADMIN)
+// ==========================================
+static Future<Map<String, dynamic>> updateStatusPesanan(String idPesanan, String statusBaru) async {
+  try {
+    var response = await http.post(
+      Uri.parse("$baseUrl/update_status_pesanan.php"),
+      body: {
+        "id_pesanan": idPesanan,
+        "status_pesanan": statusBaru,
+      },
+    );
+    return _safeDecodeMap(response.body);
+  } catch (e) {
+    return {"status": "error", "pesan": "Koneksi gagal: $e"};
+  }
+}
+
   // ==========================================
   // 7. AMBIL DATA PENGGUNA (UNTUK ADMIN)
   // ==========================================
