@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; 
 import 'package:shared_preferences/shared_preferences.dart';
-
-// ==============================================================
-// IMPORT CLASS MODELS OOP
-// ==============================================================
 import '../Models/user.dart';
 
 class MasukPage extends StatefulWidget {
@@ -79,10 +75,6 @@ class _MasukPageState extends State<MasukPage> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-
-        // ==============================================================
-        // SIMPAN ID KE MEMORI HP
-        // ==============================================================
         // ==============================================================
         // SIMPAN DATA KE MEMORI HP (Untuk Autofill di Checkout)
         // ==============================================================

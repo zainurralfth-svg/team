@@ -24,8 +24,6 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
     super.initState();
     _loadUserProfile(); 
   }
-
-  // FUNGSI PENGISI OTOMATIS BERDASARKAN REGISTRASI
  // FUNGSI PENGISI OTOMATIS BERDASARKAN DATA LOGIN DI MEMORI HP
   Future<void> _loadUserProfile() async {
     try {
