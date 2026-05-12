@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; 
+import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ==============================================================
@@ -46,9 +46,9 @@ class _MasukPageState extends State<MasukPage> {
           content: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.errorRed, 
+              color: AppColors.error, // Menggunakan warna merah error baru
               borderRadius: BorderRadius.circular(15),
-              boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 8, offset: const Offset(0, 4))],
+              boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: const Offset(0, 4))],
             ),
             child: const Row(
               children: [
@@ -75,14 +75,11 @@ class _MasukPageState extends State<MasukPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(hasil['pesan']), 
-            backgroundColor: AppColors.successGreen, 
+            backgroundColor: AppColors.success, // Menggunakan warna hijau sukses baru
             behavior: SnackBarBehavior.floating,
           ),
         );
 
-        // ==============================================================
-        // SIMPAN ID KE MEMORI HP
-        // ==============================================================
         // ==============================================================
         // SIMPAN DATA KE MEMORI HP (Untuk Autofill di Checkout)
         // ==============================================================
@@ -124,7 +121,7 @@ class _MasukPageState extends State<MasukPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(hasil['pesan'] ?? 'Login Gagal'), 
-            backgroundColor: AppColors.errorRed, 
+            backgroundColor: AppColors.error, // Menggunakan warna merah error baru
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -135,7 +132,7 @@ class _MasukPageState extends State<MasukPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Gagal terhubung ke server! Cek koneksi / XAMPP.'), 
-          backgroundColor: AppColors.errorRed, 
+          backgroundColor: AppColors.error, // Menggunakan warna merah error baru
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -143,13 +140,13 @@ class _MasukPageState extends State<MasukPage> {
   }
   
   // ==============================================================
-  // --- BUILDER UTAMA UI (TIDAK ADA YANG DIRUBAH) ---
+  // --- BUILDER UTAMA UI ---
   // ==============================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false, 
-      backgroundColor: AppColors.bgCream, 
+      backgroundColor: AppColors.bgUtama, // Menggunakan krem utama
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
@@ -215,9 +212,9 @@ class _MasukPageState extends State<MasukPage> {
               width: isDesktop ? 700 : double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
               decoration: BoxDecoration(
-                color: AppColors.primaryOrange, 
+                color: AppColors.primary, // Menggunakan warna utama oranye coklat
                 borderRadius: BorderRadius.circular(30),
-                boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 10, offset: const Offset(0, 5))],
+                boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 5))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +236,7 @@ class _MasukPageState extends State<MasukPage> {
                 SizedBox(
                   width: isDesktop ? 300 : double.infinity, height: 55,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryOrange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                     onPressed: _handleLogin,
                     child: const Text('LOGIN', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), 
                   ),
@@ -247,7 +244,7 @@ class _MasukPageState extends State<MasukPage> {
                 SizedBox(
                   width: isDesktop ? 300 : double.infinity, height: 55,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryOrange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                     onPressed: () {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       Navigator.pushNamed(context, '/login'); 
@@ -267,7 +264,7 @@ class _MasukPageState extends State<MasukPage> {
     return Container(
       height: 65, width: double.infinity,
       decoration: const BoxDecoration(
-        color: AppColors.primaryOrange, 
+        color: AppColors.primary, // Menggunakan warna utama oranye coklat
         borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
       ),
       child: Row(
@@ -276,7 +273,7 @@ class _MasukPageState extends State<MasukPage> {
           Container(
             padding: const EdgeInsets.all(5),
             decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle), 
-            child: const Icon(Icons.cake, color: AppColors.primaryOrange, size: 28), 
+            child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
           const SizedBox(width: 10),
           const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)), 
@@ -294,13 +291,13 @@ class _MasukPageState extends State<MasukPage> {
           Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)), 
           const SizedBox(height: 10),
           Container(
-            decoration: BoxDecoration(color: AppColors.inputBg, borderRadius: BorderRadius.circular(12)), 
+            decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(12)), // Background kolom form
             child: TextField(
               controller: controller,
               obscureText: isPassword ? !_passwordVisible : false,
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16, color: AppColors.textDark), // Pastikan teks yang diketik warnanya gelap
               decoration: InputDecoration(
-                prefixIcon: Icon(icon, color: AppColors.iconOrange, size: 24), 
+                prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24), // Ikon oranye gelap biar kontras dengan krem
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: () => setState(() => _passwordVisible = !_passwordVisible),
@@ -326,6 +323,6 @@ class HeaderClipper extends CustomClipper<Path> {
 }
 
 class HeaderPainter extends CustomPainter {
-  @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.strokeDark..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); }
+  @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.textBrown..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); } // Ganti strokeDark jadi textBrown
   @override bool shouldRepaint(oldDelegate) => false;
 }

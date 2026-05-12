@@ -38,11 +38,21 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+  
+  # --- PENGATURAN FONT SIGNIKA NEGATIVE ---
+  fonts:
+    - family: Signika Negative
+      fonts:
+        - asset: assets/fonts/SignikaNegative-Regular.ttf
+        - asset: assets/fonts/SignikaNegative-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/SignikaNegative-Bold.ttf
+          weight: 700
 
 # --- PENGATURAN LOGO PUDDINGKU ---
 # Pastikan nama file gambar kamu adalah "logo.png"
 # dan sudah ditaruh di dalam folder "assets/images/"
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/images/logo puddingku fiks.jpeg"

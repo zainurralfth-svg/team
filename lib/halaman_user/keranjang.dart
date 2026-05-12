@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:puddingku_smart_system/main.dart';
 import '../Backend/api_service.dart';
-import '../Core/Colour.dart';
+import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import 'profil_pengguna.dart';
 import 'konfirmasipesanan.dart'; // Pastikan file ini sudah ada
 import 'package:shared_preferences/shared_preferences.dart';
@@ -105,9 +106,9 @@ class _KeranjangPageState extends State<KeranjangPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.adminBg, // Background cerah
+      backgroundColor: AppColors.bgUtama, // Background krem dari Colour.dart
       appBar: AppBar(
-        backgroundColor: AppColors.primaryOrange, // Diseragamkan pakai warna utama
+        backgroundColor: AppColors.primary, // Diseragamkan pakai warna utama oranye coklat
         elevation: 0,
         toolbarHeight: 80,
         iconTheme: const IconThemeData(color: AppColors.textWhite),
@@ -125,7 +126,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
 
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
+              child: CircularProgressIndicator(color: AppColors.primary),
             )
           : _cartItems.isEmpty
           ? const Center(
@@ -188,7 +189,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                       decoration: BoxDecoration(
                         color: AppColors.textWhite,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.primaryOrange),
+                        border: Border.all(color: AppColors.primary),
                       ),
                       child: const TextField(
                         decoration: InputDecoration(
@@ -196,7 +197,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                           hintStyle: TextStyle(color: AppColors.textHint),
                           prefixIcon: Icon(
                             Icons.edit_note,
-                            color: AppColors.primaryOrange,
+                            color: AppColors.primary,
                           ),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(vertical: 15),
@@ -211,7 +212,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.shadowCustom, // Panggil shadow dari Colour.dart
+                            color: AppColors.shadow, // Panggil shadow dari Colour.dart
                             blurRadius: 5,
                             offset: const Offset(0, 2),
                           ),
@@ -237,7 +238,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                           Text(
                             'Rp $_totalHarga',
                             style: const TextStyle(
-                              color: AppColors.primaryOrange,
+                              color: AppColors.primary, // Warna oranye utama untuk harga
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
@@ -268,9 +269,9 @@ class _KeranjangPageState extends State<KeranjangPage> {
                           width: 240,
                           height: 45,
                           decoration: BoxDecoration(
-                            color: AppColors.cartConfirmBtn, // Panggil tombol kuning dari Colour.dart
+                            color: AppColors.accent, // Warna kuning aksen untuk tombol checkout
                             borderRadius: BorderRadius.circular(25),
-                            border: Border.all(color: AppColors.cartConfirmStroke), // Panggil border dari Colour.dart
+                            border: Border.all(color: AppColors.textDark), // Border gelap tegas
                           ),
                           child: const Center(
                             child: Text(
@@ -294,7 +295,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
-          color: AppColors.primaryOrange,
+          color: AppColors.primary, // Warna bottom nav oranye utama
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -347,7 +348,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowCustom, // Ganti ke shadow standar Colour.dart
+            color: AppColors.shadow, // Ganti ke shadow standar Colour.dart
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -362,7 +363,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
               width: 70,
               height: 70,
               fit: BoxFit.cover,
-              errorBuilder: (c, e, s) => const Icon(Icons.fastfood, size: 70, color: AppColors.iconOrange),
+              errorBuilder: (c, e, s) => const Icon(Icons.fastfood, size: 70, color: AppColors.primary),
             ),
           ),
           const SizedBox(width: 15),
@@ -379,7 +380,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                 Text(
                   harga,
                   style: const TextStyle(
-                    color: AppColors.primaryOrange,
+                    color: AppColors.primary, // Oranye utama
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -400,7 +401,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                       onTap: () => _hapusItem(idProduk),
                       child: const Icon(
                         Icons.delete_outline,
-                        color: AppColors.errorRed, // Ganti ikon tempat sampah jadi merah biar lebih intuitif
+                        color: AppColors.error, // Ganti ikon tempat sampah jadi merah error Colour.dart
                         size: 24,
                       ),
                     ),
@@ -419,7 +420,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
       width: 25,
       height: 25,
       decoration: BoxDecoration(
-        color: AppColors.inputDisabledBg, // Warna background tombol +/- agak abu/krem
+        color: AppColors.bgInput, // Warna background tombol +/- pakai abu dari bgInput
         borderRadius: BorderRadius.circular(5),
       ),
       child: Center(

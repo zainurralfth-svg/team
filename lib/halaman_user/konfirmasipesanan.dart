@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // <-- TAMBAHAN INI
 import '../Backend/api_service.dart';
-import '../Core/Colour.dart'; // Import gudang warna kita
+import '../Core/Colour.dart'; // Import gudang 14 warna kita
 
 class KonfirmasiPage extends StatefulWidget {
   const KonfirmasiPage({super.key});
@@ -25,8 +25,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
     _loadUserProfile(); 
   }
 
-  // FUNGSI PENGISI OTOMATIS BERDASARKAN REGISTRASI
- // FUNGSI PENGISI OTOMATIS BERDASARKAN DATA LOGIN DI MEMORI HP
+  // FUNGSI PENGISI OTOMATIS BERDASARKAN DATA LOGIN DI MEMORI HP
   Future<void> _loadUserProfile() async {
     try {
       // Buka brankas memori HP
@@ -85,7 +84,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
 
     if (response['status'] == 'sukses') {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Pesanan Berhasil Dibuat! 🚀"), backgroundColor: AppColors.successGreen),
+        const SnackBar(content: Text("Pesanan Berhasil Dibuat! 🚀"), backgroundColor: AppColors.success), // Pakai warna sukses baru
       );
       
       // Pindah ke halaman Bukti Pesanan dan bawa SEMUA datanya
@@ -102,7 +101,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal: ${response['pesan']}"), backgroundColor: AppColors.errorRed),
+        SnackBar(content: Text("Gagal: ${response['pesan']}"), backgroundColor: AppColors.error), // Pakai warna error baru
       );
     }
   }
@@ -115,17 +114,17 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
     final int totalHarga = args?['total'] ?? 0;
 
     return Scaffold(
-      backgroundColor: AppColors.bgCream, // Disamakan dengan Colour.dart
+      backgroundColor: AppColors.bgUtama, // Disamakan dengan krem Colour.dart baru
       body: SafeArea(
         child: Column(
           children: [
             // ============================================================
-            // HEADER COKELAT (Sesuai Baris Kode Asli Abang - 100% Utuh)
+            // HEADER COKELAT 
             // ============================================================
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               decoration: const BoxDecoration(
-                color: AppColors.primaryOrange, // Disamakan dengan Colour.dart
+                color: AppColors.primary, // Disamakan dengan oranye coklat Colour.dart
               ),
               child: Row(
                 children: [
@@ -169,7 +168,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
 
             Expanded(
               child: _isLoadingProfile 
-              ? const Center(child: CircularProgressIndicator(color: AppColors.primaryOrange))
+              ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
               : SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -189,7 +188,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.shadowCustom, // Disamakan dengan Colour.dart
+                            color: AppColors.shadow, // Disamakan dengan bayangan Colour.dart
                             blurRadius: 10,
                           )
                         ],
@@ -225,7 +224,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
-                                  color: AppColors.primaryOrange,
+                                  color: AppColors.primary, // Oranye warna utama
                                 ),
                               ),
                             ],
@@ -242,9 +241,9 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                     const SizedBox(height: 10),
 
                     // TEXTFIELD (OTOMATIS SESUAI DATA REGISTRASI)
-                    _buildTextField("Nama Lengkap", Icons.person, AppColors.primaryOrange, _namaController),
+                    _buildTextField("Nama Lengkap", Icons.person, AppColors.primary, _namaController),
                     const SizedBox(height: 12),
-                    _buildTextField("Nomor Telepon", Icons.phone, AppColors.primaryOrange, _telpController),
+                    _buildTextField("Nomor Telepon", Icons.phone, AppColors.primary, _telpController),
 
                     const SizedBox(height: 40),
 
@@ -252,7 +251,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                     Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryOrange,
+                          backgroundColor: AppColors.primary, // Warna oranye utama
                           padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25),
@@ -289,7 +288,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
   }
 
   // ============================================================
-  // WIDGET HELPER (Sesuai Baris Kode Asli Abang - 100% Utuh)
+  // WIDGET HELPER 
   // ============================================================
   Widget _buildOrderItem(String title, String qty, String price) {
     return Row(
@@ -315,7 +314,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
-            color: AppColors.primaryOrange,
+            color: AppColors.primary, // Warna oranye utama
           ),
         ),
       ],
@@ -330,20 +329,20 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
         hintText: hint,
         hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 13),
         prefixIcon: Icon(icon, color: iconColor, size: 22),
-        fillColor: AppColors.adminCardLight, // Disamakan dengan warna cream terang di AppColors
+        fillColor: AppColors.bgCard, // Disamakan dengan warna cream terang di AppColors
         filled: true,
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: AppColors.primaryOrange),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: AppColors.primaryOrange),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: AppColors.primaryOrange, width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
       ),
     );

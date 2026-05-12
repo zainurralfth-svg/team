@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Core/Colour.dart'; // Sesuaikan folder lo
+import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import '../Backend/API_Service.dart'; 
 
 class HalamanProfil extends StatefulWidget {
@@ -69,7 +69,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
               await prefs.clear();
               Navigator.pushNamedAndRemoveUntil(context, '/masuk', (route) => false);
             },
-            child: const Text('Logout', style: TextStyle(color: AppColors.errorRed, fontWeight: FontWeight.bold)),
+            child: const Text('Logout', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)), // Pakai merah error baru
           ),
         ],
       ),
@@ -79,16 +79,16 @@ class _HalamanProfilState extends State<HalamanProfil> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.profileBg,
+      backgroundColor: AppColors.bgUtama, // Pakai krem utama
       appBar: AppBar(
-        backgroundColor: AppColors.profilePrimary,
+        backgroundColor: AppColors.primary, // Pakai oranye utama
         elevation: 0,
         centerTitle: true, 
         title: const Text('Profil Anda', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: AppColors.textWhite),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.profilePrimary))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -98,11 +98,11 @@ class _HalamanProfilState extends State<HalamanProfil> {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: AppColors.profilePrimary.withOpacity(0.2),
+                      color: AppColors.primary.withOpacity(0.2), // Latar lingkaran oranye transparan
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.profilePrimary, width: 3),
+                      border: Border.all(color: AppColors.primary, width: 3),
                     ),
-                    child: const Icon(Icons.person, size: 80, color: AppColors.profilePrimary),
+                    child: const Icon(Icons.person, size: 80, color: AppColors.primary),
                   ),
                   const SizedBox(height: 24),
                   
@@ -110,7 +110,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: AppColors.profileCard,
+                      color: AppColors.bgCard, // Pakai warna krem terang untuk card
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
@@ -119,11 +119,12 @@ class _HalamanProfilState extends State<HalamanProfil> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow(Icons.badge, 'Nama Lengkap', _userData['nama'] ?? 'Belum disetting', AppColors.profileText, AppColors.profilePrimary),
+                        // Teks menggunakan textBrown biar senada
+                        _buildInfoRow(Icons.badge, 'Nama Lengkap', _userData['nama'] ?? 'Belum disetting', AppColors.textBrown, AppColors.primary),
                         const Divider(height: 30, color: Colors.grey),
-                        _buildInfoRow(Icons.alternate_email, 'Username', _userData['username'] ?? '-', AppColors.profileText, AppColors.profilePrimary),
+                        _buildInfoRow(Icons.alternate_email, 'Username', _userData['username'] ?? '-', AppColors.textBrown, AppColors.primary),
                         const Divider(height: 30, color: Colors.grey),
-                        _buildInfoRow(Icons.phone_android, 'No. Handphone', _userData['phone'] ?? '-', AppColors.profileText, AppColors.profilePrimary),
+                        _buildInfoRow(Icons.phone_android, 'No. Handphone', _userData['phone'] ?? '-', AppColors.textBrown, AppColors.primary),
                       ],
                     ),
                   ),
@@ -138,7 +139,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
                       icon: const Icon(Icons.logout, color: AppColors.textWhite),
                       label: const Text('LOGOUT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite, letterSpacing: 1.5)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.errorRed,
+                        backgroundColor: AppColors.error, // Warna tombol merah error
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         elevation: 3,
                       ),
@@ -154,7 +155,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
-          color: AppColors.adminPrimary, 
+          color: AppColors.primary, // Warna navbar bawah
           borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
         ),
         child: Row(
@@ -164,20 +165,20 @@ class _HalamanProfilState extends State<HalamanProfil> {
               onTap: () {
                 Navigator.pushNamed(context, '/cek_pesanan');
               },
-              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, AppColors.adminPrimary),
+              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, AppColors.primary),
             ),
             GestureDetector(
               onTap: () {
                 Navigator.pushNamed(context, '/menu');
               },
-              child: _buildBottomNavItem(Icons.cake, 'Produk', false, AppColors.adminPrimary),
+              child: _buildBottomNavItem(Icons.cake, 'Produk', false, AppColors.primary),
             ),
             GestureDetector(
               onTap: () {
                 // Udah di halaman Profil, gak usah ngapa-ngapain
               },
               // TRUE -> Bunderan putihnya nyala di tombol Profil
-              child: _buildBottomNavItem(Icons.person, 'Profil', true, AppColors.adminPrimary),
+              child: _buildBottomNavItem(Icons.person, 'Profil', true, AppColors.primary),
             ),
           ],
         ),

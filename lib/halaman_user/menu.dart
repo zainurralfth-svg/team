@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'product_detail.dart';
 import '../Backend/api_service.dart';
 import '../halaman_user/profil_pengguna.dart';
-import '../Core/Colour.dart'; // IMPORT GUDANG WARNA
+import '../Core/Colour.dart'; // IMPORT GUDANG WARNA (Palet 14 Warna Baru)
 import 'package:shared_preferences/shared_preferences.dart';
 
 // =============================================
@@ -135,16 +135,15 @@ class _MenuPageState extends State<MenuPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Variabel warna lokal dihapus, langsung pakai AppColors
     final String activeBanner = _banners[_selectedIndex];
     final String activeName = _categories[_selectedIndex];
     final double screenWidth = MediaQuery.of(context).size.width;
     final double categoryBtnWidth = (screenWidth - 32 - 32) / 5;
 
     return Scaffold(
-      backgroundColor: AppColors.menuBg,
+      backgroundColor: AppColors.bgUtama, // Pakai krem dari palet
       appBar: AppBar(
-        backgroundColor: AppColors.menuPrimary,
+        backgroundColor: AppColors.primary, // Pakai oranye dari palet
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Image.asset(
@@ -165,9 +164,9 @@ class _MenuPageState extends State<MenuPage> {
               alignment: Alignment.topRight,
               children: [
                 CircleAvatar(
-                  backgroundColor: AppColors.menuCard,
+                  backgroundColor: AppColors.bgCard, // Pakai background terang
                   child: IconButton(
-                    icon: const Icon(Icons.shopping_cart, color: AppColors.menuPrimary),
+                    icon: const Icon(Icons.shopping_cart, color: AppColors.primary),
                     onPressed: () => Navigator.pushNamed(context, '/keranjang').then((_) => _ambilDataKeranjang()),
                   ),
                 ),
@@ -178,7 +177,7 @@ class _MenuPageState extends State<MenuPage> {
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
-                        color: AppColors.errorRed, // Warna merah notifikasi
+                        color: AppColors.error, // Warna merah error untuk notifikasi badge
                         shape: BoxShape.circle,
                       ),
                       constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
@@ -208,7 +207,7 @@ class _MenuPageState extends State<MenuPage> {
                   width: double.infinity, height: 180, fit: BoxFit.cover,
                   errorBuilder: (c, e, s) => Container(
                     width: double.infinity, height: 180,
-                    decoration: BoxDecoration(color: AppColors.menuPrimary.withOpacity(0.4), borderRadius: BorderRadius.circular(20)),
+                    decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.4), borderRadius: BorderRadius.circular(20)),
                     child: Center(child: Text('Banner $activeName', style: const TextStyle(color: AppColors.textWhite, fontSize: 20, fontWeight: FontWeight.bold))),
                   ),
                 ),
@@ -217,13 +216,15 @@ class _MenuPageState extends State<MenuPage> {
 
               // Search Bar
               TextField(
+                style: const TextStyle(color: AppColors.textDark), // Tambah warna font ketikan
                 decoration: InputDecoration(
                   hintText: 'Search Produk',
+                  hintStyle: const TextStyle(color: AppColors.textHint),
                   prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   filled: true, fillColor: AppColors.textWhite,
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: AppColors.menuBorder, width: 0.5)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: AppColors.menuBorder, width: 0.5)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: AppColors.primaryDark, width: 0.5)), // Ganti menuBorder ke primaryDark
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: AppColors.primaryDark, width: 0.5)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -240,14 +241,14 @@ class _MenuPageState extends State<MenuPage> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
                         decoration: BoxDecoration(
-                          color: isActive ? AppColors.menuPrimary : AppColors.menuCard,
+                          color: isActive ? AppColors.primary : AppColors.bgCard, // Pakai primary kalau aktif, bgCard kalau tidak
                           borderRadius: BorderRadius.circular(25),
-                          border: Border.all(color: AppColors.menuBorder, width: isActive ? 2 : 1),
+                          border: Border.all(color: AppColors.primaryDark, width: isActive ? 2 : 1), // Ganti menuBorder ke primaryDark
                         ),
                         child: Center(
                           child: Text(
                             _categories[index],
-                            style: TextStyle(color: isActive ? AppColors.textWhite : AppColors.menuBorder, fontWeight: FontWeight.bold, fontSize: 13),
+                            style: TextStyle(color: isActive ? AppColors.textWhite : AppColors.primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
                           ),
                         ),
                       ),
@@ -260,7 +261,7 @@ class _MenuPageState extends State<MenuPage> {
               Center(
                 child: Text(
                   activeName.toUpperCase(),
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.menuText, letterSpacing: 2),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textBrown, letterSpacing: 2), // Ganti menuText ke textBrown
                 ),
               ),
               const SizedBox(height: 16),
@@ -268,14 +269,14 @@ class _MenuPageState extends State<MenuPage> {
               // Grid Produk
               Builder(
                 builder: (context) {
-                  if (_isLoading) return const Center(child: CircularProgressIndicator(color: AppColors.menuPrimary));
+                  if (_isLoading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
 
                   final produkFilter = _menuDariDatabase
                       .where((produk) => produk['kategori'] == activeName)
                       .toList();
 
                   if (produkFilter.isEmpty) {
-                    return Center(child: Padding(padding: const EdgeInsets.all(20.0), child: Text("Belum ada produk di kategori $activeName.", style: const TextStyle(color: AppColors.menuText, fontWeight: FontWeight.bold))));
+                    return Center(child: Padding(padding: const EdgeInsets.all(20.0), child: Text("Belum ada produk di kategori $activeName.", style: const TextStyle(color: AppColors.textBrown, fontWeight: FontWeight.bold))));
                   }
 
                   return GridView.builder(
@@ -298,10 +299,11 @@ class _MenuPageState extends State<MenuPage> {
                       String deskripsiDB = product['deskripsi'] ?? 'Deskripsi tidak tersedia.';
                       String stokDB = product['stok']?.toString() ?? '0';
 
+                      // Pass warna baru ke fungsi builder (bgCard, primaryDark, textBrown, primary)
                       return _buildProductCard(
                         context, idMenu, namaDB, hargaDB,
                         urlGambarLengkap, deskripsiDB, stokDB,
-                        AppColors.menuCard, AppColors.menuBorder, AppColors.menuText, AppColors.menuPrimary,
+                        AppColors.bgCard, AppColors.primaryDark, AppColors.textBrown, AppColors.primary, 
                       );
                     },
                   );
@@ -315,7 +317,7 @@ class _MenuPageState extends State<MenuPage> {
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
-          color: AppColors.menuPrimary,
+          color: AppColors.primary, // Navbar bawah oranye
           borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
         ),
         child: Row(
@@ -323,15 +325,15 @@ class _MenuPageState extends State<MenuPage> {
           children: [
             GestureDetector(
               onTap: () => Navigator.pushNamed(context, '/cek_pesanan'),
-              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, AppColors.menuPrimary),
+              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, AppColors.primary),
             ),
             GestureDetector(
               onTap: () {},
-              child: _buildBottomNavItem(Icons.cake, 'Produk', true, AppColors.menuPrimary),
+              child: _buildBottomNavItem(Icons.cake, 'Produk', true, AppColors.primary),
             ),
             GestureDetector(
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfil())),
-              child: _buildBottomNavItem(Icons.person, 'Profil', false, AppColors.menuPrimary),
+              child: _buildBottomNavItem(Icons.person, 'Profil', false, AppColors.primary),
             ),
           ],
         ),
@@ -347,7 +349,7 @@ class _MenuPageState extends State<MenuPage> {
         color: cardColor,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: borderColor, width: 1),
-        boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 5, offset: const Offset(0, 3))],
+        boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 5, offset: const Offset(0, 3))], // Pakai shadow baru
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,14 +378,14 @@ class _MenuPageState extends State<MenuPage> {
               children: [
                 Text(name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
-                Text(price, style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 12)),
+                Text(price, style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)), // Ditebalkan sedikit
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
                       onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description, stok),
-                      child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: AppColors.menuBorder, fontWeight: FontWeight.w600)),
+                      child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: AppColors.primaryDark, fontWeight: FontWeight.w600)), // Ganti menuBorder
                     ),
                     GestureDetector(
                       onTap: () async {
@@ -403,7 +405,7 @@ class _MenuPageState extends State<MenuPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('$name ditambahkan pada keranjang! 🛒', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                              backgroundColor: AppColors.successGreen, // Pakai warna hijau dari AppColors
+                              backgroundColor: AppColors.success, // Pakai hijau success
                               behavior: SnackBarBehavior.floating, // BIKIN MELAYANG
                               margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20), // JARAK DARI BAWAH BIAR GAK KETUTUP FOOTER
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), 
@@ -415,7 +417,7 @@ class _MenuPageState extends State<MenuPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Gagal: ${response['pesan']}'), 
-                              backgroundColor: AppColors.errorRed, // Pakai warna merah dari AppColors
+                              backgroundColor: AppColors.error, // Pakai merah error
                               behavior: SnackBarBehavior.floating,
                               margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
                               duration: const Duration(seconds: 2)

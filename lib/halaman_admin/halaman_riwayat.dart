@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../Backend/api_service.dart';
-import '../Core/Colour.dart';
+import '../Core/Colour.dart'; // File warna 14 Palet Baru
 import 'halaman_pengguna.dart';
-import 'tambah_produk.dart';
 import 'halaman_pesanan.dart';
 import 'admin.dart'; 
 import 'halaman_profil_admin.dart'; 
@@ -54,12 +53,12 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.adminPrimary,
+      backgroundColor: AppColors.primary, // Latar belakang utama pakai oranye coklat
       body: SafeArea(
         child: Column(
           children: [
             // ==========================================
-            // 1. HEADER (INTERAKTIF)
+            // 1. HEADER (Sapaan Admin & Profil)
             // ==========================================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
@@ -109,7 +108,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       ),
                       child: const Icon(
                         Icons.person,
-                        color: AppColors.adminPrimary,
+                        color: AppColors.primary, // Ikon profil warna utama
                         size: 30,
                       ),
                     ),
@@ -119,7 +118,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             ),
 
             // ==========================================
-            // 2. KARTU STATISTIK (INTERAKTIF)
+            // 2. KARTU STATISTIK PENDEK (INTERAKTIF)
             // ==========================================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -144,6 +143,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             ),
             const SizedBox(height: 20),
 
+            // Baris Info Pendapatan
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20.0),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -156,11 +156,11 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                 children: [
                   Text(
                     'Pendapatan',
-                    style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     'Rp -', 
-                    style: TextStyle(color: AppColors.adminPrimary, fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -168,25 +168,26 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             const SizedBox(height: 20),
 
             // ==========================================
-            // 3. AREA DAFTAR RIWAYAT PESANAN
+            // 3. AREA DAFTAR RIWAYAT PESANAN (Bagian Bawah)
             // ==========================================
             Expanded(
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
-                  color: AppColors.adminCardLight, 
+                  color: AppColors.bgCard, // Background daftar pesanan pakai krem
                 ),
                 child: Column(
                   children: [
+                    // Label Mengambang "Daftar Pesanan"
                     Transform.translate(
                       offset: const Offset(0, -15),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
                         decoration: BoxDecoration(
-                          color: AppColors.adminPrimary,
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
-                            BoxShadow(color: AppColors.shadowCustom, blurRadius: 4, offset: const Offset(0, 2))
+                            BoxShadow(color: AppColors.shadow, blurRadius: 4, offset: const Offset(0, 2))
                           ],
                         ),
                         child: const Text(
@@ -198,11 +199,11 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                     
                     Expanded(
                       child: _isLoading 
-                        ? const Center(child: CircularProgressIndicator(color: AppColors.adminPrimary))
+                        ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                         : _listPesanan.isEmpty 
                           ? const Center(child: Text("Belum ada pesanan masuk", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)))
                           : RefreshIndicator(
-                              color: AppColors.adminPrimary,
+                              color: AppColors.primary,
                               onRefresh: _fetchDataPesanan, 
                               child: ListView.builder(
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
@@ -222,7 +223,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
       ),
       
       // ==========================================
-      // 4. BOTTOM NAVIGATION BAR (DIJAMIN GAK BERUBAH)
+      // 4. BOTTOM NAVIGATION BAR 
       // ==========================================
       bottomNavigationBar: _buildBottomNavigation(context),
     );
@@ -232,7 +233,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   // WIDGET BANTUAN (Helper)
   // ----------------------------------------------------
 
-  // DITAMBAHKAN ONTAP AGAR BISA DI-KLIK
+  // Fungsi membuat Card Statistik Pendek di Header
   Widget _buildStatCard(String title, IconData icon, {bool isActive = false, VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -241,7 +242,8 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
         height: 105,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isActive ? Colors.white.withOpacity(0.4) : AppColors.adminStatCard,
+          // Efek kaca tembus pandang (translucent white)
+          color: isActive ? Colors.white.withOpacity(0.4) : Colors.white.withOpacity(0.24),
           borderRadius: BorderRadius.circular(22),
         ),
         child: Column(
@@ -273,7 +275,8 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     String waktuLengkap = item['tanggal_pesan'] ?? '';
     String waktuSingkat = waktuLengkap.length > 16 ? waktuLengkap.substring(0, 16) : waktuLengkap;
 
-    Color statusColor = status == 'SELESAI' ? AppColors.successGreen : (status == 'DIBATALKAN' ? AppColors.errorRed : AppColors.statusProsesBlue);
+    // Tentukan warna bullet poin status pesanan berdasarkan palet baru
+    Color statusColor = status == 'SELESAI' ? AppColors.success : (status == 'DIBATALKAN' ? AppColors.error : AppColors.info);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
@@ -281,23 +284,24 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
       decoration: BoxDecoration(
         color: AppColors.textWhite,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: AppColors.shadowCustom, blurRadius: 5, offset: const Offset(0, 3))],
+        boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 5, offset: const Offset(0, 3))],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Kotak inisial nama
           Container(
             width: 45,
             height: 45,
             decoration: BoxDecoration(
-              color: AppColors.adminCardLight,
+              color: AppColors.bgCard,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: Colors.black12),
             ),
             child: Center(
               child: Text(
                 hurufAwal,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.adminPrimary),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primary),
               ),
             ),
           ),
@@ -313,10 +317,11 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       namaPemesan,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark),
                     ),
+                    // Label Status
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.adminCardLight,
+                        color: AppColors.bgCard,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -344,7 +349,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   children: [
                     Text(
                       harga,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.adminPrimary),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
                     ),
                     Row(
                       children: [
@@ -367,12 +372,12 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   }
 
   // ==========================================
-  // FUNGSI BOTTOM NAVIGATION (100% SESUAI REQUEST)
+  // FUNGSI BOTTOM NAVIGATION 
   // ==========================================
   Widget _buildBottomNavigation(BuildContext context) {
     return Container(
       height: 70,
-      color: AppColors.adminPrimary,
+      color: AppColors.primary, // Latar bottom nav
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -388,14 +393,6 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
               MaterialPageRoute(builder: (context) => const HalamanPengguna()),
             );
           }),
-           _bottomNavItem(Icons.add_box, 'PRODUK BARU', false, () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TambahProdukPage(),
-                ),
-              );
-            }),
           _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
             Navigator.push(
               context,
@@ -426,6 +423,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
+                // Efek lingkar di belakang ikon navigasi jika diklik
                 color: isSelected ? AppColors.textWhite.withOpacity(0.2) : Colors.transparent,
                 shape: BoxShape.circle,
               ),

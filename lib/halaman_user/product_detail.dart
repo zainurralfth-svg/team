@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; // IMPORT GUDANG WARNA
+import '../Core/Colour.dart'; // IMPORT GUDANG WARNA (Palet 14 Warna Baru)
 
 class ProductDetailPage extends StatefulWidget {
   // Parameter yang diterima dari halaman menu
@@ -73,7 +73,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.detailBg, // Pakai dari AppColors
+      backgroundColor: AppColors.bgUtama, // Pakai background utama krem
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -92,9 +92,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                 fit: BoxFit.cover,
                 // Tampilkan icon jika gambar gagal dimuat
                 errorBuilder: (c, e, s) => Container(
-                  color: AppColors.detailImgPlaceholder, // Pakai dari AppColors
+                  color: AppColors.bgInput, // Placeholder gambar error pakai warna input abu-krem
                   child: const Center(
-                    child: Icon(Icons.cake, size: 80, color: AppColors.detailImgIcon), // Pakai dari AppColors
+                    child: Icon(Icons.cake, size: 80, color: AppColors.primaryDark), // Icon pakai oranye gelap
                   ),
                 ),
               ),
@@ -124,7 +124,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
-                          color: AppColors.detailTextTitle, // Pakai dari AppColors
+                          color: AppColors.textDark, // Pakai teks gelap
                           height: 1.2,
                         ),
                       ),
@@ -136,7 +136,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                         textAlign: TextAlign.justify,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: AppColors.detailTextBody, // Pakai dari AppColors
+                          color: AppColors.textBrown, // Pakai teks coklat
                           height: 1.65,
                         ),
                       ),
@@ -149,7 +149,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
-                          color: AppColors.detailTextTitle, // Pakai dari AppColors
+                          color: AppColors.textDark, // Pakai teks gelap
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -157,7 +157,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                       // Nilai harga dari halaman menu
                       Text(
                         widget.price,
-                        style: const TextStyle(fontSize: 15, color: AppColors.detailTextBody), // Pakai dari AppColors
+                        style: const TextStyle(fontSize: 15, color: AppColors.textBrown), // Pakai teks coklat
                       ),
                       const SizedBox(height: 14),
 
@@ -168,7 +168,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
-                          color: AppColors.detailTextTitle, // Pakai dari AppColors
+                          color: AppColors.textDark, // Pakai teks gelap
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -178,7 +178,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                       Text.rich(
                         TextSpan(
                           text: '${widget.stok} ',
-                          style: const TextStyle(fontSize: 15, color: AppColors.detailTextBody), // Pakai dari AppColors
+                          style: const TextStyle(fontSize: 15, color: AppColors.textBrown), // Pakai teks coklat
                           children: [
                             TextSpan(
                               text: (int.tryParse(widget.stok) ?? 0) > 0
@@ -187,8 +187,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                               style: TextStyle(
                                 fontStyle: FontStyle.italic,
                                 color: (int.tryParse(widget.stok) ?? 0) > 0
-                                    ? AppColors.successGreen // Pakai warna hijau seragam
-                                    : AppColors.errorRed,    // Pakai warna merah seragam
+                                    ? AppColors.success // Pakai warna hijau seragam
+                                    : AppColors.error,    // Pakai warna merah seragam
                               ),
                             ),
                           ],
@@ -213,8 +213,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
               child: OutlinedButton(
                 onPressed: () => Navigator.pop(context),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.detailTextTitle, // Pakai dari AppColors
-                  side: const BorderSide(color: AppColors.detailTextTitle, width: 1.5), // Pakai dari AppColors
+                  foregroundColor: AppColors.textDark, // Pakai teks gelap
+                  side: const BorderSide(color: AppColors.textDark, width: 1.5), // Pakai border gelap
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                   ),
