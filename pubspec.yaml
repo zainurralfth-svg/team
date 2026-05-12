@@ -24,6 +24,7 @@ dependencies:
   # --- Tambahan untuk ambil foto dari galeri ---
   image_picker: ^1.0.4
   shared_preferences: ^2.5.5
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
