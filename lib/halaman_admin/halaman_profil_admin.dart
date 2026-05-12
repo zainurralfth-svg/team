@@ -33,7 +33,7 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
       _ambilDataProfil(); 
     } else {
       // Kalau tidak ada sesi, lempar ke halaman login
-      Navigator.pushNamedAndRemoveUntil(context, '/masuk', (route) => false);
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     }
   }
 
@@ -71,7 +71,7 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
               Navigator.pop(context);
               SharedPreferences prefs = await SharedPreferences.getInstance();
               await prefs.clear(); // Hapus ingatan sesi login
-              Navigator.pushNamedAndRemoveUntil(context, '/masuk', (route) => false);
+              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
             },
             // Menggunakan AppColors.error (merah) untuk tombol logout
             child: const Text('Logout', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),

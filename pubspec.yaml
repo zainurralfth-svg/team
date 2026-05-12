@@ -61,4 +61,8 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/logo puddingku fiks.jpeg"
+  image_path: "assets/images/logo puddingku.png"
+
+  # --- NAH INI YANG KELUPAAN (BIAR GAK ADA KOTAK PUTIH) ---
+  adaptive_icon_background: "#FFFFFF" 
+  adaptive_icon_foreground: "assets/images/logo puddingku.png"

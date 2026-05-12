@@ -116,25 +116,30 @@ class _RegisterPageState extends State<RegisterPage> {
   // --- BUILDER UTAMA UI ---
   // ==============================================================
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Mencegah layout terdorong ke atas saat keyboard aktif
-      backgroundColor: AppColors.bgUtama, // Menggunakan krem utama
+      // Tetap true biar form nggak ketutup keyboard
+      resizeToAvoidBottomInset: true, 
+      backgroundColor: AppColors.bgUtama, 
+      
+      // SafeArea KITA HAPUS di sini, biar gambar kue full sampai atas jam HP
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
-          double contentWidth = isDesktop ? 650 : constraints.maxWidth * 0.9;
-          
+          double contentWidth = isDesktop ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9;
+
           return Stack(
             children: [
               SingleChildScrollView(
+                // GANTI INI AJA: Biar pas di-scroll mentok nggak ketarik/mantul
+                physics: const ClampingScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop),             // 1. Panggil Header
+                    _buildHeader(isDesktop),             // <-- Aman, nggak dirubah
                     const SizedBox(height: 20),
-                    _buildForm(contentWidth, isDesktop), // 2. Panggil Form
-                    const SizedBox(height: 80),          // 3. Jarak sebelum footer
-                    _buildFooter(),                      // 4. Footer SEKARANG IKUT KE-SCROLL DI SINI!
+                    _buildForm(contentWidth, isDesktop), // <-- Aman, nggak dirubah
+                    const SizedBox(height: 80),          
+                    _buildFooter(),                      // <-- Aman, nggak dirubah
                   ],
                 ),
               ),

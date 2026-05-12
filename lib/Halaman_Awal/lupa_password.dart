@@ -96,24 +96,28 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Mencegah layout terdorong ke atas saat keyboard aktif
-      backgroundColor: AppColors.bgUtama, // Pakai bgUtama (krem)
+      // Tetap true biar form nggak ketutup keyboard
+      resizeToAvoidBottomInset: true, 
+      backgroundColor: AppColors.bgUtama, 
+      
+      // SafeArea KITA HAPUS di sini, biar gambar kue full sampai atas jam HP
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // Konfigurasi ukuran responsif untuk layar Desktop vs Mobile
           bool isDesktop = constraints.maxWidth > 800;
-          double contentWidth = isDesktop ? 650 : constraints.maxWidth * 0.9;
+          double contentWidth = isDesktop ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9;
 
           return Stack(
             children: [
               SingleChildScrollView(
+                // GANTI INI AJA: Biar pas di-scroll mentok nggak ketarik/mantul
+                physics: const ClampingScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop),             // Memanggil komponen Header
-                    _buildErrorBanner(),                 // Memanggil komponen Banner Error
-                    _buildForm(contentWidth, isDesktop), // Memanggil komponen Form Utama
-                    const SizedBox(height: 120),         // Spacer agar konten tidak tertutup Footer
-                    _buildFooter(),                      // Footer
+                    _buildHeader(isDesktop),             // <-- Aman, nggak dirubah
+                    const SizedBox(height: 20),
+                    _buildForm(contentWidth, isDesktop), // <-- Aman, nggak dirubah
+                    const SizedBox(height: 80),          
+                    _buildFooter(),                      // <-- Aman, nggak dirubah
                   ],
                 ),
               ),

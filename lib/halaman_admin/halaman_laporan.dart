@@ -59,7 +59,7 @@ class LaporanBulan {
 // ─── DUMMY DATA (hapus jika sudah pakai API) ──────────────────────────────────
 
 final List<LaporanBulan> _dummyLaporan = [
-  LaporanBulan(
+  const LaporanBulan(
     bulan: 'Juli 2026',
     totalTransaksi: 12,
     totalPendapatan: 337000,
@@ -68,12 +68,12 @@ final List<LaporanBulan> _dummyLaporan = [
       TransaksiDetail(tanggal: 'Januari 6', jumlah: 10, pendapatan: 267000),
     ],
   ),
-  LaporanBulan(bulan: 'Juni 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  LaporanBulan(bulan: 'Mei 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  LaporanBulan(bulan: 'April 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  LaporanBulan(bulan: 'Maret 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  LaporanBulan(bulan: 'Februari 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  LaporanBulan(bulan: 'Januari 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'Juni 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'Mei 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'April 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'Maret 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'Februari 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'Januari 2026', totalTransaksi: 12, totalPendapatan: 337000),
 ];
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
@@ -269,9 +269,9 @@ class _AppHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
                 'PuddingKu',
                 style: TextStyle(
