@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../Backend/Api_service.dart';
 import 'halaman_produk.dart';
 import 'halaman_riwayat.dart';
 import 'halaman_pengguna.dart';
@@ -94,10 +93,8 @@ String formatRupiah(int value) {
 
 class _C {
   static const cream = Color(0xFFFFF3DC);
-  static const creamDark = Color(0xFFFFE8BB);
   static const brown = Color(0xFF8B5E2D);
   static const brownDark = Color(0xFF6B4520);
-  static const brownLight = Color(0xFFC4874A);
   static const accentOrange = Color(0xFFE8841A);
   static const textLight = Color(0xFFB08050);
   static const textDark = Color(0xFF3D2400);

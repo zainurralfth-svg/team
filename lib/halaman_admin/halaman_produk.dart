@@ -1,10 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../Backend/api_service.dart';
-import '../Core/Colour.dart'; // File warna 14 Palet Baru
-
-// IMPORT HALAMAN LAIN UNTUK NAVIGASI
+import '../Core/Colour.dart';
 import 'admin.dart'; 
 import 'halaman_pengguna.dart';
 import 'halaman_riwayat.dart'; 
@@ -91,7 +88,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                             
                             _label('Kategori Produk'),
                             DropdownButtonFormField<String>(
-                              value: selectedKat,
+                              initialValue: selectedKat,
                               decoration: _inputDeco('Pilih kategori...'),
                               icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.primary, size: 30),
                               items: listKategoriInput.map((String k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)))).toList(),
@@ -208,7 +205,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                             
                             _label('Kategori Produk'),
                             DropdownButtonFormField<String>(
-                              value: selectedKat,
+                              initialValue: selectedKat,
                               decoration: _inputDeco('Pilih kategori...'),
                               icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.primary, size: 30),
                               items: listKategoriInput.map((String k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)))).toList(),
@@ -467,7 +464,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
         itemCount: menuTampil.length, 
         itemBuilder: (context, index) {
           final item = menuTampil[index];
-          final baseUrl = '${ApiService.baseUrl}/uploads/'; 
+          const baseUrl = '${ApiService.baseUrl}/uploads/'; 
           return Container(
             decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 4))]),
             child: Column(

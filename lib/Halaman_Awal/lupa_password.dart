@@ -115,6 +115,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
                   children: [
                     _buildHeader(isDesktop),             // <-- Aman, nggak dirubah
                     const SizedBox(height: 20),
+                    _buildErrorBanner(),
                     _buildForm(contentWidth, isDesktop), // <-- Aman, nggak dirubah
                     const SizedBox(height: 80),          
                     _buildFooter(),                      // <-- Aman, nggak dirubah
