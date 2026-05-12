@@ -240,13 +240,16 @@ class ApiService {
 // ==========================================
 // 6. UPDATE STATUS PESANAN (UNTUK ADMIN)
 // ==========================================
+// ==========================================
+// 6. UPDATE STATUS PESANAN (UNTUK ADMIN)
+// ==========================================
 static Future<Map<String, dynamic>> updateStatusPesanan(String idPesanan, String statusBaru) async {
   try {
     var response = await http.post(
       Uri.parse("$baseUrl/update_status_pesanan.php"),
       body: {
-        "id_pesanan": idPesanan,
-        "status_pesanan": statusBaru,
+        "id": idPesanan,      // UBAH dari "id_pesanan" jadi "id"
+        "status": statusBaru, // UBAH dari "status_pesanan" jadi "status"
       },
     );
     return _safeDecodeMap(response.body);
@@ -286,6 +289,20 @@ static Future<Map<String, dynamic>> updateStatusPesanan(String idPesanan, String
       return _safeDecodeMap(response.body);
     } catch (e) {
       return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
+  }
+
+// ==========================================
+  // AMBIL DATA PRODUK / MENU DARI XAMPP
+  // ==========================================
+  static Future<List<dynamic>> getProduk() async {
+    try {
+      // PERHATIKAN: Arahkan ke api_menu.php milik abang
+      var response = await http.get(Uri.parse("$baseUrl/api_menu.php")); 
+      return _safeDecodeList(response.body);
+    } catch (e) {
+      print('Error getProduk: $e');
+      return [];
     }
   }
 
