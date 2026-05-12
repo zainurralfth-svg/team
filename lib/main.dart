@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-
-// ==========================================
-// IMPORT SEMUA HALAMAN DI SINI
-// ==========================================
+import 'package:intl/date_symbol_data_local.dart'; // <-- TAMBAHAN WAJIB
 import 'Halaman_Awal/tampilanawal.dart';
 import 'Halaman_Awal/login.dart'; // <-- Halaman Login kamu
 import 'Halaman_Awal/register.dart'; // <-- Halaman Register kamu
@@ -16,8 +13,14 @@ import 'halaman_user/cek_pesanan.dart';
 
 import 'halaman_admin/admin.dart';
 
-void main() {
-  runApp(const PuddingkuApp());
+void main() async {
+  // Pastikan Flutter sudah siap sebelum memuat bahasa
+  WidgetsFlutterBinding.ensureInitialized(); 
+  
+  // Memuat kamus bahasa Indonesia untuk tanggalan
+  await initializeDateFormatting('id_ID', null); 
+
+  runApp(const PuddingkuApp()); // Sesuaikan dengan nama class App abang
 }
 
 class PuddingkuApp extends StatelessWidget {
