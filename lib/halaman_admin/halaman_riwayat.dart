@@ -381,22 +381,29 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _bottomNavItem(Icons.home, 'BERANDA', false, () {
+           _bottomNavItem(Icons.assignment_outlined, 'Laporan', false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanLaporan()),
+            );
+          }),
+           _bottomNavItem(Icons.cake_outlined, 'Produk', false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanProduk()),
+            );
+          }),
+          _bottomNavItem(Icons.home_outlined, 'Beranda', false, () {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const HomeAdmin()),
             );
           }),
-          _bottomNavItem(Icons.person, 'PENGGUNA', false, () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanPengguna()),
-            );
-          }),
-          _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
+          _bottomNavItem(Icons.history, 'Riwayat', true, () {}),
+          _bottomNavItem(Icons.person_outline, 'Pengguna', false, () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const HalamanPesanan()),
+              MaterialPageRoute(builder: (context) => const HalamanPengguna()),
             );
           }),
         ],
