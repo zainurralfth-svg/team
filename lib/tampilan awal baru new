@@ -1,0 +1,157 @@
+import 'package:flutter/material.dart';
+
+class TampilanAwal extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Mengambil ukuran layar HP secara dinamis agar tampilan menyesuaikan ukuran device
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+      // 1. WARNA BACKGROUND
+      // Warna krem/oranye muda solid yang pas dengan desainmu
+      backgroundColor: const Color(0xFFF0BE86), 
+      
+      // Menggunakan Stack untuk menumpuk: gambar pola kue di belakang, dan menu utama di depan
+      body: Stack(
+        children: [
+          // ==========================================
+          // 2. ELEMEN DEKORATIF BACKGROUND (POLA KUE)
+          // ==========================================
+          // Opacity(0.15) membuat gambar jadi transparan seperti bayangan/pola
+          Positioned(
+            left: -20,
+            top: 50,
+            child: Opacity(
+              opacity: 0.15, 
+              child: Image.asset('assets/images/satu.png', width: 120),
+            ),
+          ),
+          Positioned(
+            right: -20,
+            top: 100,
+            child: Opacity(
+              opacity: 0.15,
+              child: Image.asset('assets/images/dua.png', width: 100),
+            ),
+          ),
+          Positioned(
+            left: 20,
+            top: screenHeight * 0.4,
+            child: Opacity(
+              opacity: 0.15,
+              child: Image.asset('assets/images/tiga.png', width: 90),
+            ),
+          ),
+          Positioned(
+            right: 10,
+            bottom: 120,
+            child: Opacity(
+              opacity: 0.15,
+              child: Image.asset('assets/images/empat.png', width: 140),
+            ),
+          ),
+          Positioned(
+            left: 30,
+            bottom: 60,
+            child: Opacity(
+              opacity: 0.15,
+              child: Image.asset('assets/images/satu.png', width: 80),
+            ),
+          ),
+
+          // ==========================================
+          // 3. KONTEN UTAMA (LOGO, KUE, TOMBOL)
+          // ==========================================
+          // SafeArea: Memastikan konten aman dari poni layar (kamera depan/status bar)
+          SafeArea(
+            // PERBAIKAN PENTING: SingleChildScrollView
+            // Ini yang menghilangkan error kuning-hitam! Jika layar HP terlalu pendek, 
+            // otomatis layarnya bisa di-scroll ke bawah.
+            child: SingleChildScrollView(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                // PERBAIKAN PENTING: BoxConstraints
+                // Memaksa tinggi container minimal setinggi layar. Jadi kalau layarnya panjang, 
+                // tombol Get Started akan tetap terdorong rapi ke paling bawah.
+                constraints: BoxConstraints(
+                  minHeight: screenHeight - MediaQuery.of(context).padding.top,
+                ),
+                child: Column(
+                  // MainAxisAlignment.spaceBetween membagi rata jarak vertikal: 
+                  // Atas (Logo), Tengah (Kue), Bawah (Tombol)
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+                  children: [
+                    // --- BAGIAN ATAS: LOGO TULISAN ---
+                    Column(
+                      children: [
+                        const SizedBox(height: 30), 
+                        Image.asset(
+                          'assets/images/tulisan_awal.png', 
+                          // Lebar logo sedikit diperkecil jadi 65% layar biar proporsional
+                          width: screenWidth * 0.65, 
+                          fit: BoxFit.contain,
+                        ),
+                      ],
+                    ),
+
+                    // --- BAGIAN TENGAH: GAMBAR KUE STRAWBERRY ---
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Image.asset(
+                        'assets/images/logo_puding.png', 
+                        // Lebar gambar kue juga disesuaikan (50%) agar tidak memakan layar
+                        width: screenWidth * 0.50, 
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+
+                    // --- BAGIAN BAWAH: TOMBOL GET STARTED ---
+                    Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            // Pindah ke halaman form masuk ('/masuk')
+                            Navigator.pushNamed(context, '/masuk');
+                          },
+                          child: Container(
+                            width: screenWidth * 0.85, 
+                            height: 60, 
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF331812), // Warna cokelat gelap
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Get Started',
+                                style: TextStyle(
+                                  color: Colors.white, 
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold, 
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Jarak dari tombol "Get Started" ke pinggir bawah HP
+                        const SizedBox(height: 40), 
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
