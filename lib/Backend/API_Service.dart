@@ -8,7 +8,7 @@ class ApiService {
   // Gunakan 10.0.2.2 untuk running di Emulator Android
   // Gunakan IP Address laptop (misal: 192.168.1.5) untuk HP Fisik
   // =========================================================
-  static const String baseUrl = "http://192.168.1.6/api_puddingku";
+  static const String baseUrl = "http://localhost/api_puddingku";
 
   // =========================================================
   // HELPER: Decode JSON aman agar aplikasi tidak crash
@@ -16,9 +16,13 @@ class ApiService {
   static Map<String, dynamic> _safeDecodeMap(String body) {
     try {
       final trimmed = body.trim();
-      if (trimmed.isEmpty) return {"status": "error", "pesan": "Response kosong"};
+      if (trimmed.isEmpty)
+        return {"status": "error", "pesan": "Response kosong"};
       if (trimmed.startsWith('<')) {
-        return {"status": "error", "pesan": "PHP Error: Server mengirim HTML (Cek XAMPP)"};
+        return {
+          "status": "error",
+          "pesan": "PHP Error: Server mengirim HTML (Cek XAMPP)",
+        };
       }
       return jsonDecode(trimmed);
     } catch (e) {
@@ -41,11 +45,20 @@ class ApiService {
   // 1. OTENTIKASI (LOGIN, REGISTER, RESET)
   // ==========================================
   static Future<Map<String, dynamic>> registerUser(
-      String nama, String username, String phone, String password) async {
+    String nama,
+    String username,
+    String phone,
+    String password,
+  ) async {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/register.php"),
-        body: {"nama": nama, "username": username, "phone": phone, "password": password},
+        body: {
+          "nama": nama,
+          "username": username,
+          "phone": phone,
+          "password": password,
+        },
       );
       return _safeDecodeMap(response.body);
     } catch (e) {
@@ -53,7 +66,10 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> loginUser(String username, String password) async {
+  static Future<Map<String, dynamic>> loginUser(
+    String username,
+    String password,
+  ) async {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/login.php"),
@@ -65,7 +81,10 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> resetPassword(String phone, {String? newPassword}) async {
+  static Future<Map<String, dynamic>> resetPassword(
+    String phone, {
+    String? newPassword,
+  }) async {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/reset_password.php"),
@@ -90,9 +109,18 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> tambahMenu(
-      String nama, String kategori, String harga, String stok, String deskripsi, var imageFile) async {
+    String nama,
+    String kategori,
+    String harga,
+    String stok,
+    String deskripsi,
+    var imageFile,
+  ) async {
     try {
-      var request = http.MultipartRequest('POST', Uri.parse("$baseUrl/api_menu.php"));
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("$baseUrl/api_menu.php"),
+      );
       request.fields['nama_produk'] = nama;
       request.fields['kategori'] = kategori;
       request.fields['harga'] = harga;
@@ -101,29 +129,52 @@ class ApiService {
 
       if (imageFile != null) {
         var bytes = await imageFile.readAsBytes();
-        request.files.add(http.MultipartFile.fromBytes('gambar', bytes, filename: imageFile.name));
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'gambar',
+            bytes,
+            filename: imageFile.name,
+          ),
+        );
       }
       var res = await http.Response.fromStream(await request.send());
       return _safeDecodeMap(res.body);
-    } catch (e) { return {"status": "error", "pesan": e.toString()}; }
+    } catch (e) {
+      return {"status": "error", "pesan": e.toString()};
+    }
   }
 
   static Future<Map<String, dynamic>> editMenu(
-    String idMenu, String nama, String kategori, String harga, String stok, String deskripsi, [var imageFile]
-  ) async {
+    String idMenu,
+    String nama,
+    String kategori,
+    String harga,
+    String stok,
+    String deskripsi, [
+    var imageFile,
+  ]) async {
     try {
-      var request = http.MultipartRequest('POST', Uri.parse("$baseUrl/edit_menu.php"));
-      
-      request.fields['id_produk']   = idMenu; 
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("$baseUrl/edit_menu.php"),
+      );
+
+      request.fields['id_produk'] = idMenu;
       request.fields['nama_produk'] = nama;
-      request.fields['kategori']    = kategori;
-      request.fields['harga']       = harga;
-      request.fields['stok']        = stok;
-      request.fields['deskripsi']   = deskripsi;
+      request.fields['kategori'] = kategori;
+      request.fields['harga'] = harga;
+      request.fields['stok'] = stok;
+      request.fields['deskripsi'] = deskripsi;
 
       if (imageFile != null) {
         var bytes = await imageFile.readAsBytes();
-        request.files.add(http.MultipartFile.fromBytes('gambar', bytes, filename: imageFile.name));
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'gambar',
+            bytes,
+            filename: imageFile.name,
+          ),
+        );
       }
 
       var res = await http.Response.fromStream(await request.send());
@@ -138,7 +189,7 @@ class ApiService {
       var response = await http.post(
         Uri.parse("$baseUrl/hapus_menu.php"),
         // ✅ PERBAIKAN: Diubah menjadi id_produk agar sesuai dengan kolom database
-        body: {"id_produk": idMenu}, 
+        body: {"id_produk": idMenu},
       );
       return _safeDecodeMap(response.body);
     } catch (e) {
@@ -151,14 +202,20 @@ class ApiService {
   // ==========================================
   static Future<List<dynamic>> getKeranjang(String idUser) async {
     try {
-      var response = await http.get(Uri.parse("$baseUrl/api_keranjang.php?id_user=$idUser"));
+      var response = await http.get(
+        Uri.parse("$baseUrl/api_keranjang.php?id_user=$idUser"),
+      );
       return _safeDecodeList(response.body);
     } catch (e) {
       return [];
     }
   }
 
-  static Future<Map<String, dynamic>> tambahKeranjang(String idUser, String idMenu, int jumlah) async {
+  static Future<Map<String, dynamic>> tambahKeranjang(
+    String idUser,
+    String idMenu,
+    int jumlah,
+  ) async {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/api_keranjang.php"),
@@ -190,7 +247,11 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> checkout(
-      String idUser, int totalHarga, List<dynamic> items, String metode) async {
+    String idUser,
+    int totalHarga,
+    List<dynamic> items,
+    String metode,
+  ) async {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/api_pesanan.php"),
@@ -208,14 +269,17 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> checkoutPesanan(String idUser, String nama, String noTelp) async {
+  static Future<Map<String, dynamic>> checkoutPesanan(
+    String idUser,
+    String nama,
+    String noTelp,
+  ) async {
     try {
       var url = Uri.parse('$baseUrl/checkout.php');
-      var response = await http.post(url, body: {
-        'id_user': idUser,
-        'nama_pemesan': nama,
-        'no_telp': noTelp,
-      });
+      var response = await http.post(
+        url,
+        body: {'id_user': idUser, 'nama_pemesan': nama, 'no_telp': noTelp},
+      );
       return _safeDecodeMap(response.body);
     } catch (e) {
       return {'status': 'error', 'pesan': 'Terjadi kesalahan jaringan: $e'};
@@ -237,26 +301,29 @@ class ApiService {
     }
   }
 
-// ==========================================
-// 6. UPDATE STATUS PESANAN (UNTUK ADMIN)
-// ==========================================
-// ==========================================
-// 6. UPDATE STATUS PESANAN (UNTUK ADMIN)
-// ==========================================
-static Future<Map<String, dynamic>> updateStatusPesanan(String idPesanan, String statusBaru) async {
-  try {
-    var response = await http.post(
-      Uri.parse("$baseUrl/update_status_pesanan.php"),
-      body: {
-        "id": idPesanan,      // UBAH dari "id_pesanan" jadi "id"
-        "status": statusBaru, // UBAH dari "status_pesanan" jadi "status"
-      },
-    );
-    return _safeDecodeMap(response.body);
-  } catch (e) {
-    return {"status": "error", "pesan": "Koneksi gagal: $e"};
+  // ==========================================
+  // 6. UPDATE STATUS PESANAN (UNTUK ADMIN)
+  // ==========================================
+  // ==========================================
+  // 6. UPDATE STATUS PESANAN (UNTUK ADMIN)
+  // ==========================================
+  static Future<Map<String, dynamic>> updateStatusPesanan(
+    String idPesanan,
+    String statusBaru,
+  ) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$baseUrl/update_status_pesanan.php"),
+        body: {
+          "id": idPesanan, // UBAH dari "id_pesanan" jadi "id"
+          "status": statusBaru, // UBAH dari "status_pesanan" jadi "status"
+        },
+      );
+      return _safeDecodeMap(response.body);
+    } catch (e) {
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
   }
-}
 
   // ==========================================
   // 7. AMBIL DATA PENGGUNA (UNTUK ADMIN)
@@ -270,7 +337,7 @@ static Future<Map<String, dynamic>> updateStatusPesanan(String idPesanan, String
           return jsonResponse['data'];
         }
       }
-      return []; 
+      return [];
     } catch (e) {
       print('Error getPengguna: $e');
       return [];
@@ -284,7 +351,7 @@ static Future<Map<String, dynamic>> updateStatusPesanan(String idPesanan, String
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/hapus_pengguna.php"),
-        body: {"id": id}, 
+        body: {"id": id},
       );
       return _safeDecodeMap(response.body);
     } catch (e) {
@@ -292,13 +359,13 @@ static Future<Map<String, dynamic>> updateStatusPesanan(String idPesanan, String
     }
   }
 
-// ==========================================
+  // ==========================================
   // AMBIL DATA PRODUK / MENU DARI XAMPP
   // ==========================================
   static Future<List<dynamic>> getProduk() async {
     try {
       // PERHATIKAN: Arahkan ke api_menu.php milik abang
-      var response = await http.get(Uri.parse("$baseUrl/api_menu.php")); 
+      var response = await http.get(Uri.parse("$baseUrl/api_menu.php"));
       return _safeDecodeList(response.body);
     } catch (e) {
       print('Error getProduk: $e');
@@ -309,15 +376,17 @@ static Future<Map<String, dynamic>> updateStatusPesanan(String idPesanan, String
   // ==========================================
   // 9. TAMBAH PESANAN MANUAL (UNTUK ADMIN)
   // ==========================================
-  static Future<Map<String, dynamic>> tambahPesanan(Map<String, dynamic> dataPesanan) async {
+  static Future<Map<String, dynamic>> tambahPesanan(
+    Map<String, dynamic> dataPesanan,
+  ) async {
     try {
       var response = await http.post(
-        Uri.parse("$baseUrl/tambah_pesanan.php"), 
+        Uri.parse("$baseUrl/tambah_pesanan.php"),
         body: {
-          "nama_pemesan"     : dataPesanan['nama_pemesan'].toString(),
+          "nama_pemesan": dataPesanan['nama_pemesan'].toString(),
           "ringkasan_pesanan": dataPesanan['ringkasan_pesanan'].toString(),
-          "total_harga"      : dataPesanan['total_harga'].toString(),
-          "status_pesanan"   : dataPesanan['status_pesanan'].toString(),
+          "total_harga": dataPesanan['total_harga'].toString(),
+          "status_pesanan": dataPesanan['status_pesanan'].toString(),
         },
       );
       return _safeDecodeMap(response.body);

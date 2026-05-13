@@ -6,6 +6,7 @@ import 'halaman_laporan.dart';
 import 'halaman_riwayat.dart';
 import 'halaman_produk.dart' ;
 import 'halaman_profil_admin.dart' ;
+import '../Widget/custom_navbar.dart';
 
 
 class HalamanPengguna extends StatefulWidget {
@@ -17,7 +18,9 @@ class HalamanPengguna extends StatefulWidget {
 
 class _HalamanPenggunaState extends State<HalamanPengguna> {
   List<dynamic> _dataPengguna = [];
+  List<dynamic> _filteredData = [];
   bool _isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -35,12 +38,26 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
 
       setState(() {
         _dataPengguna = hanyaUser;
+        _filteredData = hanyaUser;
         _isLoading = false;
       });
     } catch (e) {
       setState(() => _isLoading = false);
       print("Gagal fetch data pengguna: $e");
     }
+  }
+
+  void _filterSearch(String query) {
+    setState(() {
+      _filteredData = _dataPengguna.where((user) {
+        final name = user['nama']?.toString().toLowerCase() ?? '';
+        final phone = user['phone']?.toString().toLowerCase() ?? '';
+        final username = user['username']?.toString().toLowerCase() ?? '';
+        return name.contains(query.toLowerCase()) ||
+            phone.contains(query.toLowerCase()) ||
+            username.contains(query.toLowerCase());
+      }).toList();
+    });
   }
 
   void _konfirmasiHapus(String idUser, String namaUser) {
@@ -98,262 +115,163 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
 
   @override
   Widget build(BuildContext context) {
+    const Color bgCream = Color(0xFFFFE5B9);
+    const Color primaryOrange = Color(0xFFD27F30);
+    const Color textBrown = Color(0xFFC17F3E);
+    const Color lightBrown = Color(0xFFA89070);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFD27F30),
+      backgroundColor: bgCream,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // === HEADER: PuddingKu & Profile ===
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20.0,
-                vertical: 15.0,
-              ),
+              padding: const EdgeInsets.fromLTRB(25, 20, 25, 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: const [
                       Text(
-                        'Selamat Datang',
+                        'PuddingKu',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontFamily: 'Tai Heritage Pro',
-                          fontWeight: FontWeight.bold,
+                          color: textBrown,
+                          fontSize: 28,
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       Text(
-                        'Dashboard Admin',
+                        'Panel Admin UMKM',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontFamily: 'Tai Heritage Pro',
-                          fontWeight: FontWeight.bold,
+                          color: lightBrown,
+                          fontSize: 14,
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
                   GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HalamanProfilAdmin(),
-                    ),
-                  );
-                },
-                child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Color(0xFFD27F30),
-                      size: 30,
-                    ),
-                  ),
-                 ),
-               ],
-              ),
-            ),
-           Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // TOMBOL PRODUK INTERAKTIF
-                  _buildStatCard('12\nProduk', Icons.inventory_2_outlined, onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HalamanProduk(),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HalamanProfilAdmin(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 55,
+                      height: 55,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/profil admin.png'),
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                    );
-                  }),
-                  
-                  // TOMBOL RIWAYAT PESANAN INTERAKTIF
-                  _buildStatCard('Riwayat\nPesanan', Icons.shopping_bag_outlined, onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HalamanRiwayat(),
-                      ),
-                    );
-                  }),
-                  
-                  // TOMBOL LAPORAN
-                  _buildStatCard('Laporan', Icons.bar_chart, onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HalamanLaporan(),
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20.0),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Pendapatan',
-                    style: TextStyle(
-                      color: Color(0xFFD27F30),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '570.000',
-                    style: TextStyle(
-                      color: Color(0xFFD27F30),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(color: Color(0xFFFDF0D5)),
-                child: Column(
-                  children: [
-                    Transform.translate(
-                      offset: const Offset(0, -15),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 30,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD27F30),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Text(
-                          'Daftar Pengguna',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: _isLoading
-                          ? const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFFD27F30),
-                              ),
-                            )
-                          : _dataPengguna.isEmpty
-                          ? const Center(
-                              child: Text(
-                                "Belum ada pengguna terdaftar.",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 5,
-                              ),
-                              itemCount: _dataPengguna.length,
-                              itemBuilder: (context, index) {
-                                final user = _dataPengguna[index];
-                                return _buildUserCard(user);
-                              },
-                            ),
-                    ),
-                  ],
+
+            // === TITLE: Daftar Pengguna ===
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              child: Text(
+                'Daftar Pengguna',
+                style: TextStyle(
+                  color: textBrown,
+                  fontSize: 34,
+                  fontFamily: 'Signika Negative',
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-          ],
-        ),
-      ),
 
-      // ==========================================
-      // FOOTER BAWAAN ADMIN (KEMBAR IDENTIK)
-      // ==========================================
-      bottomNavigationBar: Container(
-        height: 70,
-        color: const Color(0xFFD27F30),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _bottomNavItem(Icons.home, 'BERANDA', false, () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const HomeAdmin()),
-              );
-            }),
-            _bottomNavItem(Icons.person, 'PENGGUNA', true, () {
-              // Udah di halaman pengguna
-            }),
-            _bottomNavItem(Icons.add_circle_outline, 'PESANAN', false, () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HalamanPesanan()),
-              );
-            }),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String title, IconData icon, {VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 105,
-        height: 105,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.24),
-          borderRadius: BorderRadius.circular(22),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: 30),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+            // === SEARCH BAR ===
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFD1A1).withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(35),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: _filterSearch,
+                  decoration: InputDecoration(
+                    hintText: 'Search..',
+                    hintStyle: TextStyle(
+                      color: textBrown.withOpacity(0.6),
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Signika Negative',
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: textBrown.withOpacity(0.6),
+                      size: 35,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                  ),
+                ),
               ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // === USER LIST ===
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: primaryOrange),
+                    )
+                  : _filteredData.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "Tidak ada pengguna ditemukan.",
+                        style: TextStyle(
+                          color: textBrown,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 25,
+                        vertical: 10,
+                      ),
+                      itemCount: _filteredData.length,
+                      itemBuilder: (context, index) {
+                        final user = _filteredData[index];
+                        return _buildUserCard(user);
+                      },
+                    ),
             ),
           ],
         ),
+      ),
+
+      // === BOTTOM NAVIGATION BAR ===
+      bottomNavigationBar: CustomBottomNavbar(
+        currentIndex: 4,
+        onTap: (index) {
+          if (index == 0) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanPesanan()));
+          if (index == 1) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
+          if (index == 2) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeAdmin()));
+          if (index == 3) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()));
+          if (index == 4) {
+            // Already here
+          }
+        },
       ),
     );
   }
@@ -361,218 +279,175 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
   Widget _buildUserCard(dynamic item) {
     String idUser = item['id']?.toString() ?? '';
     String namaLengkap = item['nama'] ?? 'Tanpa Nama';
-    String hurufDepan = namaLengkap.isNotEmpty
-        ? namaLengkap[0].toUpperCase()
-        : '?';
+    String hurufDepan = namaLengkap.isNotEmpty ? namaLengkap[0].toUpperCase() : '?';
     String telepon = item['phone'] ?? 'Tidak ada no HP';
     String username = item['username'] ?? 'Tidak ada username';
     String roleDB = item['role'] ?? 'user';
-    String status = roleDB.toUpperCase();
-    Color warnaStatus = Colors.green;
+    
+    // Status logic: if role is 'user' maybe show 'AKTIF' or check other field if available
+    String status = "AKTIF"; 
+    Color warnaStatus = const Color(0xFF4CAF50); // Green dot
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(15),
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3)),
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Container(
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFDF0D5),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.black12),
-            ),
-            child: Center(
-              child: Text(
-                hurufDepan,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFD27F30),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Avatar with Stylized Initial
+              Container(
+                width: 55,
+                height: 55,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE5B9),
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: const Color(0xFFD27F30).withOpacity(0.3), width: 2),
+                ),
+                child: Center(
+                  child: Text(
+                    hurufDepan,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFFD27F30),
+                      fontFamily: 'Signika Negative',
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        namaLengkap,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    // User Name
+                    Text(
+                      namaLengkap,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black,
+                        fontFamily: 'Sora',
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFDF0D5),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.circle, color: warnaStatus, size: 10),
-                          const SizedBox(width: 4),
-                          Text(
-                            status,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.phone, color: Colors.green, size: 16),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        telepon,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                    const SizedBox(height: 10),
+                    
+                    // Phone Number
                     Row(
                       children: [
-                        const Icon(
-                          Icons.person_outline,
-                          color: Color(0xFFD27F30),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 6),
+                        const Icon(Icons.phone_callback_rounded, color: Color(0xFF4CAF50), size: 18),
+                        const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            username,
+                            telepon,
                             style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black54,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.grey,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        if (idUser.isNotEmpty) {
-                          _konfirmasiHapus(idUser, namaLengkap);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Gagal: ID Pengguna tidak ditemukan',
-                              ),
+                    const SizedBox(height: 8),
+                    
+                    // Email / Username
+                    Row(
+                      children: [
+                        const Icon(Icons.mail_outline_rounded, color: Colors.redAccent, size: 18),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            username,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.grey,
                             ),
-                          );
-                        }
-                      },
-                      child: const Icon(
-                        Icons.delete_outline,
-                        color: Colors.black54,
-                        size: 24,
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
+            ],
+          ),
+          
+          // Status Badge (Top Right-ish)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFE5B9),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.circle, color: warnaStatus, size: 8),
+                  const SizedBox(width: 5),
+                  Text(
+                    status,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Delete Icon (Bottom Right)
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: () {
+                if (idUser.isNotEmpty) {
+                  _konfirmasiHapus(idUser, namaLengkap);
+                }
+              },
+              child: Image.asset(
+                'assets/icons/trash.png', // Assuming user has this or similar icon
+                width: 35,
+                height: 35,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.grey,
+                  size: 35,
+                ),
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // ==============================================================
-  // HELPER BOTTOM ITEM (100% KEMBAR KAYA ADMIN.DART)
-  // ==============================================================
-  Widget _bottomNavItem(
-    IconData icon,
-    String label,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        color: Colors.transparent,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.white : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? const Color(0xFFD27F30) : Colors.white,
-                size: 24,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

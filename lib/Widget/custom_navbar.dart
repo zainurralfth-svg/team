@@ -20,11 +20,11 @@ class CustomBottomNavbar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _navItem(Icons.assignment_outlined, 'Laporan', currentIndex == 0, () => onTap(0)),
-          _navItem(Icons.cake_outlined, 'Produk', currentIndex == 1, () => onTap(1)),
-          _navItem(Icons.home_outlined, 'Beranda', currentIndex == 2, () => onTap(2)),
-          _navItem(Icons.history, 'Riwayat', currentIndex == 3, () => onTap(3)),
-          _navItem(Icons.person_outline, 'Pengguna', currentIndex == 4, () => onTap(4)),
+          _navItem(Icons.assignment_rounded, 'Pesanan', currentIndex == 0, () => onTap(0)),
+          _navItem(Icons.cake_rounded, 'Produk', currentIndex == 1, () => onTap(1)),
+          _navItem(Icons.home_rounded, 'Beranda', currentIndex == 2, () => onTap(2)),
+          _navItem(Icons.history_rounded, 'Riwayat', currentIndex == 3, () => onTap(3)),
+          _navItem(Icons.person_rounded, 'Pengguna', currentIndex == 4, () => onTap(4)),
         ],
       ),
     );
