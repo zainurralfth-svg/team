@@ -27,7 +27,7 @@ class TampilanAwal extends StatelessWidget {
               ),
             ),
           ),
-
+ 
           // 2. ELEMEN DEKORATIF BACKGROUND (POLA KUE)
           Positioned(
             left: -20, top: 50,
@@ -65,6 +65,7 @@ class TampilanAwal extends StatelessWidget {
             ),
           ),
 
+
           // 3. KONTEN UTAMA
           SafeArea(
             child: SingleChildScrollView(
@@ -77,27 +78,38 @@ class TampilanAwal extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween, 
                   children: [
-                    // --- BAGIAN ATAS: LOGO TULISAN ---
-                    Column(
+                    // 1. Bagian Atas: Kosong untuk penyeimbang
+                    const SizedBox(),
+
+                    // 2. Bagian Tengah: Logo Utama dengan Efek Sederhana (Glow Belakang)
+                    Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
                       children: [
-                        const SizedBox(height: 30), 
+                        // Efek Cahaya di belakang logo
+                        Container(
+                          width: screenWidth * 0.5,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.accent.withOpacity(0.4),
+                                blurRadius: 80,
+                                spreadRadius: 10,
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Logo Utama
                         Image.asset(
-                          'assets/images/tulisan_awal.png', 
-                          width: screenWidth * 0.65, 
+                          'assets/images/tulisan tampilan awal.png', 
+                          width: screenWidth * 0.85, 
                           fit: BoxFit.contain,
                         ),
                       ],
                     ),
 
-                    // --- BAGIAN TENGAH: GAMBAR KUE STRAWBERRY UTAMA ---
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Image.asset(
-                        'assets/images/logo_puding.png', 
-                        width: screenWidth * 0.50, 
-                        fit: BoxFit.contain,
-                      ),
-                    ),
 
                     // --- BAGIAN BAWAH: TOMBOL "GET STARTED" ---
                     Column(
@@ -145,4 +157,4 @@ class TampilanAwal extends StatelessWidget {
       ),
     );
   }
-}
+}
