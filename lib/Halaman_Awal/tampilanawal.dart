@@ -119,7 +119,7 @@ class TampilanAwal extends StatelessWidget {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Navigator.pushNamed(context, '/masuk');
+                            Navigator.pushNamed(context, '/login');
                           },
                           child: Container(
                             width: screenWidth * 0.85,
