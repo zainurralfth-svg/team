@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../Backend/Api_service.dart';
 import 'halaman_produk.dart';
 import 'halaman_riwayat.dart';
 import 'halaman_pengguna.dart';
@@ -59,7 +58,7 @@ class LaporanBulan {
 // ─── DUMMY DATA (hapus jika sudah pakai API) ──────────────────────────────────
 
 final List<LaporanBulan> _dummyLaporan = [
-  LaporanBulan(
+  const LaporanBulan(
     bulan: 'Juli 2026',
     totalTransaksi: 12,
     totalPendapatan: 337000,
@@ -68,12 +67,12 @@ final List<LaporanBulan> _dummyLaporan = [
       TransaksiDetail(tanggal: 'Januari 6', jumlah: 10, pendapatan: 267000),
     ],
   ),
-  LaporanBulan(bulan: 'Juni 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  LaporanBulan(bulan: 'Mei 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  LaporanBulan(bulan: 'April 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  LaporanBulan(bulan: 'Maret 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  LaporanBulan(bulan: 'Februari 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  LaporanBulan(bulan: 'Januari 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'Juni 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'Mei 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'April 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'Maret 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'Februari 2026', totalTransaksi: 12, totalPendapatan: 337000),
+  const LaporanBulan(bulan: 'Januari 2026', totalTransaksi: 12, totalPendapatan: 337000),
 ];
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
@@ -94,10 +93,8 @@ String formatRupiah(int value) {
 
 class _C {
   static const cream = Color(0xFFFFF3DC);
-  static const creamDark = Color(0xFFFFE8BB);
   static const brown = Color(0xFF8B5E2D);
   static const brownDark = Color(0xFF6B4520);
-  static const brownLight = Color(0xFFC4874A);
   static const accentOrange = Color(0xFFE8841A);
   static const textLight = Color(0xFFB08050);
   static const textDark = Color(0xFF3D2400);
@@ -269,9 +266,9 @@ class _AppHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
                 'PuddingKu',
                 style: TextStyle(

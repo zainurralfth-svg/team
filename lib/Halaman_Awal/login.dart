@@ -7,14 +7,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 // ==============================================================
 import '../Models/user.dart';
 
-class MasukPage extends StatefulWidget {
-  const MasukPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<MasukPage> createState() => _MasukPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _MasukPageState extends State<MasukPage> {
+class _LoginPageState extends State<LoginPage> {
   // Controller untuk membaca data yang diketik oleh user
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -55,7 +55,7 @@ class _MasukPageState extends State<MasukPage> {
                 Icon(Icons.error_outline, color: AppColors.textWhite, size: 24), 
                 SizedBox(width: 12),
                 Expanded(
-                  child: Text('Username dan Password tidak boleh kosong!', style: TextStyle(color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600)),
+                  child: Text('Username dan Password tidak boleh kosong!', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
@@ -66,7 +66,7 @@ class _MasukPageState extends State<MasukPage> {
       return;
     }
 
-    // 2. Eksekusi API melalui Class Model OOP (Tidak ada fungsi redundan)
+    // 2. Eksekusi API melalui Class Model OOP
     try {
       var hasil = await User.autentikasiOOP(username, password);
 
@@ -74,7 +74,7 @@ class _MasukPageState extends State<MasukPage> {
       if (hasil['status'] == 'sukses') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(hasil['pesan']), 
+            content: Text(hasil['pesan'], style: const TextStyle(fontFamily: 'Signika Negative')), 
             backgroundColor: AppColors.success, // Menggunakan warna hijau sukses baru
             behavior: SnackBarBehavior.floating,
           ),
@@ -91,8 +91,8 @@ class _MasukPageState extends State<MasukPage> {
         
         if (idUserLoginStr.isNotEmpty && idUserLoginStr != "0") {
           await prefs.setString('id_user', idUserLoginStr);
-          await prefs.setString('nama_user', namaUser);   // <-- Simpan Nama ke memori
-          await prefs.setString('phone_user', phoneUser); // <-- Simpan Telp ke memori
+          await prefs.setString('nama_user', namaUser);   
+          await prefs.setString('phone_user', phoneUser); 
           print("Mantap! Data ID, Nama, dan Telp berhasil disimpan ke memori!");
         }
 
@@ -117,22 +117,20 @@ class _MasukPageState extends State<MasukPage> {
         _passwordController.clear();
         
       } else {
-        // Tampilkan pesan error jika kredensial salah
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(hasil['pesan'] ?? 'Login Gagal'), 
-            backgroundColor: AppColors.error, // Menggunakan warna merah error baru
+            content: Text(hasil['pesan'] ?? 'Login Gagal', style: const TextStyle(fontFamily: 'Signika Negative')), 
+            backgroundColor: AppColors.error, 
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
     } catch (e) {
-      // Penanganan error jika server XAMPP mati atau IP salah
       print("Error Server: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Gagal terhubung ke server! Cek koneksi / XAMPP.'), 
-          backgroundColor: AppColors.error, // Menggunakan warna merah error baru
+          content: Text('Gagal terhubung ke server! Cek koneksi / XAMPP.', style: TextStyle(fontFamily: 'Signika Negative')), 
+          backgroundColor: AppColors.error, 
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -145,8 +143,11 @@ class _MasukPageState extends State<MasukPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, 
-      backgroundColor: AppColors.bgUtama, // Menggunakan krem utama
+      // Tetap true biar form nggak ketutup keyboard
+      resizeToAvoidBottomInset: true, 
+      backgroundColor: AppColors.bgUtama, 
+      
+      // SafeArea KITA HAPUS di sini, biar gambar kue full sampai atas jam HP
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
@@ -155,13 +156,15 @@ class _MasukPageState extends State<MasukPage> {
           return Stack(
             children: [
               SingleChildScrollView(
+                // GANTI INI AJA: Biar pas di-scroll mentok nggak ketarik/mantul
+                physics: const ClampingScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop),             
+                    _buildHeader(isDesktop),             // <-- Aman, nggak dirubah
                     const SizedBox(height: 20),
-                    _buildForm(contentWidth, isDesktop), 
+                    _buildForm(contentWidth, isDesktop), // <-- Aman, nggak dirubah
                     const SizedBox(height: 80),          
-                    _buildFooter(),                      
+                    _buildFooter(),                      // <-- Aman, nggak dirubah
                   ],
                 ),
               ),
@@ -204,8 +207,19 @@ class _MasukPageState extends State<MasukPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            const Text('SELAMAT DATANG', style: TextStyle(color: AppColors.textDark, fontSize: 36, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic)),
-            const Text('Login Untuk Mulai Memesan', style: TextStyle(color: AppColors.textDark, fontSize: 18)),
+            // =====================================
+            // INI DIA PERUBAHAN FONT OLEO SCRIPT NYA
+            // =====================================
+            const Text(
+              'Selamat Datang', 
+              style: TextStyle(
+                fontFamily: 'Oleo Script', // Pakai font Oleo Script 
+                color: AppColors.textDark, 
+                fontSize: 38, 
+                fontWeight: FontWeight.w900, 
+              )
+            ),
+            const Text('Login Untuk Mulai Memesan', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark, fontSize: 18)),
             const SizedBox(height: 30),
 
             Container(
@@ -223,7 +237,7 @@ class _MasukPageState extends State<MasukPage> {
                   _buildInputField('Password', '******', Icons.lock, _passwordController, isPassword: true),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/lupa-password'),
-                    child: const Text('Lupa password?', style: TextStyle(color: AppColors.textWhite, fontSize: 14, decoration: TextDecoration.underline)),
+                    child: const Text('Lupa password?', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 14, decoration: TextDecoration.underline)),
                   ),
                 ],
               ),
@@ -238,7 +252,7 @@ class _MasukPageState extends State<MasukPage> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                     onPressed: _handleLogin,
-                    child: const Text('LOGIN', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), 
+                    child: const Text('LOGIN', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), 
                   ),
                 ),
                 SizedBox(
@@ -247,9 +261,9 @@ class _MasukPageState extends State<MasukPage> {
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                     onPressed: () {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      Navigator.pushNamed(context, '/login'); 
+                      Navigator.pushNamed(context, '/register'); // <-- Ganti ke /register kalau mau pindah ke halaman register
                     },
-                    child: const Text('REGISTER', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), 
+                    child: const Text('REGISTER', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), 
                   ),
                 ),
               ],
@@ -276,7 +290,7 @@ class _MasukPageState extends State<MasukPage> {
             child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
           const SizedBox(width: 10),
-          const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)), 
+          const Text('Puddingku', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)), 
         ],
       ),
     );
@@ -288,16 +302,16 @@ class _MasukPageState extends State<MasukPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)), 
+          Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)), 
           const SizedBox(height: 10),
           Container(
-            decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(12)), // Background kolom form
+            decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(12)), 
             child: TextField(
               controller: controller,
               obscureText: isPassword ? !_passwordVisible : false,
-              style: const TextStyle(fontSize: 16, color: AppColors.textDark), // Pastikan teks yang diketik warnanya gelap
+              style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16, color: AppColors.textDark), 
               decoration: InputDecoration(
-                prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24), // Ikon oranye gelap biar kontras dengan krem
+                prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24), 
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: () => setState(() => _passwordVisible = !_passwordVisible),
@@ -305,7 +319,7 @@ class _MasukPageState extends State<MasukPage> {
                       )
                     : null,
                 hintText: hint,
-                hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 16), 
+                hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 16), 
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
               ),
@@ -323,6 +337,6 @@ class HeaderClipper extends CustomClipper<Path> {
 }
 
 class HeaderPainter extends CustomPainter {
-  @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.textBrown..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); } // Ganti strokeDark jadi textBrown
+  @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.textBrown..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); } 
   @override bool shouldRepaint(oldDelegate) => false;
 }

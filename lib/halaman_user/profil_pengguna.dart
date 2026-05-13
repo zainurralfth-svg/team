@@ -31,7 +31,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
       });
       _ambilDataProfil(); 
     } else {
-      Navigator.pushNamedAndRemoveUntil(context, '/masuk', (route) => false);
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     }
   }
 
@@ -67,7 +67,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
               Navigator.pop(context);
               SharedPreferences prefs = await SharedPreferences.getInstance();
               await prefs.clear();
-              Navigator.pushNamedAndRemoveUntil(context, '/masuk', (route) => false);
+              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
             },
             child: const Text('Logout', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)), // Pakai merah error baru
           ),

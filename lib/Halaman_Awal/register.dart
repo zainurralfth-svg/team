@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import '../Backend/API_Service.dart'; 
 
-class LoginPage extends StatefulWidget { 
-  const LoginPage({super.key}); 
+class RegisterPage extends StatefulWidget { 
+  const RegisterPage({super.key}); 
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> { 
+class _RegisterPageState extends State<RegisterPage> { 
   // Controller untuk membaca data yang diketik oleh user
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
                 Icon(Icons.error_outline, color: AppColors.textWhite, size: 24),
                 SizedBox(width: 12),
                 Expanded(
-                  child: Text('Semua data register harus diisi!', style: TextStyle(color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600)),
+                  child: Text('Semua data register harus diisi!', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
@@ -74,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
       if (hasil['status'] == 'sukses') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(hasil['pesan']), 
+            content: Text(hasil['pesan'], style: const TextStyle(fontFamily: 'Signika Negative')), 
             backgroundColor: AppColors.success, // Menggunakan hijau sukses baru
             behavior: SnackBarBehavior.floating,
           ),
@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
         // Tampilkan error dari server (misal: Username sudah dipakai)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(hasil['pesan']), 
+            content: Text(hasil['pesan'], style: const TextStyle(fontFamily: 'Signika Negative')), 
             backgroundColor: AppColors.error, // Menggunakan merah error baru
             behavior: SnackBarBehavior.floating,
           ),
@@ -104,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
       // Penanganan error jika server mati atau IP salah
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Gagal terhubung ke server! Cek koneksi / XAMPP.'), 
+          content: Text('Gagal terhubung ke server! Cek koneksi / XAMPP.', style: TextStyle(fontFamily: 'Signika Negative')), 
           backgroundColor: AppColors.error, // Menggunakan merah error baru
           behavior: SnackBarBehavior.floating,
         ),
@@ -116,25 +116,30 @@ class _LoginPageState extends State<LoginPage> {
   // --- BUILDER UTAMA UI ---
   // ==============================================================
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Mencegah layout terdorong ke atas saat keyboard aktif
-      backgroundColor: AppColors.bgUtama, // Menggunakan krem utama
+      // Tetap true biar form nggak ketutup keyboard
+      resizeToAvoidBottomInset: true, 
+      backgroundColor: AppColors.bgUtama, 
+      
+      // SafeArea KITA HAPUS di sini, biar gambar kue full sampai atas jam HP
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
-          double contentWidth = isDesktop ? 650 : constraints.maxWidth * 0.9;
-          
+          double contentWidth = isDesktop ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9;
+
           return Stack(
             children: [
               SingleChildScrollView(
+                // GANTI INI AJA: Biar pas di-scroll mentok nggak ketarik/mantul
+                physics: const ClampingScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop),             // 1. Panggil Header
+                    _buildHeader(isDesktop),             // <-- Aman, nggak dirubah
                     const SizedBox(height: 20),
-                    _buildForm(contentWidth, isDesktop), // 2. Panggil Form
-                    const SizedBox(height: 80),          // 3. Jarak sebelum footer
-                    _buildFooter(),                      // 4. Footer SEKARANG IKUT KE-SCROLL DI SINI!
+                    _buildForm(contentWidth, isDesktop), // <-- Aman, nggak dirubah
+                    const SizedBox(height: 80),          
+                    _buildFooter(),                      // <-- Aman, nggak dirubah
                   ],
                 ),
               ),
@@ -178,9 +183,19 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            // Tambahin miring (italic) biar seragam sama halaman Masuk
-            const Text('REGISTER', style: TextStyle(color: AppColors.textDark, fontSize: 36, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic, letterSpacing: 1)),
-            const Text('Register Untuk Membuat Akun', style: TextStyle(color: AppColors.textDark, fontSize: 18)),
+            // =====================================
+            // INI PERUBAHAN FONT OLEO SCRIPT NYA
+            // =====================================
+            const Text(
+              'Register', 
+              style: TextStyle(
+                fontFamily: 'Oleo Script', // Pakai font Oleo Script 
+                color: AppColors.textDark, 
+                fontSize: 38, 
+                fontWeight: FontWeight.w900, 
+              )
+            ),
+            const Text('Register Untuk Membuat Akun', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark, fontSize: 18)),
             const SizedBox(height: 30),
 
             // Container Background Form
@@ -210,7 +225,7 @@ class _LoginPageState extends State<LoginPage> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                 onPressed: _prosesRegister,
-                child: const Text('REGISTER', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)),
+                child: const Text('REGISTER', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)),
               ),
             ),
           ],
@@ -236,7 +251,7 @@ class _LoginPageState extends State<LoginPage> {
             child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
           const SizedBox(width: 10),
-          const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
+          const Text('Puddingku', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -249,14 +264,14 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(12)), // Background kolom input
             child: TextField(
               controller: controller,
               obscureText: isPassword ? !_passwordVisible : false,
-              style: const TextStyle(fontSize: 16, color: AppColors.textDark), // Teks warna gelap biar terbaca
+              style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16, color: AppColors.textDark), // Teks warna gelap biar terbaca
               decoration: InputDecoration(
                 prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24), // Ikon oranye gelap
                 suffixIcon: isPassword
@@ -266,7 +281,7 @@ class _LoginPageState extends State<LoginPage> {
                       )
                     : null,
                 hintText: hint,
-                hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 16),
+                hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 16),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
               ),

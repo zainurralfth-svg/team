@@ -41,11 +41,11 @@ class PuddingkuApp extends StatelessWidget {
         
         // CATATAN: Kalau di sini 'MasukPage()' ada garis merah, 
         // ganti namanya jadi 'LoginPage()' menyesuaikan nama class di file login.dart kamu.
-        '/masuk': (context) => const MasukPage(), 
+        '/login': (context) => const LoginPage(), 
         
         // CATATAN: Kalau di sini 'LoginPage()' ada garis merah, 
         // ganti namanya jadi 'RegisterPage()' menyesuaikan nama class di file register.dart kamu.
-        '/login': (context) => const LoginPage(), 
+        '/register': (context) => const RegisterPage(), 
 
         '/lupa-password': (context) => const LupaPasswordPage(), 
         '/menu': (context) => const MenuPage(), 

@@ -45,7 +45,10 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
       animType: AnimType.bottomSlide,
       title: 'Berhasil!',
       desc: 'Password kamu sudah diperbarui. Silakan login kembali!',
+      titleTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 20),
+      descTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16),
       btnOkText: "Siap, Login!",
+      buttonsTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: Colors.white),
       btnOkColor: AppColors.primary, // Pakai primary (Oranye Coklat)
       btnOkOnPress: () => Navigator.pop(context), // Kembali ke halaman sebelumnya (Login)
     ).show();
@@ -93,24 +96,29 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Mencegah layout terdorong ke atas saat keyboard aktif
-      backgroundColor: AppColors.bgUtama, // Pakai bgUtama (krem)
+      // Tetap true biar form nggak ketutup keyboard
+      resizeToAvoidBottomInset: true, 
+      backgroundColor: AppColors.bgUtama, 
+      
+      // SafeArea KITA HAPUS di sini, biar gambar kue full sampai atas jam HP
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // Konfigurasi ukuran responsif untuk layar Desktop vs Mobile
           bool isDesktop = constraints.maxWidth > 800;
-          double contentWidth = isDesktop ? 650 : constraints.maxWidth * 0.9;
+          double contentWidth = isDesktop ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9;
 
           return Stack(
             children: [
               SingleChildScrollView(
+                // GANTI INI AJA: Biar pas di-scroll mentok nggak ketarik/mantul
+                physics: const ClampingScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop),             // Memanggil komponen Header
-                    _buildErrorBanner(),                 // Memanggil komponen Banner Error
-                    _buildForm(contentWidth, isDesktop), // Memanggil komponen Form Utama
-                    const SizedBox(height: 120),         // Spacer agar konten tidak tertutup Footer
-                    _buildFooter(),                      // Footer
+                    _buildHeader(isDesktop),             // <-- Aman, nggak dirubah
+                    const SizedBox(height: 20),
+                    _buildErrorBanner(),
+                    _buildForm(contentWidth, isDesktop), // <-- Aman, nggak dirubah
+                    const SizedBox(height: 80),          
+                    _buildFooter(),                      // <-- Aman, nggak dirubah
                   ],
                 ),
               ),
@@ -161,7 +169,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
           children: [
             const Icon(Icons.error_outline, color: AppColors.textWhite),
             const SizedBox(width: 12),
-            Expanded(child: Text(_errorMessage!, style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold))),
+            Expanded(child: Text(_errorMessage!, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold))),
           ],
         ),
       ),
@@ -176,9 +184,25 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            Text(_isPhoneVerified ? 'BUAT PASSWORD BARU' : 'RESET PASSWORD', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textDark, fontSize: 28, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+            // =====================================
+            // INI PERUBAHAN FONT OLEO SCRIPT NYA
+            // =====================================
+            Text(
+              _isPhoneVerified ? 'Buat Password Baru' : 'Reset Password', 
+              textAlign: TextAlign.center, 
+              style: const TextStyle(
+                fontFamily: 'Oleo Script', // Pakai font Oleo Script
+                color: AppColors.textDark, 
+                fontSize: 38, 
+                fontWeight: FontWeight.w900, 
+              )
+            ),
             const SizedBox(height: 10),
-            Text(_isPhoneVerified ? 'Nomor terverifikasi! Masukkan Password Baru Anda.' : 'Masukkan Nomor Telepon Yang Terdaftar Di Akun Anda.', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textDark, fontSize: 16)),
+            Text(
+              _isPhoneVerified ? 'Nomor terverifikasi! Masukkan Password Baru Anda.' : 'Masukkan Nomor Telepon Yang Terdaftar Di Akun Anda.', 
+              textAlign: TextAlign.center, 
+              style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark, fontSize: 16)
+            ),
             const SizedBox(height: 30),
 
             // Container Background Form (Warna Oranye)
@@ -208,7 +232,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                 onPressed: _prosesReset, 
-                child: Text(_isPhoneVerified ? 'SIMPAN PASSWORD' : 'CEK NOMOR TELEPON', style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 18)),
+                child: Text(_isPhoneVerified ? 'SIMPAN PASSWORD' : 'CEK NOMOR TELEPON', style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 18)),
               ),
             ),
           ],
@@ -234,7 +258,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
           const SizedBox(width: 10),
-          const Text('Puddingku', style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
+          const Text('Puddingku', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -245,7 +269,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)),
+        Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         Container(
           // Mengubah warna background menjadi abu-abu jika parameter enabled = false
@@ -255,14 +279,14 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             enabled: enabled, 
             obscureText: isPassword ? _obscureText : false, // Menyembunyikan teks jika ini form password
             keyboardType: isPassword ? TextInputType.text : TextInputType.phone,
-            style: const TextStyle(fontSize: 16, color: AppColors.textDark),
+            style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16, color: AppColors.textDark),
             decoration: InputDecoration(
               prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24),
               suffixIcon: isPassword 
                 ? IconButton(icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: AppColors.primaryDark), onPressed: () => setState(() => _obscureText = !_obscureText))
                 : null,
               hintText: hint, 
-              hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 16), 
+              hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 16), 
               border: InputBorder.none, 
               contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
             ),
