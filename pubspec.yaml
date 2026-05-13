@@ -13,7 +13,7 @@ dependencies:
   cupertino_icons: ^1.0.6
 
   # --- VERSI YANG COCOK BUAT SDK KAMU ---
-  awesome_dialog: 3.1.0
+  awesome_dialog: ^3.3.0
   http: ^1.6.0
 
   # --- Library Firebase ---
@@ -29,10 +29,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^6.0.0
   
   # --- Alat Tukang Ganti Logo Aplikasi ---
-  flutter_launcher_icons: "^0.13.1"
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
