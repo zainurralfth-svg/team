@@ -20,17 +20,47 @@ class CustomBottomNavbar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _navItem(Icons.assignment_rounded, 'Pesanan', currentIndex == 0, () => onTap(0)),
-          _navItem(Icons.cake_rounded, 'Produk', currentIndex == 1, () => onTap(1)),
-          _navItem(Icons.home_rounded, 'Beranda', currentIndex == 2, () => onTap(2)),
-          _navItem(Icons.history_rounded, 'Riwayat', currentIndex == 3, () => onTap(3)),
-          _navItem(Icons.person_rounded, 'Pengguna', currentIndex == 4, () => onTap(4)),
+          _navItem(
+            Icons.assignment_rounded,
+            'Laporan',
+            currentIndex == 0,
+            () => onTap(0),
+          ),
+          _navItem(
+            Icons.cake_rounded,
+            'Produk',
+            currentIndex == 1,
+            () => onTap(1),
+          ),
+          _navItem(
+            Icons.home_rounded,
+            'Beranda',
+            currentIndex == 2,
+            () => onTap(2),
+          ),
+          _navItem(
+            Icons.history_rounded,
+            'Riwayat',
+            currentIndex == 3,
+            () => onTap(3),
+          ),
+          _navItem(
+            Icons.person_rounded,
+            'Pengguna',
+            currentIndex == 4,
+            () => onTap(4),
+          ),
         ],
       ),
     );
   }
 
-  Widget _navItem(IconData icon, String label, bool isSelected, VoidCallback onTap) {
+  Widget _navItem(
+    IconData icon,
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -40,7 +70,9 @@ class CustomBottomNavbar extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isSelected ? Colors.black.withOpacity(0.3) : Colors.transparent,
+              color: isSelected
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.transparent,
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: Colors.white, size: 30),
