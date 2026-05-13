@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import '../Backend/API_Service.dart';
 import 'admin.dart';
-import 'halaman_pesanan.dart';
 import 'halaman_laporan.dart';
 import 'halaman_riwayat.dart';
-import 'halaman_produk.dart' ;
-import 'halaman_profil_admin.dart' ;
+import 'halaman_produk.dart';
+import 'halaman_profil_admin.dart';
 import '../Widget/custom_navbar.dart';
-
 
 class HalamanPengguna extends StatefulWidget {
   const HalamanPengguna({super.key});
@@ -264,10 +262,26 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
       bottomNavigationBar: CustomBottomNavbar(
         currentIndex: 4,
         onTap: (index) {
-          if (index == 0) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanPesanan()));
-          if (index == 1) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
-          if (index == 2) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeAdmin()));
-          if (index == 3) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()));
+          if (index == 0)
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanLaporan()),
+            );
+          if (index == 1)
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanProduk()),
+            );
+          if (index == 2)
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeAdmin()),
+            );
+          if (index == 3)
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HalamanRiwayat()),
+            );
           if (index == 4) {
             // Already here
           }
@@ -279,13 +293,15 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
   Widget _buildUserCard(dynamic item) {
     String idUser = item['id']?.toString() ?? '';
     String namaLengkap = item['nama'] ?? 'Tanpa Nama';
-    String hurufDepan = namaLengkap.isNotEmpty ? namaLengkap[0].toUpperCase() : '?';
+    String hurufDepan = namaLengkap.isNotEmpty
+        ? namaLengkap[0].toUpperCase()
+        : '?';
     String telepon = item['phone'] ?? 'Tidak ada no HP';
     String username = item['username'] ?? 'Tidak ada username';
     String roleDB = item['role'] ?? 'user';
-    
+
     // Status logic: if role is 'user' maybe show 'AKTIF' or check other field if available
-    String status = "AKTIF"; 
+    String status = "User";
     Color warnaStatus = const Color(0xFF4CAF50); // Green dot
 
     return Container(
@@ -314,7 +330,10 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFE5B9),
                   borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: const Color(0xFFD27F30).withOpacity(0.3), width: 2),
+                  border: Border.all(
+                    color: const Color(0xFFD27F30).withOpacity(0.3),
+                    width: 2,
+                  ),
                 ),
                 child: Center(
                   child: Text(
@@ -344,14 +363,21 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    
+
                     // Phone Number
                     Row(
                       children: [
-                        const Icon(Icons.phone_callback_rounded, color: Color(0xFF4CAF50), size: 18),
+                        const Icon(
+                          Icons.phone_callback_rounded,
+                          color: Color(0xFF4CAF50),
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
@@ -368,14 +394,21 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    
+
                     // Email / Username
                     Row(
                       children: [
-                        const Icon(Icons.mail_outline_rounded, color: Colors.redAccent, size: 18),
+                        const Icon(
+                          Icons.mail_outline_rounded,
+                          color: Colors.redAccent,
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
@@ -396,7 +429,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
               ),
             ],
           ),
-          
+
           // Status Badge (Top Right-ish)
           Positioned(
             top: 0,
@@ -424,7 +457,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
               ),
             ),
           ),
-          
+
           // Delete Icon (Bottom Right)
           Positioned(
             bottom: 0,
