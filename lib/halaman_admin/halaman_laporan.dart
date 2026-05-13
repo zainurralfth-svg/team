@@ -3,9 +3,11 @@ import 'halaman_produk.dart';
 import 'halaman_riwayat.dart';
 import 'halaman_pengguna.dart';
 import 'admin.dart';
+import 'halaman_profil_admin.dart';
 
 // ─── MODEL ────────────────────────────────────────────────────────────────────
 
+// Model data satu transaksi harian (tanggal, jumlah, pendapatan).
 class TransaksiDetail {
   final String tanggal;
   final int jumlah;
@@ -26,6 +28,7 @@ class TransaksiDetail {
   }
 }
 
+// Model data laporan satu bulan beserta daftar transaksi hariannya.
 class LaporanBulan {
   final String bulan;
   final int totalTransaksi;
@@ -39,6 +42,7 @@ class LaporanBulan {
     this.details = const [],
   });
 
+  // Getter: hitung rata-rata pendapatan per hari dari jumlah data detail.
   int get rataPerHari =>
       details.isEmpty ? 0 : totalPendapatan ~/ details.length;
 
@@ -57,6 +61,7 @@ class LaporanBulan {
 
 // ─── DUMMY DATA (hapus jika sudah pakai API) ──────────────────────────────────
 
+// Data statis sementara pengganti API; hapus dan ganti dengan data asli.
 final List<LaporanBulan> _dummyLaporan = [
   const LaporanBulan(
     bulan: 'Juli 2026',
@@ -77,6 +82,7 @@ final List<LaporanBulan> _dummyLaporan = [
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
 
+// Mengubah angka integer menjadi format "Rp 337.000".
 String formatRupiah(int value) {
   final str = value.toString();
   final result = StringBuffer();
@@ -91,6 +97,7 @@ String formatRupiah(int value) {
 
 // ─── WARNA ────────────────────────────────────────────────────────────────────
 
+// Kumpulan konstanta warna tema cokelat/krem untuk seluruh halaman.
 class _C {
   static const cream = Color(0xFFFFF3DC);
   static const brown = Color(0xFF8B5E2D);
@@ -103,7 +110,6 @@ class _C {
 }
 
 // ─── HALAMAN LAPORAN ──────────────────────────────────────────────────────────
-
 class HalamanLaporan extends StatefulWidget {
   const HalamanLaporan({super.key});
 
@@ -122,13 +128,9 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     _loadData();
   }
 
+  // Memuat data laporan saat halaman dibuka; ganti dummy dengan API nyata di sini.
   Future<void> _loadData() async {
     try {
-      // Ganti dengan pemanggilan API nyata, contoh:
-      // final data = await ApiService.getLaporan();
-      // _laporan = data.map((e) => LaporanBulan.fromJson(e)).toList();
-
-      // Dummy sementara:
       await Future.delayed(const Duration(milliseconds: 400));
       setState(() {
         _laporan = _dummyLaporan;
@@ -179,6 +181,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     );
   }
 
+  // Item navigasi bawah; lingkaran gelap muncul di belakang ikon yang sedang aktif.
   Widget _buildNavIcon(BuildContext context, IconData icon, String label,
       bool isSelected, VoidCallback onTap) {
     return GestureDetector(
@@ -209,6 +212,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     );
   }
 
+  // Menampilkan spinner saat loading, pesan error jika gagal, atau daftar kartu laporan.
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(
@@ -254,8 +258,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
   }
 }
 
-// ─── APP HEADER ───────────────────────────────────────────────────────────────
-
+// Header atas: nama app & subtitle di kiri, foto profil admin di kanan.
 class _AppHeader extends StatelessWidget {
   const _AppHeader();
 
@@ -291,10 +294,10 @@ class _AppHeader extends StatelessWidget {
             ],
           ),
           GestureDetector(
-            onTap: () => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeAdmin()),
-            ),
+            onTap: () => Navigator.push(
+            context,
+          MaterialPageRoute(builder: (_) => const HalamanProfilAdmin()),
+          ),
             child: Container(
               width: 50,
               height: 50,
@@ -314,8 +317,7 @@ class _AppHeader extends StatelessWidget {
   }
 }
 
-// ─── PAGE LABEL ───────────────────────────────────────────────────────────────
-
+// Label bertuliskan "LAPORAN" sebagai penanda judul halaman.
 class _PageLabel extends StatelessWidget {
   const _PageLabel();
 
@@ -345,6 +347,7 @@ class _PageLabel extends StatelessWidget {
 
 // ─── LAPORAN CARD ─────────────────────────────────────────────────────────────
 
+// Kartu expandable per bulan; kartu pertama terbuka secara default.
 class _LaporanCard extends StatefulWidget {
   final LaporanBulan laporan;
   final bool initiallyExpanded;
@@ -355,6 +358,7 @@ class _LaporanCard extends StatefulWidget {
   State<_LaporanCard> createState() => _LaporanCardState();
 }
 
+// Mengelola animasi buka/tutup kartu dengan AnimationController 250ms.
 class _LaporanCardState extends State<_LaporanCard>
     with SingleTickerProviderStateMixin {
   late bool _expanded;
@@ -379,6 +383,7 @@ class _LaporanCardState extends State<_LaporanCard>
     super.dispose();
   }
 
+  // Membalik state expand dan menjalankan animasi maju atau mundur.
   void _toggle() {
     setState(() => _expanded = !_expanded);
     _expanded ? _ctrl.forward() : _ctrl.reverse();
@@ -394,7 +399,7 @@ class _LaporanCardState extends State<_LaporanCard>
       shadowColor: _C.brown.withOpacity(0.2),
       child: Column(
         children: [
-          // Header
+          // Header kartu – selalu terlihat, ditekan untuk buka/tutup detail.
           InkWell(
             onTap: _toggle,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -434,7 +439,7 @@ class _LaporanCardState extends State<_LaporanCard>
             ),
           ),
 
-          // Expandable
+          // Bagian detail yang muncul/hilang dengan animasi SizeTransition.
           SizeTransition(
             sizeFactor: _anim,
             child: Column(
@@ -471,6 +476,7 @@ class _LaporanCardState extends State<_LaporanCard>
 
 // ─── CARD ICON ────────────────────────────────────────────────────────────────
 
+// Kotak bergradient dengan emoji 📋 sebagai ikon dekoratif header kartu.
 class _CardIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -499,6 +505,7 @@ class _CardIcon extends StatelessWidget {
 
 // ─── PRINT BUTTON ─────────────────────────────────────────────────────────────
 
+// Tombol cetak biru; saat ini hanya tampilkan SnackBar, belum implementasi cetak.
 class _PrintButton extends StatelessWidget {
   final String bulan;
   const _PrintButton({required this.bulan});
@@ -542,6 +549,7 @@ class _PrintButton extends StatelessWidget {
 
 // ─── STAT PILL ────────────────────────────────────────────────────────────────
 
+// Pill ringkasan statistik (label + nilai) yang dibagi rata dalam tiga kolom.
 class _StatPill extends StatelessWidget {
   final String label;
   final String value;
@@ -582,6 +590,7 @@ class _StatPill extends StatelessWidget {
 
 // ─── LAPORAN TABLE ────────────────────────────────────────────────────────────
 
+// Tabel rincian harian: header cokelat → baris zebra striping → baris total.
 class _LaporanTable extends StatelessWidget {
   final LaporanBulan laporan;
   const _LaporanTable({required this.laporan});
