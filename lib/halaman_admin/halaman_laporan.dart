@@ -4,10 +4,8 @@ import 'halaman_riwayat.dart';
 import 'halaman_pengguna.dart';
 import 'admin.dart';
 import 'halaman_profil_admin.dart';
+import '../Backend/api_service.dart';
 
-// ─── MODEL ────────────────────────────────────────────────────────────────────
-
-// Model data satu transaksi harian (tanggal, jumlah, pendapatan).
 class TransaksiDetail {
   final String tanggal;
   final int jumlah;
@@ -18,19 +16,10 @@ class TransaksiDetail {
     required this.jumlah,
     required this.pendapatan,
   });
-
-  factory TransaksiDetail.fromJson(Map<String, dynamic> json) {
-    return TransaksiDetail(
-      tanggal: json['tanggal'] ?? '',
-      jumlah: json['jumlah'] ?? 0,
-      pendapatan: json['pendapatan'] ?? 0,
-    );
-  }
 }
 
-// Model data laporan satu bulan beserta daftar transaksi hariannya.
 class LaporanBulan {
-  final String bulan;
+  final String bulan; 
   final int totalTransaksi;
   final int totalPendapatan;
   final List<TransaksiDetail> details;
@@ -42,47 +31,93 @@ class LaporanBulan {
     this.details = const [],
   });
 
-  // Getter: hitung rata-rata pendapatan per hari dari jumlah data detail.
+  // Rata-rata pendapatan per hari aktif (hari yang ada transaksinya)
   int get rataPerHari =>
       details.isEmpty ? 0 : totalPendapatan ~/ details.length;
-
-  factory LaporanBulan.fromJson(Map<String, dynamic> json) {
-    final detailList = (json['details'] as List<dynamic>? ?? [])
-        .map((e) => TransaksiDetail.fromJson(e))
-        .toList();
-    return LaporanBulan(
-      bulan: json['bulan'] ?? '',
-      totalTransaksi: json['total_transaksi'] ?? 0,
-      totalPendapatan: json['total_pendapatan'] ?? 0,
-      details: detailList,
-    );
-  }
 }
 
-// ─── DUMMY DATA (hapus jika sudah pakai API) ──────────────────────────────────
+/// dikelompokkan per bulan (format "MMMM yyyy") lalu per tanggal harian.
+List<LaporanBulan> _parseLaporan(List<dynamic> rawPesanan) {
+  const namaBulan = [
+    '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  ];
 
-// Data statis sementara pengganti API; hapus dan ganti dengan data asli.
-final List<LaporanBulan> _dummyLaporan = [
-  const LaporanBulan(
-    bulan: 'Juli 2026',
-    totalTransaksi: 12,
-    totalPendapatan: 337000,
-    details: [
-      TransaksiDetail(tanggal: 'Januari 4', jumlah: 2, pendapatan: 70000),
-      TransaksiDetail(tanggal: 'Januari 6', jumlah: 10, pendapatan: 267000),
-    ],
-  ),
-  const LaporanBulan(bulan: 'Juni 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  const LaporanBulan(bulan: 'Mei 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  const LaporanBulan(bulan: 'April 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  const LaporanBulan(bulan: 'Maret 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  const LaporanBulan(bulan: 'Februari 2026', totalTransaksi: 12, totalPendapatan: 337000),
-  const LaporanBulan(bulan: 'Januari 2026', totalTransaksi: 12, totalPendapatan: 337000),
-];
+  // Map: "Juli 2026" → { "2026-07-04" → {jumlah, pendapatan} }
+  final Map<String, Map<String, Map<String, int>>> grupBulan = {};
+  // Map: "Juli 2026" → urutan bulan (untuk sorting)
+  final Map<String, DateTime> urutan = {};
+
+  for (final item in rawPesanan) {
+    // Field dari api_pesanan.php – sesuaikan jika nama field berbeda
+    final String? rawTanggal =
+        item['tanggal_pesanan'] ?? item['created_at'] ?? item['tanggal'];
+    final dynamic rawHarga =
+        item['total_harga'] ?? item['harga_total'] ?? 0;
+
+    if (rawTanggal == null || rawTanggal.isEmpty) continue;
+
+    DateTime tgl;
+    try {
+      // Format yang umum: "2026-07-04 12:30:00" atau "2026-07-04"
+      tgl = DateTime.parse(rawTanggal.split(' ')[0]);
+    } catch (_) {
+      continue;
+    }
+
+    final int harga = int.tryParse(rawHarga.toString()) ?? 0;
+
+    // Kunci bulan: "Juli 2026"
+    final String kunciBulan = '${namaBulan[tgl.month]} ${tgl.year}';
+    // Kunci hari: "4 Juli" (tampil di tabel)
+    final String kunciHari = '${tgl.day} ${namaBulan[tgl.month]}';
+
+    urutan.putIfAbsent(kunciBulan, () => DateTime(tgl.year, tgl.month));
+    grupBulan.putIfAbsent(kunciBulan, () => {});
+    grupBulan[kunciBulan]!.putIfAbsent(kunciHari, () => {'jumlah': 0, 'pendapatan': 0});
+    grupBulan[kunciBulan]![kunciHari]!['jumlah'] =
+        (grupBulan[kunciBulan]![kunciHari]!['jumlah'] ?? 0) + 1;
+    grupBulan[kunciBulan]![kunciHari]!['pendapatan'] =
+        (grupBulan[kunciBulan]![kunciHari]!['pendapatan'] ?? 0) + harga;
+  }
+
+  // Susun LaporanBulan, urutkan dari terbaru ke terlama
+  final List<LaporanBulan> hasil = [];
+  final sortedKeys = urutan.keys.toList()
+    ..sort((a, b) => urutan[b]!.compareTo(urutan[a]!));
+
+  for (final bulan in sortedKeys) {
+    final hariMap = grupBulan[bulan]!;
+    final details = hariMap.entries.map((e) {
+      return TransaksiDetail(
+        tanggal: e.key,
+        jumlah: e.value['jumlah'] ?? 0,
+        pendapatan: e.value['pendapatan'] ?? 0,
+      );
+    }).toList();
+
+    // Urutkan detail dari tanggal terkecil ke terbesar (dalam bulan yang sama)
+    details.sort((a, b) {
+      final da = int.tryParse(a.tanggal.split(' ')[0]) ?? 0;
+      final db = int.tryParse(b.tanggal.split(' ')[0]) ?? 0;
+      return da.compareTo(db);
+    });
+
+    final totalTransaksi = details.fold(0, (s, d) => s + d.jumlah);
+    final totalPendapatan = details.fold(0, (s, d) => s + d.pendapatan);
+
+    hasil.add(LaporanBulan(
+      bulan: bulan,
+      totalTransaksi: totalTransaksi,
+      totalPendapatan: totalPendapatan,
+      details: details,
+    ));
+  }
+
+  return hasil;
+}
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
-
-// Mengubah angka integer menjadi format "Rp 337.000".
 String formatRupiah(int value) {
   final str = value.toString();
   final result = StringBuffer();
@@ -96,8 +131,6 @@ String formatRupiah(int value) {
 }
 
 // ─── WARNA ────────────────────────────────────────────────────────────────────
-
-// Kumpulan konstanta warna tema cokelat/krem untuk seluruh halaman.
 class _C {
   static const cream = Color(0xFFFFF3DC);
   static const brown = Color(0xFF8B5E2D);
@@ -128,17 +161,30 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     _loadData();
   }
 
-  // Memuat data laporan saat halaman dibuka; ganti dummy dengan API nyata di sini.
+  /// Ambil semua pesanan dari API, lalu olah jadi laporan per bulan.
   Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
-      await Future.delayed(const Duration(milliseconds: 400));
+      // Ambil SEMUA pesanan (tanpa filter id_user) → laporan admin
+      final rawPesanan = await ApiService.getPesanan();
+      if (rawPesanan.isEmpty) {
+        setState(() {
+          _laporan = [];
+          _isLoading = false;
+        });
+        return;
+      }
+      final hasil = _parseLaporan(rawPesanan);
       setState(() {
-        _laporan = _dummyLaporan;
+        _laporan = hasil;
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _error = e.toString();
+        _error = 'Gagal memuat data: $e';
         _isLoading = false;
       });
     }
@@ -166,7 +212,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildNavIcon(context, Icons.assignment_outlined, 'Laporan', true, () {}), // Aktif
+            _buildNavIcon(context, Icons.assignment_outlined, 'Laporan', true, () {}),
             _buildNavIcon(context, Icons.cake_outlined, 'Produk', false,
                 () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HalamanProduk()))),
             _buildNavIcon(context, Icons.home_outlined, 'Beranda', false,
@@ -181,7 +227,6 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     );
   }
 
-  // Item navigasi bawah; lingkaran gelap muncul di belakang ikon yang sedang aktif.
   Widget _buildNavIcon(BuildContext context, IconData icon, String label,
       bool isSelected, VoidCallback onTap) {
     return GestureDetector(
@@ -193,9 +238,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.transparent,
+              color: isSelected ? Colors.black.withOpacity(0.3) : Colors.transparent,
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: Colors.white, size: 30),
@@ -212,7 +255,6 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     );
   }
 
-  // Menampilkan spinner saat loading, pesan error jika gagal, atau daftar kartu laporan.
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(
@@ -229,12 +271,29 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
             Text(_error!, style: const TextStyle(color: _C.textLight)),
             const SizedBox(height: 12),
             ElevatedButton(
-              onPressed: () {
-                setState(() { _isLoading = true; _error = null; });
-                _loadData();
-              },
+              onPressed: _loadData,
               style: ElevatedButton.styleFrom(backgroundColor: _C.brown),
               child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+    }
+    if (_laporan.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.inbox_outlined, color: _C.textLight, size: 56),
+            const SizedBox(height: 12),
+            const Text('Belum ada data laporan.',
+                style: TextStyle(color: _C.textLight, fontSize: 14)),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: _loadData,
+              style: ElevatedButton.styleFrom(backgroundColor: _C.brown),
+              icon: const Icon(Icons.refresh, color: Colors.white),
+              label: const Text('Muat Ulang', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -258,7 +317,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
   }
 }
 
-// Header atas: nama app & subtitle di kiri, foto profil admin di kanan.
+// ─── APP HEADER ───────────────────────────────────────────────────────────────
 class _AppHeader extends StatelessWidget {
   const _AppHeader();
 
@@ -272,32 +331,26 @@ class _AppHeader extends StatelessWidget {
           const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'PuddingKu',
-                style: TextStyle(
-                  color: Color(0xFFC17F3E),
-                  fontSize: 24,
-                  fontFamily: 'Sora',
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              Text(
-                'Panel Admin UMKM',
-                style: TextStyle(
-                  color: Color(0xFFA89070),
-                  fontSize: 12,
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              Text('PuddingKu',
+                  style: TextStyle(
+                    color: Color(0xFFC17F3E),
+                    fontSize: 24,
+                    fontFamily: 'Sora',
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  )),
+              Text('Panel Admin UMKM',
+                  style: TextStyle(
+                    color: Color(0xFFA89070),
+                    fontSize: 12,
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontWeight: FontWeight.w600,
+                  )),
             ],
           ),
           GestureDetector(
             onTap: () => Navigator.push(
-            context,
-          MaterialPageRoute(builder: (_) => const HalamanProfilAdmin()),
-          ),
+                context, MaterialPageRoute(builder: (_) => const HalamanProfilAdmin())),
             child: Container(
               width: 50,
               height: 50,
@@ -317,7 +370,7 @@ class _AppHeader extends StatelessWidget {
   }
 }
 
-// Label bertuliskan "LAPORAN" sebagai penanda judul halaman.
+// ─── PAGE LABEL ───────────────────────────────────────────────────────────────
 class _PageLabel extends StatelessWidget {
   const _PageLabel();
 
@@ -331,23 +384,19 @@ class _PageLabel extends StatelessWidget {
           border: Border.all(color: _C.brown, width: 2),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: const Text(
-          'LAPORAN',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            color: _C.brownDark,
-            letterSpacing: 1.5,
-          ),
-        ),
+        child: const Text('LAPORAN',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: _C.brownDark,
+              letterSpacing: 1.5,
+            )),
       ),
     );
   }
 }
 
 // ─── LAPORAN CARD ─────────────────────────────────────────────────────────────
-
-// Kartu expandable per bulan; kartu pertama terbuka secara default.
 class _LaporanCard extends StatefulWidget {
   final LaporanBulan laporan;
   final bool initiallyExpanded;
@@ -358,7 +407,6 @@ class _LaporanCard extends StatefulWidget {
   State<_LaporanCard> createState() => _LaporanCardState();
 }
 
-// Mengelola animasi buka/tutup kartu dengan AnimationController 250ms.
 class _LaporanCardState extends State<_LaporanCard>
     with SingleTickerProviderStateMixin {
   late bool _expanded;
@@ -383,7 +431,6 @@ class _LaporanCardState extends State<_LaporanCard>
     super.dispose();
   }
 
-  // Membalik state expand dan menjalankan animasi maju atau mundur.
   void _toggle() {
     setState(() => _expanded = !_expanded);
     _expanded ? _ctrl.forward() : _ctrl.reverse();
@@ -399,7 +446,7 @@ class _LaporanCardState extends State<_LaporanCard>
       shadowColor: _C.brown.withOpacity(0.2),
       child: Column(
         children: [
-          // Header kartu – selalu terlihat, ditekan untuk buka/tutup detail.
+          // Header kartu
           InkWell(
             onTap: _toggle,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -413,14 +460,12 @@ class _LaporanCardState extends State<_LaporanCard>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Laporan ${l.bulan}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: _C.accentOrange,
-                          ),
-                        ),
+                        Text('Laporan ${l.bulan}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: _C.accentOrange,
+                            )),
                         const SizedBox(height: 2),
                         Text(
                           '${l.totalTransaksi} transaksi · ${formatRupiah(l.totalPendapatan)}',
@@ -439,7 +484,7 @@ class _LaporanCardState extends State<_LaporanCard>
             ),
           ),
 
-          // Bagian detail yang muncul/hilang dengan animasi SizeTransition.
+          // Detail yang bisa expand/collapse
           SizeTransition(
             sizeFactor: _anim,
             child: Column(
@@ -453,11 +498,7 @@ class _LaporanCardState extends State<_LaporanCard>
                       const SizedBox(width: 8),
                       _StatPill(
                         label: 'Rata/Hari',
-                        value: formatRupiah(
-                          l.details.isEmpty
-                              ? l.totalPendapatan ~/ 2
-                              : l.rataPerHari,
-                        ),
+                        value: formatRupiah(l.rataPerHari),
                       ),
                       const SizedBox(width: 8),
                       _StatPill(label: 'Total', value: formatRupiah(l.totalPendapatan)),
@@ -475,8 +516,6 @@ class _LaporanCardState extends State<_LaporanCard>
 }
 
 // ─── CARD ICON ────────────────────────────────────────────────────────────────
-
-// Kotak bergradient dengan emoji 📋 sebagai ikon dekoratif header kartu.
 class _CardIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -504,8 +543,6 @@ class _CardIcon extends StatelessWidget {
 }
 
 // ─── PRINT BUTTON ─────────────────────────────────────────────────────────────
-
-// Tombol cetak biru; saat ini hanya tampilkan SnackBar, belum implementasi cetak.
 class _PrintButton extends StatelessWidget {
   final String bulan;
   const _PrintButton({required this.bulan});
@@ -548,8 +585,6 @@ class _PrintButton extends StatelessWidget {
 }
 
 // ─── STAT PILL ────────────────────────────────────────────────────────────────
-
-// Pill ringkasan statistik (label + nilai) yang dibagi rata dalam tiga kolom.
 class _StatPill extends StatelessWidget {
   final String label;
   final String value;
@@ -589,8 +624,6 @@ class _StatPill extends StatelessWidget {
 }
 
 // ─── LAPORAN TABLE ────────────────────────────────────────────────────────────
-
-// Tabel rincian harian: header cokelat → baris zebra striping → baris total.
 class _LaporanTable extends StatelessWidget {
   final LaporanBulan laporan;
   const _LaporanTable({required this.laporan});
@@ -599,7 +632,7 @@ class _LaporanTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Header
+        // Header tabel
         Container(
           color: _C.brown,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -612,7 +645,7 @@ class _LaporanTable extends StatelessWidget {
           ),
         ),
 
-        // Rows
+        // Baris data harian
         ...laporan.details.asMap().entries.map((entry) {
           final i = entry.key;
           final d = entry.value;
@@ -632,7 +665,7 @@ class _LaporanTable extends StatelessWidget {
           );
         }),
 
-        // Total
+        // Baris total
         Container(
           decoration: const BoxDecoration(
             color: _C.brown,
