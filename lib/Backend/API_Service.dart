@@ -232,6 +232,21 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> hapusKeranjang(String idUser, String idProduk) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$baseUrl/api_hapuskeranjang.php"),
+        body: {
+          "id_user": idUser,
+          "id_produk": idProduk,
+        },
+      );
+      return _safeDecodeMap(response.body);
+    } catch (e) {
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
+  }
+
   // ==========================================
   // 4. PESANAN & CHECKOUT
   // ==========================================
