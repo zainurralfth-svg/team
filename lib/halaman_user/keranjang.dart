@@ -42,12 +42,17 @@ class _KeranjangPageState extends State<KeranjangPage> {
   Future<void> _fetchCartData() async {
     try {
       final data = await ApiService.getKeranjang(currentUserId);
-      setState(() {
-        _cartItems = data;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _cartItems = data;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() => _isLoading = false);
+      print("Error fetching cart: $e");
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -75,8 +80,38 @@ class _KeranjangPageState extends State<KeranjangPage> {
   }
 
   void _hapusItem(String idProduk) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Fitur hapus memerlukan api_hapus.php")),
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Hapus Item"),
+        content: const Text("Apakah Anda yakin ingin menghapus item ini dari keranjang?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              setState(() => _isLoading = true);
+              
+              final res = await ApiService.hapusKeranjang(currentUserId, idProduk);
+              if (res['status'] == 'sukses') {
+                _fetchCartData();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Item berhasil dihapus")),
+                );
+              } else {
+                setState(() => _isLoading = false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Gagal: ${res['pesan']}")),
+                );
+              }
+            },
+            child: const Text("Hapus", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 
