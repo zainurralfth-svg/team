@@ -205,16 +205,32 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   // ============================================================
   // FUNGSI PEMBUAT DESAIN KARTU PESANAN
   // ============================================================
-  Widget _buildOrderCard(Map<String, dynamic> item) {
+ Widget _buildOrderCard(Map<String, dynamic> item) {
     String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
     String ringkasan = item['ringkasan_pesanan'] ?? 'Detail Kosong';
     String harga = 'Rp ${item['total_harga'] ?? 0}';
     String status = item['status_pesanan'] ?? 'PROSES';
 
     String waktuLengkap = item['tanggal_pesan'] ?? '';
-    String waktuSingkat = waktuLengkap.length > 16
-        ? waktuLengkap.substring(0, 16)
-        : waktuLengkap;
+
+    // Pisahkan tanggal dan jam
+    String tanggal = '';
+    String jam = '';
+
+    if (waktuLengkap.length >= 10) {
+      List<String> bagian = waktuLengkap.substring(0, 10).split('-');
+      if (bagian.length == 3) {
+        List<String> namaBulan = [
+          '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli','Agustus', 'September', 'Oktober', 'November', 'Desember'        
+        ];
+        int bulanIndex = int.tryParse(bagian[1]) ?? 0;
+        tanggal = '${bagian[2]} ${namaBulan[bulanIndex]} ${bagian[0]}';
+      }
+    }
+
+    if (waktuLengkap.length > 11) {
+      jam = waktuLengkap.substring(11, 16);
+      }
 
     Color statusColor = status == 'SELESAI'
         ? AppColors.success
@@ -242,6 +258,16 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
+                Text(
+                  tanggal,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.black45,
+                  ),
+                ),
+                const SizedBox(height: 4),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -280,6 +306,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   ],
                 ),
                 const SizedBox(height: 8),
+
                 Text(
                   ringkasan,
                   style: const TextStyle(
@@ -289,17 +316,24 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   ),
                 ),
                 const SizedBox(height: 10),
+
+                Row(
+                  children: List.generate(
+                    100,
+                    (index) => Expanded(
+                      child: Container(
+                        height: 1,
+                        color: index % 2 == 0 ? Colors.black26 : Colors.transparent,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      harga,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
                     Row(
                       children: [
                         const Icon(
@@ -309,7 +343,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          waktuSingkat,
+                          jam,
                           style: const TextStyle(
                             fontSize: 11,
                             color: Colors.black45,
@@ -317,8 +351,17 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                         ),
                       ],
                     ),
+                    Text(
+                      harga,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ],
                 ),
+
               ],
             ),
           ),
