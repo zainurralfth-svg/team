@@ -64,22 +64,9 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'PuddingKu',
-                        style: TextStyle(
-                          color: AppColors.primaryDark, // <-- Oranye gelap
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Panel Admin UMKM',
-                        style: TextStyle(
-                          color: AppColors.primary, // <-- Oranye utama
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      SizedBox(height: 2),
+                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
                   GestureDetector(

@@ -126,27 +126,12 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                  const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'PuddingKu',
-                        style: TextStyle(
-                          color: AppColors.primaryDark, // <-- Oranye gelap
-                          fontSize: 28,
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      Text(
-                        'Panel Admin UMKM',
-                        style: TextStyle(
-                          color: AppColors.primary, // <-- Oranye utama
-                          fontSize: 14,
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                    children: [
+                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      SizedBox(height: 2),
+                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
                   // FOTO PROFIL (Sudah diseragamkan 50x50)

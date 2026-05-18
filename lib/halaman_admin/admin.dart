@@ -5,7 +5,7 @@ import 'halaman_detail_pesanan.dart';
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart'; 
 import 'halaman_produk.dart';
-import 'riwayat_pesanan.dart';
+import 'riwayat_pesanan.dart'; 
 import 'halaman_laporan.dart';
 import 'halaman_pengguna.dart';
 import 'halaman_profil_admin.dart';
@@ -43,13 +43,22 @@ class _HomeAdminState extends State<HomeAdmin> {
       final dataPesanan = await ApiService.getPesanan();
 
       if (mounted) {
+        // 1. Hitung pendapatan dari SEMUA pesanan khusus yang SELESAI
+        int hitungPendapatan = dataPesanan
+            .where((p) => p['status_pesanan']?.toString().toUpperCase() == 'SELESAI')
+            .fold(0, (sum, item) => sum + (int.tryParse(item['total_harga'].toString()) ?? 0));
+
+        // 2. FILTER PESANAN: Sembunyikan yang SELESAI dan DIBATALKAN agar pindah ke Riwayat
+        List<dynamic> pesananAktif = dataPesanan.where((item) {
+          String status = item['status_pesanan']?.toString().toUpperCase() ?? '';
+          return status != 'SELESAI' && status != 'DIBATALKAN';
+        }).toList();
+
         setState(() {
           _namaAdmin = profilData['nama'] ?? "Admin UMKM";
-          _listPesanan = dataPesanan;
-          _jumlahPesananHariIni = _listPesanan.length;
-          _pendapatanBulanIni = _listPesanan
-              .where((p) => p['status_pesanan']?.toString().toUpperCase() == 'SELESAI')
-              .fold(0, (sum, item) => sum + (int.tryParse(item['total_harga'].toString()) ?? 0));
+          _listPesanan = pesananAktif; // Beranda HANYA nampilin pesanan aktif
+          _jumlahPesananHariIni = pesananAktif.length; 
+          _pendapatanBulanIni = hitungPendapatan; 
           _isLoading = false;
         });
       }
@@ -87,10 +96,8 @@ class _HomeAdminState extends State<HomeAdmin> {
 
   @override
   Widget build(BuildContext context) {
-    // Variabel warna lokal dihapus, kita full pakai AppColors sekarang!
-
     return Scaffold(
-      backgroundColor: AppColors.bgUtama, // <-- Latar belakang krem
+      backgroundColor: AppColors.bgUtama,
       body: SafeArea(
         child: Column(
           children: [
@@ -100,11 +107,12 @@ class _HomeAdminState extends State<HomeAdmin> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                  const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('PuddingKu', style: TextStyle(color: AppColors.primaryDark, fontSize: 24, fontFamily: 'Sora', fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-                      Text('Panel Admin UMKM', style: TextStyle(color: AppColors.primary, fontSize: 12, fontFamily: 'Plus Jakarta Sans', fontWeight: FontWeight.w600)),
+                    children: [
+                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      SizedBox(height: 2),
+                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
                   GestureDetector(
@@ -152,7 +160,16 @@ class _HomeAdminState extends State<HomeAdmin> {
                                   const SizedBox(height: 2),
                                   Text(DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now()), style: const TextStyle(color: AppColors.textWhite, fontSize: 11, fontFamily: 'Plus Jakarta Sans')),
                                   const SizedBox(height: 15),
-                                  Row(children: [_buildGlassBadge('$_jumlahPesananHariIni Pesanan Baru'), const SizedBox(width: 8), _buildGlassBadge('+12% Minggu Ini')]),
+                                  
+                                  // === INI PERUBAHANNYA: Menggunakan Wrap agar tidak overflow ===
+                                  Wrap(
+                                    spacing: 8, // Jarak horizontal
+                                    runSpacing: 8, // Jarak vertikal kalau turun baris
+                                    children: [
+                                      _buildGlassBadge('$_jumlahPesananHariIni Pesanan Baru'),
+                                      _buildGlassBadge('+12% Minggu Ini'),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
@@ -210,7 +227,7 @@ class _HomeAdminState extends State<HomeAdmin> {
                       _isLoading
                           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                           : _listPesanan.isEmpty
-                          ? const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text("Belum ada pesanan masuk.", style: TextStyle(color: AppColors.textHint, fontWeight: FontWeight.bold))))
+                          ? const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text("Belum ada pesanan aktif.", style: TextStyle(color: AppColors.textHint, fontWeight: FontWeight.bold))))
                           : ListView.builder(
                               shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: _listPesanan.length,
                               itemBuilder: (context, index) {
@@ -250,11 +267,11 @@ class _HomeAdminState extends State<HomeAdmin> {
 
       // === BOTTOM NAVIGATION BAR ===
       bottomNavigationBar: CustomBottomNavbar(
-        currentIndex: 2, // Posisi 2 = Beranda
+        currentIndex: 2, 
         onTap: (index) {
           if (index == 0) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()));
           if (index == 1) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
-          if (index == 3) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()));
+          if (index == 3) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat())); 
           if (index == 4) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanPengguna()));
         },
       ),
@@ -262,7 +279,6 @@ class _HomeAdminState extends State<HomeAdmin> {
   }
 
   Widget _buildGlassBadge(String text) {
-    // Efek kaca putih transparan tetap dipertahankan karena menempel di background oranye
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(color: Colors.white.withOpacity(0.18), borderRadius: BorderRadius.circular(10)),
