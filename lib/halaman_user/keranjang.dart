@@ -5,6 +5,9 @@ import 'profil_pengguna.dart';
 import 'konfirmasipesanan.dart'; // Pastikan file ini sudah ada
 import 'package:shared_preferences/shared_preferences.dart';
 
+// PASTIKAN IMPORT FILE NAVBAR CUSTOM LO DISINI YAH BRO!
+import '../Widget/custom_user_navbar.dart';
+
 class KeranjangPage extends StatefulWidget {
   const KeranjangPage({super.key});
 
@@ -326,43 +329,20 @@ class _KeranjangPageState extends State<KeranjangPage> {
               ),
             ),
 
-      bottomNavigationBar: Container(
-        height: 70,
-        decoration: const BoxDecoration(
-          color: AppColors.primary, // Warna bottom nav oranye utama
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/cek_pesanan');
-              },
-              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan'),
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: _buildBottomNavItem(Icons.cake, 'Produk'),
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const HalamanProfil(),
-                  ),
-                );
-              },
-              child: _buildBottomNavItem(Icons.person, 'Profil'),
-            ),
-          ],
-        ),
+      // ==============================================================
+      // INI PERUBAHANNYA: MANGGIL CUSTOM NAVBAR PELANGGAN (INDEKS -1 = GAK ADA YANG NYALA)
+      // ==============================================================
+      bottomNavigationBar: CustomUserNavbar(
+        currentIndex: -1, // Sengaja -1 biar nggak ada bunderan putih (karena ini hal. keranjang)
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacementNamed(context, '/cek_pesanan');
+          } else if (index == 1) {
+            Navigator.pushReplacementNamed(context, '/menu'); 
+          } else if (index == 2) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProfil()));
+          }
+        },
       ),
     );
   }
@@ -459,24 +439,6 @@ class _KeranjangPageState extends State<KeranjangPage> {
       ),
       child: Center(
         child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavItem(IconData icon, String label) {
-    return Container(
-      color: Colors.transparent,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: AppColors.textWhite),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(color: AppColors.textWhite, fontSize: 12),
-          ),
-        ],
       ),
     );
   }

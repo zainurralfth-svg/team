@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart'; 
+
 import 'halaman_detail_pesanan.dart'; 
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart'; 
@@ -8,6 +9,7 @@ import 'halaman_produk.dart';
 import 'riwayat_pesanan.dart'; 
 import 'halaman_laporan.dart';
 import 'halaman_pengguna.dart';
+import 'tambah_pesanan.dart'; 
 import 'halaman_profil_admin.dart';
 import '../Widget/custom_navbar.dart';
 import '../Widget/order_card.dart';
@@ -21,12 +23,17 @@ class HomeAdmin extends StatefulWidget {
 }
 
 class _HomeAdminState extends State<HomeAdmin> {
-  List<dynamic> _listPesanan = [];
+  List<dynamic> _pesananMenunggu = [];
+  List<dynamic> _pesananProses = [];
+  
   bool _isLoading = true;
   String _namaAdmin = "Sari Andini"; 
   String _currentUserId = "1";
   int _pendapatanBulanIni = 0;
   int _jumlahPesananHariIni = 0;
+  
+  int _jumlahBatalSebelumnya = -1;
+  bool _isAdminAction = false; 
 
   @override
   void initState() {
@@ -43,21 +50,43 @@ class _HomeAdminState extends State<HomeAdmin> {
       final dataPesanan = await ApiService.getPesanan();
 
       if (mounted) {
-        // 1. Hitung pendapatan dari SEMUA pesanan khusus yang SELESAI
-        int hitungPendapatan = dataPesanan
-            .where((p) => p['status_pesanan']?.toString().toUpperCase() == 'SELESAI')
-            .fold(0, (sum, item) => sum + (int.tryParse(item['total_harga'].toString()) ?? 0));
+        int hitungPendapatan = 0;
+        int hitungBatalSaatIni = 0;
+        
+        List<dynamic> antreanMenunggu = [];
+        List<dynamic> antreanProses = [];
 
-        // 2. FILTER PESANAN: Sembunyikan yang SELESAI dan DIBATALKAN agar pindah ke Riwayat
-        List<dynamic> pesananAktif = dataPesanan.where((item) {
-          String status = item['status_pesanan']?.toString().toUpperCase() ?? '';
-          return status != 'SELESAI' && status != 'DIBATALKAN';
-        }).toList();
+        for (var item in dataPesanan) {
+          String statusRaw = item['status_pesanan']?.toString().toUpperCase() ?? '';
+          String status = statusRaw.isEmpty ? 'MENUNGGU' : statusRaw;
+          
+          if (status == 'SELESAI') {
+            hitungPendapatan += (int.tryParse(item['total_harga'].toString()) ?? 0);
+          } else if (status == 'DIBATALKAN') {
+            hitungBatalSaatIni++;
+          } else if (status == 'MENUNGGU') {
+            antreanMenunggu.add(item);
+          } else if (status == 'PROSES') {
+            antreanProses.add(item);
+          }
+        }
+
+        if (!_isAdminAction && _jumlahBatalSebelumnya != -1 && hitungBatalSaatIni > _jumlahBatalSebelumnya) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⚠️ Notifikasi: Ada pelanggan yang membatalkan pesanan! Cek Riwayat.'), 
+              backgroundColor: AppColors.error,
+              duration: Duration(seconds: 5),
+            )
+          );
+        }
+        _jumlahBatalSebelumnya = hitungBatalSaatIni;
 
         setState(() {
           _namaAdmin = profilData['nama'] ?? "Admin UMKM";
-          _listPesanan = pesananAktif; // Beranda HANYA nampilin pesanan aktif
-          _jumlahPesananHariIni = pesananAktif.length; 
+          _pesananMenunggu = antreanMenunggu;
+          _pesananProses = antreanProses;
+          _jumlahPesananHariIni = antreanMenunggu.length + antreanProses.length; 
           _pendapatanBulanIni = hitungPendapatan; 
           _isLoading = false;
         });
@@ -74,15 +103,41 @@ class _HomeAdminState extends State<HomeAdmin> {
     return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
   }
 
+  // =========================================================
+  // MESIN WAKTU: Bikin tanggal jadi "5 menit lalu", dll
+  // =========================================================
+  String _formatWaktu(Map<String, dynamic> item) {
+    // Cari tanggal di database (coba semua kemungkinan nama kolom)
+    String? rawTime = item['tanggal_pesanan'] ?? item['created_at'] ?? item['tanggal'] ?? item['waktu'];
+    
+    if (rawTime == null || rawTime.isEmpty) return 'Baru saja';
+    
+    try {
+      DateTime orderTime = DateTime.parse(rawTime);
+      Duration diff = DateTime.now().difference(orderTime);
+      
+      if (diff.inMinutes < 1) return 'Baru saja';
+      if (diff.inMinutes < 60) return '${diff.inMinutes} menit lalu';
+      if (diff.inHours < 24) return '${diff.inHours} jam lalu';
+      return '${diff.inDays} hari lalu';
+    } catch (e) {
+      // Kalo format di database bukan datetime standar, potong aja teksnya
+      return rawTime.length > 15 ? rawTime.substring(0, 15) : rawTime;
+    }
+  }
+
   Future<void> _ubahStatusPesanan(String idPesanan, String statusBaru) async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _isAdminAction = true;
+    });
     try {
       final response = await ApiService.updateStatusPesanan(idPesanan, statusBaru);
       if (response['status'] == 'sukses') {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Status berhasil diubah ke $statusBaru ✓'), backgroundColor: AppColors.success));
-        _loadDataDashboard(); 
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Pesanan berhasil di-update ke $statusBaru ✓'), backgroundColor: AppColors.success));
+        await _loadDataDashboard(); 
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal mengubah status: ${response['pesan']}'), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal: ${response['pesan']}'), backgroundColor: AppColors.error));
       }
     } catch (e) {
       debugPrint("Error update status: $e");
@@ -90,7 +145,12 @@ class _HomeAdminState extends State<HomeAdmin> {
         SnackBar(content: Text('Sistem Error: $e'), backgroundColor: AppColors.error, duration: const Duration(seconds: 4))
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isAdminAction = false; 
+        });
+      }
     }
   }
 
@@ -107,12 +167,11 @@ class _HomeAdminState extends State<HomeAdmin> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
-                      SizedBox(height: 2),
-                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
+                    children: const [
+                      Text('PuddingKu', style: TextStyle(color: AppColors.primaryDark, fontSize: 24, fontFamily: 'Sora', fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+                      Text('Panel Admin UMKM', style: TextStyle(color: AppColors.primary, fontSize: 12, fontFamily: 'Plus Jakarta Sans', fontWeight: FontWeight.w600)),
                     ],
                   ),
                   GestureDetector(
@@ -160,13 +219,11 @@ class _HomeAdminState extends State<HomeAdmin> {
                                   const SizedBox(height: 2),
                                   Text(DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now()), style: const TextStyle(color: AppColors.textWhite, fontSize: 11, fontFamily: 'Plus Jakarta Sans')),
                                   const SizedBox(height: 15),
-                                  
-                                  // === INI PERUBAHANNYA: Menggunakan Wrap agar tidak overflow ===
                                   Wrap(
-                                    spacing: 8, // Jarak horizontal
-                                    runSpacing: 8, // Jarak vertikal kalau turun baris
+                                    spacing: 8, 
+                                    runSpacing: 8, 
                                     children: [
-                                      _buildGlassBadge('$_jumlahPesananHariIni Pesanan Baru'),
+                                      _buildGlassBadge('$_jumlahPesananHariIni Pesanan Aktif'),
                                       _buildGlassBadge('+12% Minggu Ini'),
                                     ],
                                   ),
@@ -220,41 +277,61 @@ class _HomeAdminState extends State<HomeAdmin> {
                       ),
                       const SizedBox(height: 25),
 
-                      const Text('Daftar Pesanan', style: TextStyle(color: AppColors.textBrown, fontSize: 30, fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 15),
+                      if (_isLoading)
+                        const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                      else if (_pesananMenunggu.isEmpty && _pesananProses.isEmpty)
+                        const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text("Yey! Belum ada antrean pesanan.", style: TextStyle(color: AppColors.textHint, fontWeight: FontWeight.bold))))
+                      else ...[
+                        
+                        // SECTION 1: BUTUH KONFIRMASI (MENUNGGU)
+                        if (_pesananMenunggu.isNotEmpty) ...[
+                          const Text('Butuh Konfirmasi Pesanan ⚠️', style: TextStyle(color: AppColors.error, fontSize: 24, fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 10),
+                          ListView.builder(
+                            shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: _pesananMenunggu.length,
+                            itemBuilder: (context, index) {
+                              final item = _pesananMenunggu[index];
+                              return GestureDetector(
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => HalamanDetailPesanan(dataPesanan: item))),
+                                child: OrderCard(
+                                  id: item['id_pesanan'].toString(),
+                                  nama: item['nama_pemesan'] ?? 'Unknown',
+                                  ringkasan: item['ringkasan_pesanan'] ?? 'Detail tidak tersedia',
+                                  harga: formatRupiah(item['total_harga']),
+                                  status: 'MENUNGGU', 
+                                  waktu: _formatWaktu(item), // <-- Menggunakan mesin waktu
+                                  onStatusChanged: (newStatus) => _ubahStatusPesanan(item['id_pesanan'].toString(), newStatus),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                        ],
 
-                      // === DAFTAR PESANAN ===
-                      _isLoading
-                          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-                          : _listPesanan.isEmpty
-                          ? const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text("Belum ada pesanan aktif.", style: TextStyle(color: AppColors.textHint, fontWeight: FontWeight.bold))))
-                          : ListView.builder(
-                              shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: _listPesanan.length,
-                              itemBuilder: (context, index) {
-                                final item = _listPesanan[index];
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => HalamanDetailPesanan(dataPesanan: item),
-                                      ),
-                                    );
-                                  },
-                                  child: OrderCard(
-                                    id: item['id_pesanan'].toString(),
-                                    nama: item['nama_pemesan'] ?? 'Unknown',
-                                    ringkasan: item['ringkasan_pesanan'] ?? 'Detail tidak tersedia',
-                                    harga: formatRupiah(item['total_harga']),
-                                    status: item['status_pesanan'] ?? 'PROSES',
-                                    waktu: item['tanggal_pesanan'] ?? '15 menit lalu',
-                                    onStatusChanged: (newStatus) {
-                                      _ubahStatusPesanan(item['id_pesanan'].toString(), newStatus);
-                                    },
-                                  ),
-                                );
-                              },
-                            ),
+                        // SECTION 2: SEDANG DIPROSES
+                        if (_pesananProses.isNotEmpty) ...[
+                          const Text('Sedang Diproses 🍳', style: TextStyle(color: AppColors.info, fontSize: 24, fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 10),
+                          ListView.builder(
+                            shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: _pesananProses.length,
+                            itemBuilder: (context, index) {
+                              final item = _pesananProses[index];
+                              return GestureDetector(
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => HalamanDetailPesanan(dataPesanan: item))),
+                                child: OrderCard(
+                                  id: item['id_pesanan'].toString(),
+                                  nama: item['nama_pemesan'] ?? 'Unknown',
+                                  ringkasan: item['ringkasan_pesanan'] ?? 'Detail tidak tersedia',
+                                  harga: formatRupiah(item['total_harga']),
+                                  status: 'PROSES', 
+                                  waktu: _formatWaktu(item), // <-- Menggunakan mesin waktu
+                                  onStatusChanged: (newStatus) => _ubahStatusPesanan(item['id_pesanan'].toString(), newStatus),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ],
                       const SizedBox(height: 30), 
                     ],
                   ),
@@ -267,7 +344,7 @@ class _HomeAdminState extends State<HomeAdmin> {
 
       // === BOTTOM NAVIGATION BAR ===
       bottomNavigationBar: CustomBottomNavbar(
-        currentIndex: 2, 
+        currentIndex: 2, // Posisi 2 = Beranda
         onTap: (index) {
           if (index == 0) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()));
           if (index == 1) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
