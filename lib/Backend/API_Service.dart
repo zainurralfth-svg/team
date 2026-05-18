@@ -232,14 +232,14 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> hapusKeranjang(String idUser, String idProduk) async {
+  static Future<Map<String, dynamic>> hapusKeranjang(
+    String idUser,
+    String idProduk,
+  ) async {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/api_hapuskeranjang.php"),
-        body: {
-          "id_user": idUser,
-          "id_produk": idProduk,
-        },
+        body: {"id_user": idUser, "id_produk": idProduk},
       );
       return _safeDecodeMap(response.body);
     } catch (e) {
@@ -399,14 +399,17 @@ class ApiService {
         Uri.parse("$baseUrl/tambah_pesanan.php"),
         body: {
           "nama_pemesan": dataPesanan['nama_pemesan'].toString(),
-          "ringkasan_pesanan": dataPesanan['ringkasan_pesanan'].toString(),
+          "no_telp": dataPesanan['no_telp'].toString(),
+          "keranjang": dataPesanan['keranjang']
+              .toString(), // ✅ WAJIB DIUBAH KE "keranjang"
           "total_harga": dataPesanan['total_harga'].toString(),
           "status_pesanan": dataPesanan['status_pesanan'].toString(),
         },
       );
+
       return _safeDecodeMap(response.body);
     } catch (e) {
-      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+      return {"status": "error", "pesan": "Koneksi API gagal: $e"};
     }
   }
 }
