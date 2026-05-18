@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'halaman_produk.dart';
-import 'halaman_riwayat.dart';
+import 'riwayat_pesanan.dart';
 import 'halaman_pengguna.dart';
 import 'admin.dart';
 import 'halaman_profil_admin.dart';
 import '../Backend/api_service.dart';
+import '../Core/Colour.dart'; 
+import '../Widget/custom_navbar.dart';
 
 class TransaksiDetail {
   final String tanggal;
@@ -130,18 +132,6 @@ String formatRupiah(int value) {
   return 'Rp ${result.toString().split('').reversed.join()}';
 }
 
-// ─── WARNA ────────────────────────────────────────────────────────────────────
-class _C {
-  static const cream = Color(0xFFFFF3DC);
-  static const brown = Color(0xFF8B5E2D);
-  static const brownDark = Color(0xFF6B4520);
-  static const accentOrange = Color(0xFFE8841A);
-  static const textLight = Color(0xFFB08050);
-  static const textDark = Color(0xFF3D2400);
-  static const blue = Color(0xFF4A90D9);
-  static const blueDark = Color(0xFF2E6DB4);
-}
-
 // ─── HALAMAN LAPORAN ──────────────────────────────────────────────────────────
 class HalamanLaporan extends StatefulWidget {
   const HalamanLaporan({super.key});
@@ -192,10 +182,8 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryOrange = Color(0xFFD27F30);
-
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF3DC),
+      backgroundColor: AppColors.bgUtama, // <-- Pakai krem utama AppColors
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,51 +194,18 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        height: 75,
-        color: primaryOrange,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildNavIcon(context, Icons.assignment_outlined, 'Laporan', true, () {}),
-            _buildNavIcon(context, Icons.cake_outlined, 'Produk', false,
-                () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HalamanProduk()))),
-            _buildNavIcon(context, Icons.home_outlined, 'Beranda', false,
-                () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeAdmin()))),
-            _buildNavIcon(context, Icons.history, 'Riwayat', false,
-                () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HalamanRiwayat()))),
-            _buildNavIcon(context, Icons.person_outline, 'Pengguna', false,
-                () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HalamanPengguna()))),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavIcon(BuildContext context, IconData icon, String label,
-      bool isSelected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: isSelected ? Colors.black.withOpacity(0.3) : Colors.transparent,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: Colors.white, size: 30),
-          ),
-          Text(label,
-              style: const TextStyle(
-                fontFamily: 'Signika Negative',
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              )),
-        ],
+      
+      // ==============================================================
+      // BOTTOM NAVBAR CUSTOM
+      // ==============================================================
+      bottomNavigationBar: CustomBottomNavbar(
+        currentIndex: 0, // Posisi 0 karena ini halaman Laporan
+        onTap: (index) {
+          if (index == 1) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HalamanProduk()));
+          if (index == 2) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeAdmin()));
+          if (index == 3) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HalamanRiwayat()));
+          if (index == 4) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HalamanPengguna()));
+        },
       ),
     );
   }
@@ -258,7 +213,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(color: _C.accentOrange),
+        child: CircularProgressIndicator(color: AppColors.primary),
       );
     }
     if (_error != null) {
@@ -266,13 +221,13 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: _C.accentOrange, size: 48),
+            const Icon(Icons.error_outline, color: AppColors.error, size: 48),
             const SizedBox(height: 12),
-            Text(_error!, style: const TextStyle(color: _C.textLight)),
+            Text(_error!, style: const TextStyle(color: AppColors.textBrown)),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _loadData,
-              style: ElevatedButton.styleFrom(backgroundColor: _C.brown),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
             ),
           ],
@@ -284,14 +239,14 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.inbox_outlined, color: _C.textLight, size: 56),
+            const Icon(Icons.inbox_outlined, color: AppColors.textHint, size: 56),
             const SizedBox(height: 12),
             const Text('Belum ada data laporan.',
-                style: TextStyle(color: _C.textLight, fontSize: 14)),
+                style: TextStyle(color: AppColors.textHint, fontSize: 14)),
             const SizedBox(height: 12),
             ElevatedButton.icon(
               onPressed: _loadData,
-              style: ElevatedButton.styleFrom(backgroundColor: _C.brown),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               icon: const Icon(Icons.refresh, color: Colors.white),
               label: const Text('Muat Ulang', style: TextStyle(color: Colors.white)),
             ),
@@ -300,7 +255,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
       );
     }
     return RefreshIndicator(
-      color: _C.accentOrange,
+      color: AppColors.primary,
       onRefresh: _loadData,
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
@@ -333,7 +288,7 @@ class _AppHeader extends StatelessWidget {
             children: [
               Text('PuddingKu',
                   style: TextStyle(
-                    color: Color(0xFFC17F3E),
+                    color: AppColors.primaryDark, // <-- Seragam Oranye Gelap
                     fontSize: 24,
                     fontFamily: 'Sora',
                     fontWeight: FontWeight.w800,
@@ -341,7 +296,7 @@ class _AppHeader extends StatelessWidget {
                   )),
               Text('Panel Admin UMKM',
                   style: TextStyle(
-                    color: Color(0xFFA89070),
+                    color: AppColors.primary, // <-- Seragam Oranye Utama
                     fontSize: 12,
                     fontFamily: 'Plus Jakarta Sans',
                     fontWeight: FontWeight.w600,
@@ -381,14 +336,14 @@ class _PageLabel extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
-          border: Border.all(color: _C.brown, width: 2),
+          border: Border.all(color: AppColors.primary, width: 2), // <-- Pakai oranye
           borderRadius: BorderRadius.circular(6),
         ),
         child: const Text('LAPORAN',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
-              color: _C.brownDark,
+              color: AppColors.primaryDark,
               letterSpacing: 1.5,
             )),
       ),
@@ -443,7 +398,7 @@ class _LaporanCardState extends State<_LaporanCard>
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
       elevation: 4,
-      shadowColor: _C.brown.withOpacity(0.2),
+      shadowColor: AppColors.shadow, // <-- Pakai shadow AppColors
       child: Column(
         children: [
           // Header kartu
@@ -464,7 +419,7 @@ class _LaporanCardState extends State<_LaporanCard>
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
-                              color: _C.accentOrange,
+                              color: AppColors.primary,
                             )),
                         const SizedBox(height: 2),
                         Text(
@@ -472,7 +427,7 @@ class _LaporanCardState extends State<_LaporanCard>
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: _C.textLight,
+                            color: AppColors.textHint,
                           ),
                         ),
                       ],
@@ -489,7 +444,7 @@ class _LaporanCardState extends State<_LaporanCard>
             sizeFactor: _anim,
             child: Column(
               children: [
-                const Divider(color: Color(0xFFF5EAD8), height: 1),
+                const Divider(color: AppColors.bgInput, height: 1),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                   child: Row(
@@ -523,15 +478,11 @@ class _CardIcon extends StatelessWidget {
       width: 42,
       height: 42,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFE8BB), Color(0xFFFFF3DC)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.bgUtama, // <-- Krem
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: _C.brown.withOpacity(0.15),
+            color: AppColors.shadow,
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -554,7 +505,7 @@ class _PrintButton extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Mencetak laporan $bulan...'),
-            backgroundColor: _C.brown,
+            backgroundColor: AppColors.info, // <-- Info Biru
           ),
         );
       },
@@ -562,15 +513,11 @@ class _PrintButton extends StatelessWidget {
         width: 34,
         height: 34,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [_C.blue, _C.blueDark],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: AppColors.info, // <-- Info Biru AppColors
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: _C.blue.withOpacity(0.4),
+              color: AppColors.shadow,
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -596,7 +543,7 @@ class _StatPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: _C.cream,
+          color: AppColors.bgCard, // <-- Pakai krem terang
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -605,7 +552,7 @@ class _StatPill extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: _C.textLight,
+                  color: AppColors.textHint,
                   letterSpacing: 0.3,
                 )),
             const SizedBox(height: 3),
@@ -614,7 +561,7 @@ class _StatPill extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
-                  color: _C.brownDark,
+                  color: AppColors.textBrown,
                 )),
           ],
         ),
@@ -634,7 +581,7 @@ class _LaporanTable extends StatelessWidget {
       children: [
         // Header tabel
         Container(
-          color: _C.brown,
+          color: AppColors.primary, // <-- Oranye
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: const Row(
             children: [
@@ -651,8 +598,8 @@ class _LaporanTable extends StatelessWidget {
           final d = entry.value;
           return Container(
             decoration: BoxDecoration(
-              color: i.isEven ? Colors.white : const Color(0xFFFFF9F0),
-              border: const Border(bottom: BorderSide(color: Color(0xFFF8F0E4))),
+              color: i.isEven ? Colors.white : AppColors.bgCard, // <-- Selang seling putih & krem terang
+              border: const Border(bottom: BorderSide(color: AppColors.bgUtama)),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -668,7 +615,7 @@ class _LaporanTable extends StatelessWidget {
         // Baris total
         Container(
           decoration: const BoxDecoration(
-            color: _C.brown,
+            color: AppColors.primaryDark, // <-- Pakai Oranye Gelap
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
@@ -685,12 +632,12 @@ class _LaporanTable extends StatelessWidget {
   }
 
   static const _tableHeadStyle = TextStyle(
-    fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white,
+    fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textWhite,
   );
   static const _tableRowStyle = TextStyle(
-    fontSize: 12, fontWeight: FontWeight.w600, color: _C.textDark,
+    fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textDark,
   );
   static const _tableTotalStyle = TextStyle(
-    fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white,
+    fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textWhite,
   );
 }

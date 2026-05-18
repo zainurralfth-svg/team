@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../Backend/API_Service.dart';
+import '../Core/Colour.dart'; 
 import 'admin.dart';
 import 'halaman_laporan.dart';
-import 'halaman_riwayat.dart';
+import 'riwayat_pesanan.dart';
 import 'halaman_produk.dart';
 import 'halaman_profil_admin.dart';
 import '../Widget/custom_navbar.dart';
@@ -77,15 +78,15 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text('Menghapus $namaUser...')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Menghapus $namaUser...'))
+              );
               final response = await ApiService.hapusPengguna(idUser);
               if (response['status'] == 'sukses') {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Berhasil dihapus! ✅'),
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppColors.success, // <-- Hijau success
                   ),
                 );
                 setState(() => _isLoading = true);
@@ -96,14 +97,14 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                     content: Text(
                       'Gagal menghapus: ${response['pesan'] ?? 'Error'}',
                     ),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppColors.error, // <-- Merah error
                   ),
                 );
               }
             },
             child: const Text(
               'Hapus',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold), // <-- Merah error
             ),
           ),
         ],
@@ -113,13 +114,8 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
 
   @override
   Widget build(BuildContext context) {
-    const Color bgCream = Color(0xFFFFE5B9);
-    const Color primaryOrange = Color(0xFFD27F30);
-    const Color textBrown = Color(0xFFC17F3E);
-    const Color lightBrown = Color(0xFFA89070);
-
     return Scaffold(
-      backgroundColor: bgCream,
+      backgroundColor: AppColors.bgUtama, // <-- Latar belakang utama krem
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,7 +132,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       Text(
                         'PuddingKu',
                         style: TextStyle(
-                          color: textBrown,
+                          color: AppColors.primaryDark, // <-- Oranye gelap
                           fontSize: 28,
                           fontFamily: 'Sora',
                           fontWeight: FontWeight.w800,
@@ -145,7 +141,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       Text(
                         'Panel Admin UMKM',
                         style: TextStyle(
-                          color: lightBrown,
+                          color: AppColors.primary, // <-- Oranye utama
                           fontSize: 14,
                           fontFamily: 'Plus Jakarta Sans',
                           fontWeight: FontWeight.w600,
@@ -153,6 +149,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       ),
                     ],
                   ),
+                  // FOTO PROFIL (Sudah diseragamkan 50x50)
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -163,11 +160,11 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       );
                     },
                     child: Container(
-                      width: 55,
-                      height: 55,
+                      width: 50,
+                      height: 50,
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: AppColors.textWhite,
                         image: DecorationImage(
                           image: AssetImage('assets/images/profil admin.png'),
                           fit: BoxFit.cover,
@@ -180,12 +177,12 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
             ),
 
             // === TITLE: Daftar Pengguna ===
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
               child: Text(
                 'Daftar Pengguna',
                 style: TextStyle(
-                  color: textBrown,
+                  color: AppColors.textBrown, // <-- Teks coklat tua
                   fontSize: 34,
                   fontFamily: 'Signika Negative',
                   fontWeight: FontWeight.bold,
@@ -198,23 +195,28 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFD1A1).withOpacity(0.5),
+                  color: AppColors.textWhite, // <-- Pakai putih biar bersih
                   borderRadius: BorderRadius.circular(35),
                 ),
                 child: TextField(
                   controller: _searchController,
                   onChanged: _filterSearch,
+                  style: const TextStyle(
+                    fontFamily: 'Signika Negative',
+                    color: AppColors.textDark,
+                    fontSize: 18,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Search..',
-                    hintStyle: TextStyle(
-                      color: textBrown.withOpacity(0.6),
+                    hintStyle: const TextStyle(
+                      color: AppColors.textHint, // <-- Teks abu-abu
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Signika Negative',
                     ),
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.search,
-                      color: textBrown.withOpacity(0.6),
+                      color: AppColors.primary, // <-- Ikon oranye utama
                       size: 35,
                     ),
                     border: InputBorder.none,
@@ -230,14 +232,14 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
             Expanded(
               child: _isLoading
                   ? const Center(
-                      child: CircularProgressIndicator(color: primaryOrange),
+                      child: CircularProgressIndicator(color: AppColors.primary), // <-- Loading oranye
                     )
                   : _filteredData.isEmpty
                   ? const Center(
                       child: Text(
                         "Tidak ada pengguna ditemukan.",
                         style: TextStyle(
-                          color: textBrown,
+                          color: AppColors.textHint, // <-- Teks abu-abu
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -262,26 +264,30 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
       bottomNavigationBar: CustomBottomNavbar(
         currentIndex: 4,
         onTap: (index) {
-          if (index == 0)
+          if (index == 0) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const HalamanLaporan()),
             );
-          if (index == 1)
+          }
+          if (index == 1) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const HalamanProduk()),
             );
-          if (index == 2)
+          }
+          if (index == 2) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const HomeAdmin()),
             );
-          if (index == 3)
+          }
+          if (index == 3) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HalamanRiwayat()),
+              MaterialPageRoute(builder: (context) => const HalamanRiwayat()), // Pastikan nama kelas Halaman Riwayat benar
             );
+          }
           if (index == 4) {
             // Already here
           }
@@ -298,21 +304,20 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
         : '?';
     String telepon = item['phone'] ?? 'Tidak ada no HP';
     String username = item['username'] ?? 'Tidak ada username';
-    String roleDB = item['role'] ?? 'user';
+    // String roleDB = item['role'] ?? 'user';
 
-    // Status logic: if role is 'user' maybe show 'AKTIF' or check other field if available
     String status = "User";
-    Color warnaStatus = const Color(0xFF4CAF50); // Green dot
+    Color warnaStatus = AppColors.success; // <-- Hijau sukses
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textWhite, // <-- Latar kartu putih
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.shadow, // <-- Pakai shadow dari AppColors
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -328,10 +333,10 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                 width: 55,
                 height: 55,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFE5B9),
+                  color: AppColors.bgUtama, // <-- Background krem
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(
-                    color: const Color(0xFFD27F30).withOpacity(0.3),
+                    color: AppColors.primary.withOpacity(0.3), // <-- Border oranye
                     width: 2,
                   ),
                 ),
@@ -341,7 +346,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                     style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFFD27F30),
+                      color: AppColors.primary, // <-- Teks inisial oranye
                       fontFamily: 'Signika Negative',
                     ),
                   ),
@@ -358,7 +363,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        color: Colors.black,
+                        color: AppColors.textDark, // <-- Teks hitam pekat
                         fontFamily: 'Sora',
                       ),
                     ),
@@ -369,7 +374,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       children: [
                         const Icon(
                           Icons.phone_callback_rounded,
-                          color: Color(0xFF4CAF50),
+                          color: AppColors.success, // <-- Ikon hijau
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -379,7 +384,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey[200],
+                            color: AppColors.bgInput, // <-- Background kotak abu-abu
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -387,7 +392,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: Colors.grey,
+                              color: AppColors.textHint, // <-- Teks abu-abu
                             ),
                           ),
                         ),
@@ -400,7 +405,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                       children: [
                         const Icon(
                           Icons.mail_outline_rounded,
-                          color: Colors.redAccent,
+                          color: AppColors.error, // <-- Ikon merah
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -410,7 +415,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey[200],
+                            color: AppColors.bgInput, // <-- Background kotak abu-abu
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -418,7 +423,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: Colors.grey,
+                              color: AppColors.textHint, // <-- Teks abu-abu
                             ),
                           ),
                         ),
@@ -437,7 +442,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFE5B9),
+                color: AppColors.bgUtama, // <-- Krem
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
@@ -450,7 +455,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
-                      color: Colors.black,
+                      color: AppColors.textDark, // <-- Teks hitam pekat
                     ),
                   ),
                 ],
@@ -469,12 +474,12 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                 }
               },
               child: Image.asset(
-                'assets/icons/trash.png', // Assuming user has this or similar icon
+                'assets/icons/trash.png',
                 width: 35,
                 height: 35,
                 errorBuilder: (context, error, stackTrace) => const Icon(
                   Icons.delete_outline_rounded,
-                  color: Colors.grey,
+                  color: AppColors.error, // <-- Pakai merah AppColors
                   size: 35,
                 ),
               ),
