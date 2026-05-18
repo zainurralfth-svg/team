@@ -56,6 +56,9 @@ class _MenuPageState extends State<MenuPage> {
 
   // VARIABEL BARU: Menyimpan jumlah item di keranjang
   int _cartItemCount = 0; 
+  // Variabel untuk fitur pencarian
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   final List<String> _categories = ['Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
   final List<String> _banners = [
@@ -216,6 +219,12 @@ class _MenuPageState extends State<MenuPage> {
 
               // Search Bar
               TextField(
+                controller: _searchController, // <-- Pengendali dipasang di sini!
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.toLowerCase(); 
+                  });
+                },
                 style: const TextStyle(color: AppColors.textDark), // Tambah warna font ketikan
                 decoration: InputDecoration(
                   hintText: 'Search Produk',
@@ -267,16 +276,23 @@ class _MenuPageState extends State<MenuPage> {
               const SizedBox(height: 16),
 
               // Grid Produk
-              Builder(
+             Builder(
                 builder: (context) {
                   if (_isLoading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
 
-                  final produkFilter = _menuDariDatabase
-                      .where((produk) => produk['kategori'] == activeName)
-                      .toList();
+                  final produkFilter = _menuDariDatabase.where((produk) {
+                    final bool cocokKategori = produk['kategori'] == activeName;
+                    final String namaProduk = (produk['nama_produk'] ?? produk['nama_menu'] ?? produk['nama'] ?? '').toString().toLowerCase();
+                    final bool cocokPencarian = namaProduk.contains(_searchQuery);
+
+                    if (_searchQuery.isNotEmpty) {
+                      return cocokPencarian;
+                    }
+                    return cocokKategori;
+                  }).toList();
 
                   if (produkFilter.isEmpty) {
-                    return Center(child: Padding(padding: const EdgeInsets.all(20.0), child: Text("Belum ada produk di kategori $activeName.", style: const TextStyle(color: AppColors.textBrown, fontWeight: FontWeight.bold))));
+                    return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text("Produk tidak ditemukan.", style: TextStyle(color: AppColors.textBrown, fontWeight: FontWeight.bold))));
                   }
 
                   return GridView.builder(
@@ -299,7 +315,6 @@ class _MenuPageState extends State<MenuPage> {
                       String deskripsiDB = product['deskripsi'] ?? 'Deskripsi tidak tersedia.';
                       String stokDB = product['stok']?.toString() ?? '0';
 
-                      // Pass warna baru ke fungsi builder (bgCard, primaryDark, textBrown, primary)
                       return _buildProductCard(
                         context, idMenu, namaDB, hargaDB,
                         urlGambarLengkap, deskripsiDB, stokDB,
@@ -307,17 +322,18 @@ class _MenuPageState extends State<MenuPage> {
                       );
                     },
                   );
-                },
-              ),
-              const SizedBox(height: 100),
-            ],
-          ),
-        ),
-      ),
+                }, 
+              ), 
+
+            ], 
+          ),  
+        ),   
+      ),    
+            
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
-          color: AppColors.primary, // Navbar bawah oranye
+          color: AppColors.primary, 
           borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
         ),
         child: Row(
@@ -327,10 +343,7 @@ class _MenuPageState extends State<MenuPage> {
               onTap: () => Navigator.pushNamed(context, '/cek_pesanan'),
               child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, AppColors.primary),
             ),
-            GestureDetector(
-              onTap: () {},
-              child: _buildBottomNavItem(Icons.cake, 'Produk', true, AppColors.primary),
-            ),
+           _buildBottomNavItem(Icons.cake, 'Produk', true, AppColors.primary),
             GestureDetector(
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfil())),
               child: _buildBottomNavItem(Icons.person, 'Profil', false, AppColors.primary),
@@ -338,9 +351,8 @@ class _MenuPageState extends State<MenuPage> {
           ],
         ),
       ),
-    );
+    ); // <--- 6. INI PENUTUP UTAMA SCAFFOLD
   }
-
   Widget _buildProductCard(BuildContext context, String idMenu, String name, String price,
       String imgUrl, String description, String stok,
       Color cardColor, Color borderColor, Color textColor, Color btnColor) {

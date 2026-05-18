@@ -51,7 +51,13 @@ List<LaporanBulan> _parseLaporan(List<dynamic> rawPesanan) {
   final Map<String, DateTime> urutan = {};
 
   for (final item in rawPesanan) {
-    // Field dari api_pesanan.php – sesuaikan jika nama field berbeda
+    final String status = (
+      item['status_pesanan'] ??
+      item['status'] ??
+      ''
+    ).toString().toLowerCase().trim();
+
+    if (status != 'selesai') continue;
     final String? rawTanggal =
         item['tanggal_pesanan'] ?? item['created_at'] ?? item['tanggal'];
     final dynamic rawHarga =
