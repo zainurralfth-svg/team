@@ -4,11 +4,11 @@ import '../Backend/api_service.dart';
 import '../Core/Colour.dart';
 import 'admin.dart'; 
 import 'halaman_pengguna.dart';
-import 'halaman_riwayat.dart'; 
+import 'riwayat_pesanan.dart'; 
 import 'halaman_profil_admin.dart';
-import 'halaman_laporan.dart'; 
+import 'halaman_laporan.dart';
+import '../Widget/custom_navbar.dart'; 
 
-// KELAS SUDAH DIGABUNG BIAR GAK MUBASIR KARDUS DALAM KARDUS
 class HalamanProduk extends StatefulWidget {
   const HalamanProduk({super.key});
   @override
@@ -19,7 +19,6 @@ class _HalamanProdukState extends State<HalamanProduk> {
   List<Map<String, dynamic>> menuItems = [];
   bool _isLoading = false;
 
-  // ── DAFTAR KATEGORI ──
   final List<String> listKategoriFilter = ['Semua', 'Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
   final List<String> listKategoriInput = ['Pudding', 'Dessert', 'Cake', 'Brownies', 'Cookies'];
   String kategoriTerpilih = 'Semua';
@@ -30,7 +29,6 @@ class _HalamanProdukState extends State<HalamanProduk> {
     _fetchMenu();
   }
 
-  // ── FETCH DATA DARI DATABASE (XAMPP) ───────────────────────────────────────
   Future<void> _fetchMenu() async {
     setState(() => _isLoading = true);
     try {
@@ -45,7 +43,6 @@ class _HalamanProdukState extends State<HalamanProduk> {
     }
   }
 
-  // ── TAMPILAN POP-UP (BOTTOM SHEET) UNTUK TAMBAH PRODUK ────────────────────
   void _bukaSheetTambah() {
     final nameCtrl     = TextEditingController();
     final priceCtrl    = TextEditingController();
@@ -161,7 +158,6 @@ class _HalamanProdukState extends State<HalamanProduk> {
     );
   }
 
-  // ── TAMPILAN POP-UP (BOTTOM SHEET) UNTUK EDIT PRODUK ──────────────────────
   void bukaSHeetEdit(int i) {
     final item         = menuItems[i];
     final nameCtrl     = TextEditingController(text: item['nama_produk']?.toString() ?? '');
@@ -280,7 +276,6 @@ class _HalamanProdukState extends State<HalamanProduk> {
     );
   }
 
-  // ── DIALOG KONFIRMASI HAPUS PRODUK ────────────────────────────────────────
   void bukaDialogHapus(int i) {
     showDialog(
       context: context,
@@ -307,7 +302,6 @@ class _HalamanProdukState extends State<HalamanProduk> {
     );
   }
 
-  // ── WIDGET-WIDGET BANTUAN (HELPER) ────────────────────────────────────────
   void _snackbar(String msg, Color color) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg, style: const TextStyle(fontFamily: 'Signika Negative', color: Colors.white)), backgroundColor: color, behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))));
@@ -360,7 +354,6 @@ class _HalamanProdukState extends State<HalamanProduk> {
     );
   }
 
-  // ── DESAIN HALAMAN UTAMA MANAJEMEN PRODUK ─────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -382,9 +375,21 @@ class _HalamanProdukState extends State<HalamanProduk> {
                       Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
+                  // INI BAGIAN FOTO PROFIL YANG UDAH DISERAGAMIN UKURANNYA
                   GestureDetector(
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfilAdmin())),
-                    child: const CircleAvatar(radius: 20, backgroundColor: Colors.transparent, backgroundImage: AssetImage('assets/images/profil admin.png')),
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/profil admin.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
                   )
                 ],
               ),
@@ -435,7 +440,16 @@ class _HalamanProdukState extends State<HalamanProduk> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildNewBottomNavigation(context),
+      
+      bottomNavigationBar: CustomBottomNavbar(
+        currentIndex: 1, 
+        onTap: (index) {
+          if (index == 0) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()));
+          if (index == 2) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeAdmin()));
+          if (index == 3) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()));
+          if (index == 4) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanPengguna()));
+        },
+      ),
     );
   }
 
@@ -470,7 +484,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(20)), child: item['gambar'] != null ? Image.network('$baseUrl${item['gambar']}', fit: BoxFit.cover, width: double.infinity, errorBuilder: (_,__,___) => const Icon(Icons.fastfood, size: 50)) : const Icon(Icons.fastfood, size: 50))),
+                Expanded(child: ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(20)), child: item['gambar'] != null ? Image.network('$baseUrl${item['gambar']}', fit: BoxFit.cover, width: double.infinity, errorBuilder: (_,_,_) => const Icon(Icons.fastfood, size: 50)) : const Icon(Icons.fastfood, size: 50))),
                 Padding(
                   padding: const EdgeInsets.all(10.0), 
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -490,25 +504,5 @@ class _HalamanProdukState extends State<HalamanProduk> {
         },
       ),
     );
-  }
-
-  Widget _buildNewBottomNavigation(BuildContext context) {
-    return Container(
-      height: 75, decoration: const BoxDecoration(color: AppColors.primary),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        _navItem(Icons.assignment_outlined, 'Laporan', false, () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()))),
-        _navItem(Icons.cake_outlined, 'Produk', true, () {}),
-        _navItem(Icons.home_outlined, 'Beranda', false, () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeAdmin()))),
-        _navItem(Icons.history, 'Riwayat', false, () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()))),
-        _navItem(Icons.person_outline, 'Pengguna', false, () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanPengguna()))),
-      ]),
-    );
-  }
-
-  Widget _navItem(IconData icon, String label, bool isSelected, VoidCallback onTap) {
-    return GestureDetector(onTap: onTap, behavior: HitTestBehavior.opaque, child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: isSelected ? AppColors.primaryDark : Colors.transparent, shape: BoxShape.circle), child: Icon(icon, color: Colors.white, size: 30)), 
-      Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
-    ]));
   }
 }

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart';
 import 'halaman_pengguna.dart';
-import 'halaman_pesanan.dart';
 import 'admin.dart';
 import 'halaman_profil_admin.dart';
 import 'halaman_produk.dart';
 import 'halaman_laporan.dart';
+import '../Widget/custom_navbar.dart';
 
 class HalamanRiwayat extends StatefulWidget {
   const HalamanRiwayat({super.key});
@@ -46,7 +46,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9E4C5),
+      backgroundColor: AppColors.bgUtama, // <-- Pakai krem utama
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,22 +64,9 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'PuddingKu',
-                        style: TextStyle(
-                          color: Color(0xFFA66428),
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Panel Admin UMKM',
-                        style: TextStyle(
-                          color: Color(0xFFD27F30),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      SizedBox(height: 2),
+                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
                   GestureDetector(
@@ -87,7 +74,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const HomeAdmin(),
+                          builder: (context) => const HalamanProfilAdmin(),
                         ),
                       );
                     },
@@ -95,6 +82,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       width: 50,
                       height: 50,
                       decoration: const BoxDecoration(
+                        color: AppColors.textWhite,
                         shape: BoxShape.circle,
                         image: DecorationImage(
                           image: AssetImage('assets/images/profil admin.png'),
@@ -116,7 +104,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 253, 251),
+                  color: AppColors.textWhite, // <-- Pakai background putih biar mencolok
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: const Row(
@@ -125,14 +113,14 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                     Text(
                       'Search...',
                       style: TextStyle(
-                        color: Color(0xFFD27F30),
+                        color: AppColors.primary, // <-- Teks oranye utama
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Icon(
                       Icons.search,
-                      color: Color(0xFFD27F30),
+                      color: AppColors.primary, // <-- Ikon oranye utama
                     ),
                   ],
                 ),
@@ -149,7 +137,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
               child: const Text(
                 'Riwayat Pesanan',
                 style: TextStyle(
-                  color: Color(0xFFA66428),
+                  color: AppColors.primaryDark, // <-- Pakai oranye gelap biar tegas
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -171,7 +159,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                           child: Text(
                             "Belum ada riwayat pesanan",
                             style: TextStyle(
-                              color: Colors.grey,
+                              color: AppColors.textHint, // <-- Teks abu-abu
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -195,17 +183,19 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
         ),
       ),
 
-      // ==========================================
-      // 5. BOTTOM NAVIGATION BAR
-      // ==========================================
-      bottomNavigationBar: _buildBottomNavigation(context),
+      bottomNavigationBar: CustomBottomNavbar(
+        currentIndex: 3, 
+        onTap: (index) {
+          if (index == 0) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()));
+          if (index == 1) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
+          if (index == 2) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeAdmin()));
+          if (index == 4) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanPengguna()));
+        },
+      ),
     );
   }
 
-  // ============================================================
-  // FUNGSI PEMBUAT DESAIN KARTU PESANAN
-  // ============================================================
- Widget _buildOrderCard(Map<String, dynamic> item) {
+  Widget _buildOrderCard(Map<String, dynamic> item) {
     String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
     String ringkasan = item['ringkasan_pesanan'] ?? 'Detail Kosong';
     String harga = 'Rp ${item['total_harga'] ?? 0}';
@@ -213,7 +203,6 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
 
     String waktuLengkap = item['tanggal_pesan'] ?? '';
 
-    // Pisahkan tanggal dan jam
     String tanggal = '';
     String jam = '';
 
@@ -263,7 +252,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   tanggal,
                   style: const TextStyle(
                     fontSize: 11,
-                    color: Colors.black45,
+                    color: AppColors.textHint, // <-- Teks abu-abu
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -276,7 +265,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
+                        color: AppColors.textDark, // <-- Teks hitam pekat
                       ),
                     ),
                     Container(
@@ -311,7 +300,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   ringkasan,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.black54,
+                    color: AppColors.textBrown, // <-- Teks coklat tua
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -323,7 +312,8 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                     (index) => Expanded(
                       child: Container(
                         height: 1,
-                        color: index % 2 == 0 ? Colors.black26 : Colors.transparent,
+                        // <-- Garis pembatas abu-abu tipis
+                        color: index % 2 == 0 ? AppColors.textHint.withOpacity(0.5) : Colors.transparent,
                       ),
                     ),
                   ),
@@ -339,14 +329,14 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                         const Icon(
                           Icons.access_time,
                           size: 14,
-                          color: Colors.black45,
+                          color: AppColors.textHint, // <-- Ikon abu-abu
                         ),
                         const SizedBox(width: 4),
                         Text(
                           jam,
                           style: const TextStyle(
                             fontSize: 11,
-                            color: Colors.black45,
+                            color: AppColors.textHint, // <-- Teks abu-abu
                           ),
                         ),
                       ],
@@ -356,101 +346,15 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: AppColors.primary, // <-- Harga oranye
                       ),
                     ),
                   ],
                 ),
-
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // ==========================================
-  // FUNGSI BOTTOM NAVIGATION
-  // ==========================================
-  Widget _buildBottomNavigation(BuildContext context) {
-    return Container(
-      height: 70,
-      color: AppColors.primary,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _bottomNavItem(Icons.assignment_outlined, 'Laporan', false, () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanLaporan()),
-            );
-          }),
-          _bottomNavItem(Icons.cake_outlined, 'Produk', false, () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanProduk()),
-            );
-          }),
-          _bottomNavItem(Icons.home_outlined, 'Beranda', false, () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeAdmin()),
-            );
-          }),
-          _bottomNavItem(Icons.history, 'Riwayat', true, () {}),
-          _bottomNavItem(Icons.person_outline, 'Pengguna', false, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanPengguna()),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================
-  // WIDGET ITEM NAVIGASI
-  // ==========================================
-  Widget _bottomNavItem(
-    IconData icon,
-    String label,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        color: Colors.transparent,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xFF3A1F0F).withOpacity(0.2)
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: AppColors.textWhite,
-                size: 28,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: AppColors.textWhite,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

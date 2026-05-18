@@ -3,8 +3,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import '../Backend/API_Service.dart'; 
 
+// PASTIKAN IMPORT FILE NAVBAR CUSTOM LO DISINI YAH BRO!
+import '../Widget/custom_user_navbar.dart';
+
 class HalamanProfil extends StatefulWidget {
-  const HalamanProfil({Key? key}) : super(key: key);
+  const HalamanProfil({super.key});
 
   @override
   State<HalamanProfil> createState() => _HalamanProfilState();
@@ -81,6 +84,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
     return Scaffold(
       backgroundColor: AppColors.bgUtama, // Pakai krem utama
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: AppColors.primary, // Pakai oranye utama
         elevation: 0,
         centerTitle: true, 
@@ -150,38 +154,19 @@ class _HalamanProfilState extends State<HalamanProfil> {
             ),
             
       // ==============================================================
-      // FOOTER BAWAAN MENU (KEMBAR IDENTIK DENGAN BUNDERAN AKTIF)
+      // INI PERUBAHANNYA: MANGGIL CUSTOM NAVBAR PELANGGAN (INDEKS 2 = Profil)
       // ==============================================================
-      bottomNavigationBar: Container(
-        height: 70,
-        decoration: const BoxDecoration(
-          color: AppColors.primary, // Warna navbar bawah
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/cek_pesanan');
-              },
-              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, AppColors.primary),
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/menu');
-              },
-              child: _buildBottomNavItem(Icons.cake, 'Produk', false, AppColors.primary),
-            ),
-            GestureDetector(
-              onTap: () {
-                // Udah di halaman Profil, gak usah ngapa-ngapain
-              },
-              // TRUE -> Bunderan putihnya nyala di tombol Profil
-              child: _buildBottomNavItem(Icons.person, 'Profil', true, AppColors.primary),
-            ),
-          ],
-        ),
+      bottomNavigationBar: CustomUserNavbar(
+        currentIndex: 2, // Posisi 2 = Halaman Profil
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacementNamed(context, '/cek_pesanan'); // Sesuaikan route lo
+          } else if (index == 1) {
+            Navigator.pushReplacementNamed(context, '/menu'); // Sesuaikan route lo
+          } else if (index == 2) {
+            // Biarin kosong, udah di sini
+          }
+        },
       ),
     );
   }
@@ -206,42 +191,6 @@ class _HalamanProfilState extends State<HalamanProfil> {
           ),
         ),
       ],
-    );
-  }
-
-  // ==============================================================
-  // HELPER BOTTOM ITEM (DENGAN LOGIKA BUNDERAN PUTIH AKTIF)
-  // ==============================================================
-  Widget _buildBottomNavItem(IconData icon, String label, bool isSelected, Color activeColor) {
-    return Container(
-      color: Colors.transparent,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: Column(
-        mainAxisSize: MainAxisSize.min, 
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: isSelected ? Colors.white : Colors.transparent, // Bunderan putih kalau aktif
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon, 
-              color: isSelected ? activeColor : Colors.white, // Ikon menyesuaikan warna
-              size: 24,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label, 
-            style: const TextStyle(
-              color: Colors.white, 
-              fontSize: 12,
-              fontWeight: FontWeight.bold // Teks tegas
-            )
-          )
-        ]
-      ),
     );
   }
 }

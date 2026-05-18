@@ -5,6 +5,9 @@ import '../halaman_user/profil_pengguna.dart';
 import '../Core/Colour.dart'; // IMPORT GUDANG WARNA (Palet 14 Warna Baru)
 import 'package:shared_preferences/shared_preferences.dart';
 
+// PASTIKAN IMPORT FILE NAVBAR CUSTOM LO DISINI YAH BRO!
+import '../Widget/custom_user_navbar.dart'; 
+
 // =============================================
 // ANIMASI TRANSISI HALAMAN — gaya Instagram
 // =============================================
@@ -43,7 +46,7 @@ PageRoute instagramSlideRoute(Widget page) {
 }
 
 class MenuPage extends StatefulWidget {
-  const MenuPage({Key? key}) : super(key: key);
+  const MenuPage({super.key});
 
   @override
   State<MenuPage> createState() => _MenuPageState();
@@ -219,7 +222,7 @@ class _MenuPageState extends State<MenuPage> {
 
               // Search Bar
               TextField(
-                controller: _searchController, // <-- Pengendali dipasang di sini!
+                controller: _searchController, 
                 onChanged: (value) {
                   setState(() {
                     _searchQuery = value.toLowerCase(); 
@@ -232,7 +235,7 @@ class _MenuPageState extends State<MenuPage> {
                   prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   filled: true, fillColor: AppColors.textWhite,
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: AppColors.primaryDark, width: 0.5)), // Ganti menuBorder ke primaryDark
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: AppColors.primaryDark, width: 0.5)), 
                   enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: AppColors.primaryDark, width: 0.5)),
                 ),
               ),
@@ -252,7 +255,7 @@ class _MenuPageState extends State<MenuPage> {
                         decoration: BoxDecoration(
                           color: isActive ? AppColors.primary : AppColors.bgCard, // Pakai primary kalau aktif, bgCard kalau tidak
                           borderRadius: BorderRadius.circular(25),
-                          border: Border.all(color: AppColors.primaryDark, width: isActive ? 2 : 1), // Ganti menuBorder ke primaryDark
+                          border: Border.all(color: AppColors.primaryDark, width: isActive ? 2 : 1), 
                         ),
                         child: Center(
                           child: Text(
@@ -270,7 +273,7 @@ class _MenuPageState extends State<MenuPage> {
               Center(
                 child: Text(
                   activeName.toUpperCase(),
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textBrown, letterSpacing: 2), // Ganti menuText ke textBrown
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textBrown, letterSpacing: 2), 
                 ),
               ),
               const SizedBox(height: 16),
@@ -330,29 +333,24 @@ class _MenuPageState extends State<MenuPage> {
         ),   
       ),    
             
-      bottomNavigationBar: Container(
-        height: 70,
-        decoration: const BoxDecoration(
-          color: AppColors.primary, 
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/cek_pesanan'),
-              child: _buildBottomNavItem(Icons.receipt_long, 'Pesanan', false, AppColors.primary),
-            ),
-           _buildBottomNavItem(Icons.cake, 'Produk', true, AppColors.primary),
-            GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfil())),
-              child: _buildBottomNavItem(Icons.person, 'Profil', false, AppColors.primary),
-            ),
-          ],
-        ),
+      // ==============================================================
+      // INI PERUBAHANNYA: MANGGIL CUSTOM NAVBAR PELANGGAN (INDEKS 1 = Produk)
+      // ==============================================================
+      bottomNavigationBar: CustomUserNavbar(
+        currentIndex: 1, // Posisi 1 = Halaman Produk
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacementNamed(context, '/cek_pesanan'); // Ganti kalau route-nya beda
+          } else if (index == 1) {
+            // Biarin kosong, udah di sini
+          } else if (index == 2) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProfil()));
+          }
+        },
       ),
-    ); // <--- 6. INI PENUTUP UTAMA SCAFFOLD
+    ); 
   }
+
   Widget _buildProductCard(BuildContext context, String idMenu, String name, String price,
       String imgUrl, String description, String stok,
       Color cardColor, Color borderColor, Color textColor, Color btnColor) {
@@ -361,7 +359,7 @@ class _MenuPageState extends State<MenuPage> {
         color: cardColor,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: borderColor, width: 1),
-        boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 5, offset: const Offset(0, 3))], // Pakai shadow baru
+        boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 5, offset: const Offset(0, 3))], 
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,14 +388,14 @@ class _MenuPageState extends State<MenuPage> {
               children: [
                 Text(name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
-                Text(price, style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)), // Ditebalkan sedikit
+                Text(price, style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)), 
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
                       onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description, stok),
-                      child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: AppColors.primaryDark, fontWeight: FontWeight.w600)), // Ganti menuBorder
+                      child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: AppColors.primaryDark, fontWeight: FontWeight.w600)), 
                     ),
                     GestureDetector(
                       onTap: () async {
@@ -406,22 +404,20 @@ class _MenuPageState extends State<MenuPage> {
                         print("🚨 RESPON DARI XAMPP: $response");
 
                         if (response['status'] == 'sukses') {
-                          // UPDATE: Menambah angka notifikasi di ikon keranjang atas
                           setState(() {
                             _cartItemCount++; 
                           });
 
-                          // --- NOTIFIKASI MELAYANG (INFO PRODUK SAJA) ---
                           ScaffoldMessenger.of(context).clearSnackBars(); 
                           
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('$name ditambahkan pada keranjang! 🛒', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                              backgroundColor: AppColors.success, // Pakai hijau success
-                              behavior: SnackBarBehavior.floating, // BIKIN MELAYANG
-                              margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20), // JARAK DARI BAWAH BIAR GAK KETUTUP FOOTER
+                              backgroundColor: AppColors.success, 
+                              behavior: SnackBarBehavior.floating, 
+                              margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20), 
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), 
-                              duration: const Duration(milliseconds: 1500), // MUNCUL BENTAR AJA
+                              duration: const Duration(milliseconds: 1500), 
                             ),
                           );
                         } else {
@@ -429,7 +425,7 @@ class _MenuPageState extends State<MenuPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Gagal: ${response['pesan']}'), 
-                              backgroundColor: AppColors.error, // Pakai merah error
+                              backgroundColor: AppColors.error, 
                               behavior: SnackBarBehavior.floating,
                               margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
                               duration: const Duration(seconds: 2)
@@ -448,25 +444,6 @@ class _MenuPageState extends State<MenuPage> {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavItem(IconData icon, String label, bool isSelected, Color activeColor) {
-    return Container(
-      color: Colors.transparent,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(color: isSelected ? AppColors.textWhite : Colors.transparent, shape: BoxShape.circle),
-            child: Icon(icon, color: isSelected ? activeColor : AppColors.textWhite, size: 24),
-          ),
-          const SizedBox(height: 2),
-          Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 12, fontWeight: FontWeight.bold)),
         ],
       ),
     );

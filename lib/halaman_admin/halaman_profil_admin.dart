@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Core/Colour.dart'; // File warna 14 Palet Baru
+import '../Core/Colour.dart';
 import '../Backend/API_Service.dart'; 
 
 class HalamanProfilAdmin extends StatefulWidget {
-  const HalamanProfilAdmin({Key? key}) : super(key: key);
+  const HalamanProfilAdmin({super.key});
 
   @override
   State<HalamanProfilAdmin> createState() => _HalamanProfilAdminState();
