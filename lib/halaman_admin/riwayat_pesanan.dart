@@ -19,10 +19,19 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   List<dynamic> _listPesanan = [];
   bool _isLoading = true;
 
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
     _fetchDataPesanan();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchDataPesanan() async {
@@ -43,10 +52,22 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     }
   }
 
+  List<dynamic> get _filteredList {
+    if (_searchQuery.isEmpty) return _listPesanan;
+    return _listPesanan.where((item) {
+      final nama = (item['nama_pemesan'] ?? '').toLowerCase();
+      final ringkasan = (item['ringkasan_pesanan'] ?? '').toLowerCase();
+      final status = (item['status_pesanan'] ?? '').toLowerCase();
+      return nama.contains(_searchQuery) ||
+          ringkasan.contains(_searchQuery) ||
+          status.contains(_searchQuery);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgUtama, // <-- Pakai krem utama
+      backgroundColor: AppColors.bgUtama,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,26 +123,47 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                 decoration: BoxDecoration(
-                  color: AppColors.textWhite, // <-- Pakai background putih biar mencolok
+                  color: AppColors.textWhite,
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Row(
                   children: [
-                    Text(
-                      'Search...',
-                      style: TextStyle(
-                        color: AppColors.primary, // <-- Teks oranye utama
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value.toLowerCase();
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          hintText: 'Search...',
+                          hintStyle: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
-                    Icon(
-                      Icons.search,
-                      color: AppColors.primary, // <-- Ikon oranye utama
-                    ),
+                    _searchQuery.isNotEmpty
+                        ? GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _searchController.clear();
+                                _searchQuery = '';
+                              });
+                            },
+                            child: const Icon(Icons.close, color: AppColors.primary),
+                          )
+                        : const Icon(Icons.search, color: AppColors.primary),
                   ],
                 ),
               ),
@@ -137,7 +179,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
               child: const Text(
                 'Riwayat Pesanan',
                 style: TextStyle(
-                  color: AppColors.primaryDark, // <-- Pakai oranye gelap biar tegas
+                  color: AppColors.primaryDark,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -154,12 +196,14 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                         color: AppColors.primary,
                       ),
                     )
-                  : _listPesanan.isEmpty
-                      ? const Center(
+                  : _filteredList.isEmpty
+                      ? Center(
                           child: Text(
-                            "Belum ada riwayat pesanan",
-                            style: TextStyle(
-                              color: AppColors.textHint, // <-- Teks abu-abu
+                            _searchQuery.isNotEmpty
+                                ? 'Tidak ada hasil untuk "$_searchQuery"'
+                                : 'Belum ada riwayat pesanan',
+                            style: const TextStyle(
+                              color: AppColors.textHint,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -172,9 +216,9 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                               horizontal: 20,
                               vertical: 5,
                             ),
-                            itemCount: _listPesanan.length,
+                            itemCount: _filteredList.length,
                             itemBuilder: (context, index) {
-                              return _buildOrderCard(_listPesanan[index]);
+                              return _buildOrderCard(_filteredList[index]);
                             },
                           ),
                         ),
@@ -184,7 +228,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
       ),
 
       bottomNavigationBar: CustomBottomNavbar(
-        currentIndex: 3, 
+        currentIndex: 3,
         onTap: (index) {
           if (index == 0) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()));
           if (index == 1) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
@@ -195,6 +239,9 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     );
   }
 
+  // ==========================================
+  // FUNGSI BUILD ORDER CARD
+  // ==========================================
   Widget _buildOrderCard(Map<String, dynamic> item) {
     String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
     String ringkasan = item['ringkasan_pesanan'] ?? 'Detail Kosong';
@@ -210,7 +257,8 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
       List<String> bagian = waktuLengkap.substring(0, 10).split('-');
       if (bagian.length == 3) {
         List<String> namaBulan = [
-          '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli','Agustus', 'September', 'Oktober', 'November', 'Desember'        
+          '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
         ];
         int bulanIndex = int.tryParse(bagian[1]) ?? 0;
         tanggal = '${bagian[2]} ${namaBulan[bulanIndex]} ${bagian[0]}';
@@ -219,7 +267,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
 
     if (waktuLengkap.length > 11) {
       jam = waktuLengkap.substring(11, 16);
-      }
+    }
 
     Color statusColor = status == 'SELESAI'
         ? AppColors.success
@@ -247,16 +295,14 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Text(
                   tanggal,
                   style: const TextStyle(
                     fontSize: 11,
-                    color: AppColors.textHint, // <-- Teks abu-abu
+                    color: AppColors.textHint,
                   ),
                 ),
                 const SizedBox(height: 4),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -265,7 +311,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textDark, // <-- Teks hitam pekat
+                        color: AppColors.textDark,
                       ),
                     ),
                     Container(
@@ -295,32 +341,29 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   ],
                 ),
                 const SizedBox(height: 8),
-
                 Text(
                   ringkasan,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: AppColors.textBrown, // <-- Teks coklat tua
+                    color: AppColors.textBrown,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 10),
-
                 Row(
                   children: List.generate(
                     100,
                     (index) => Expanded(
                       child: Container(
                         height: 1,
-                        // <-- Garis pembatas abu-abu tipis
-                        color: index % 2 == 0 ? AppColors.textHint.withOpacity(0.5) : Colors.transparent,
+                        color: index % 2 == 0
+                            ? AppColors.textHint.withOpacity(0.5)
+                            : Colors.transparent,
                       ),
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -329,14 +372,14 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                         const Icon(
                           Icons.access_time,
                           size: 14,
-                          color: AppColors.textHint, // <-- Ikon abu-abu
+                          color: AppColors.textHint,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           jam,
                           style: const TextStyle(
                             fontSize: 11,
-                            color: AppColors.textHint, // <-- Teks abu-abu
+                            color: AppColors.textHint,
                           ),
                         ),
                       ],
@@ -346,7 +389,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary, // <-- Harga oranye
+                        color: AppColors.primary,
                       ),
                     ),
                   ],

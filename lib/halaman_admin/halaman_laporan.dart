@@ -5,8 +5,11 @@ import 'halaman_pengguna.dart';
 import 'admin.dart';
 import 'halaman_profil_admin.dart';
 import '../Backend/api_service.dart';
-import '../Core/Colour.dart'; 
+import '../Core/Colour.dart';
 import '../Widget/custom_navbar.dart';
+import 'cetak_laporan.dart';
+
+// ─── MODEL ────────────────────────────────────────────────────────────────────
 
 class TransaksiDetail {
   final String tanggal;
@@ -21,7 +24,7 @@ class TransaksiDetail {
 }
 
 class LaporanBulan {
-  final String bulan; 
+  final String bulan;
   final int totalTransaksi;
   final int totalPendapatan;
   final List<TransaksiDetail> details;
@@ -33,99 +36,12 @@ class LaporanBulan {
     this.details = const [],
   });
 
-  // Rata-rata pendapatan per hari aktif (hari yang ada transaksinya)
   int get rataPerHari =>
       details.isEmpty ? 0 : totalPendapatan ~/ details.length;
 }
 
-/// dikelompokkan per bulan (format "MMMM yyyy") lalu per tanggal harian.
-List<LaporanBulan> _parseLaporan(List<dynamic> rawPesanan) {
-  const namaBulan = [
-    '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-  ];
-
-  // Map: "Juli 2026" → { "2026-07-04" → {jumlah, pendapatan} }
-  final Map<String, Map<String, Map<String, int>>> grupBulan = {};
-  // Map: "Juli 2026" → urutan bulan (untuk sorting)
-  final Map<String, DateTime> urutan = {};
-
-  for (final item in rawPesanan) {
-    final String status = (
-      item['status_pesanan'] ??
-      item['status'] ??
-      ''
-    ).toString().toLowerCase().trim();
-
-    if (status != 'selesai') continue;
-    final String? rawTanggal =
-        item['tanggal_pesanan'] ?? item['created_at'] ?? item['tanggal'];
-    final dynamic rawHarga =
-        item['total_harga'] ?? item['harga_total'] ?? 0;
-
-    if (rawTanggal == null || rawTanggal.isEmpty) continue;
-
-    DateTime tgl;
-    try {
-      // Format yang umum: "2026-07-04 12:30:00" atau "2026-07-04"
-      tgl = DateTime.parse(rawTanggal.split(' ')[0]);
-    } catch (_) {
-      continue;
-    }
-
-    final int harga = int.tryParse(rawHarga.toString()) ?? 0;
-
-    // Kunci bulan: "Juli 2026"
-    final String kunciBulan = '${namaBulan[tgl.month]} ${tgl.year}';
-    // Kunci hari: "4 Juli" (tampil di tabel)
-    final String kunciHari = '${tgl.day} ${namaBulan[tgl.month]}';
-
-    urutan.putIfAbsent(kunciBulan, () => DateTime(tgl.year, tgl.month));
-    grupBulan.putIfAbsent(kunciBulan, () => {});
-    grupBulan[kunciBulan]!.putIfAbsent(kunciHari, () => {'jumlah': 0, 'pendapatan': 0});
-    grupBulan[kunciBulan]![kunciHari]!['jumlah'] =
-        (grupBulan[kunciBulan]![kunciHari]!['jumlah'] ?? 0) + 1;
-    grupBulan[kunciBulan]![kunciHari]!['pendapatan'] =
-        (grupBulan[kunciBulan]![kunciHari]!['pendapatan'] ?? 0) + harga;
-  }
-
-  // Susun LaporanBulan, urutkan dari terbaru ke terlama
-  final List<LaporanBulan> hasil = [];
-  final sortedKeys = urutan.keys.toList()
-    ..sort((a, b) => urutan[b]!.compareTo(urutan[a]!));
-
-  for (final bulan in sortedKeys) {
-    final hariMap = grupBulan[bulan]!;
-    final details = hariMap.entries.map((e) {
-      return TransaksiDetail(
-        tanggal: e.key,
-        jumlah: e.value['jumlah'] ?? 0,
-        pendapatan: e.value['pendapatan'] ?? 0,
-      );
-    }).toList();
-
-    // Urutkan detail dari tanggal terkecil ke terbesar (dalam bulan yang sama)
-    details.sort((a, b) {
-      final da = int.tryParse(a.tanggal.split(' ')[0]) ?? 0;
-      final db = int.tryParse(b.tanggal.split(' ')[0]) ?? 0;
-      return da.compareTo(db);
-    });
-
-    final totalTransaksi = details.fold(0, (s, d) => s + d.jumlah);
-    final totalPendapatan = details.fold(0, (s, d) => s + d.pendapatan);
-
-    hasil.add(LaporanBulan(
-      bulan: bulan,
-      totalTransaksi: totalTransaksi,
-      totalPendapatan: totalPendapatan,
-      details: details,
-    ));
-  }
-
-  return hasil;
-}
-
 // ─── HELPER ───────────────────────────────────────────────────────────────────
+
 String formatRupiah(int value) {
   final str = value.toString();
   final result = StringBuffer();
@@ -138,7 +54,77 @@ String formatRupiah(int value) {
   return 'Rp ${result.toString().split('').reversed.join()}';
 }
 
+// ─── PARSER ───────────────────────────────────────────────────────────────────
+
+List<LaporanBulan> _parseLaporan(List<dynamic> rawPesanan) {
+  const namaBulan = [
+    '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  ];
+
+  final Map<String, Map<String, Map<String, int>>> grupBulan = {};
+  final Map<String, DateTime> urutan = {};
+
+  for (final item in rawPesanan) {
+    final String status = (
+      item['status_pesanan'] ?? item['status'] ?? ''
+    ).toString().toLowerCase().trim();
+
+    if (status != 'selesai') continue;
+
+    final String? rawTanggal =
+        item['tanggal_pesanan'] ?? item['created_at'] ?? item['tanggal'];
+    final dynamic rawHarga = item['total_harga'] ?? item['harga_total'] ?? 0;
+
+    if (rawTanggal == null || rawTanggal.isEmpty) continue;
+
+    DateTime tgl;
+    try {
+      tgl = DateTime.parse(rawTanggal.split(' ')[0]);
+    } catch (_) {
+      continue;
+    }
+
+    final int harga = int.tryParse(rawHarga.toString()) ?? 0;
+    final String kunciBulan = '${namaBulan[tgl.month]} ${tgl.year}';
+    final String kunciHari = '${tgl.day} ${namaBulan[tgl.month]}';
+
+    urutan.putIfAbsent(kunciBulan, () => DateTime(tgl.year, tgl.month));
+    grupBulan.putIfAbsent(kunciBulan, () => {});
+    grupBulan[kunciBulan]!.putIfAbsent(kunciHari, () => {'jumlah': 0, 'pendapatan': 0});
+    grupBulan[kunciBulan]![kunciHari]!['jumlah'] =
+        (grupBulan[kunciBulan]![kunciHari]!['jumlah'] ?? 0) + 1;
+    grupBulan[kunciBulan]![kunciHari]!['pendapatan'] =
+        (grupBulan[kunciBulan]![kunciHari]!['pendapatan'] ?? 0) + harga;
+  }
+
+  final sortedKeys = urutan.keys.toList()
+    ..sort((a, b) => urutan[b]!.compareTo(urutan[a]!));
+
+  return sortedKeys.map((bulan) {
+    final hariMap = grupBulan[bulan]!;
+    final details = hariMap.entries.map((e) => TransaksiDetail(
+      tanggal: e.key,
+      jumlah: e.value['jumlah'] ?? 0,
+      pendapatan: e.value['pendapatan'] ?? 0,
+    )).toList()
+      ..sort((a, b) {
+        final da = int.tryParse(a.tanggal.split(' ')[0]) ?? 0;
+        final db = int.tryParse(b.tanggal.split(' ')[0]) ?? 0;
+        return da.compareTo(db);
+      });
+
+    return LaporanBulan(
+      bulan: bulan,
+      totalTransaksi: details.fold(0, (s, d) => s + d.jumlah),
+      totalPendapatan: details.fold(0, (s, d) => s + d.pendapatan),
+      details: details,
+    );
+  }).toList();
+}
+
 // ─── HALAMAN LAPORAN ──────────────────────────────────────────────────────────
+
 class HalamanLaporan extends StatefulWidget {
   const HalamanLaporan({super.key});
 
@@ -157,25 +143,15 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     _loadData();
   }
 
-  /// Ambil semua pesanan dari API, lalu olah jadi laporan per bulan.
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
       _error = null;
     });
     try {
-      // Ambil SEMUA pesanan (tanpa filter id_user) → laporan admin
       final rawPesanan = await ApiService.getPesanan();
-      if (rawPesanan.isEmpty) {
-        setState(() {
-          _laporan = [];
-          _isLoading = false;
-        });
-        return;
-      }
-      final hasil = _parseLaporan(rawPesanan);
       setState(() {
-        _laporan = hasil;
+        _laporan = rawPesanan.isEmpty ? [] : _parseLaporan(rawPesanan);
         _isLoading = false;
       });
     } catch (e) {
@@ -189,7 +165,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgUtama, // <-- Pakai krem utama AppColors
+      backgroundColor: AppColors.bgUtama,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,12 +176,8 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
           ],
         ),
       ),
-      
-      // ==============================================================
-      // BOTTOM NAVBAR CUSTOM
-      // ==============================================================
       bottomNavigationBar: CustomBottomNavbar(
-        currentIndex: 0, // Posisi 0 karena ini halaman Laporan
+        currentIndex: 0,
         onTap: (index) {
           if (index == 1) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HalamanProduk()));
           if (index == 2) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeAdmin()));
@@ -279,6 +251,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
 }
 
 // ─── APP HEADER ───────────────────────────────────────────────────────────────
+
 class _AppHeader extends StatelessWidget {
   const _AppHeader();
 
@@ -290,16 +263,29 @@ class _AppHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
-                      SizedBox(height: 2),
-                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('PuddingKu',
+                  style: TextStyle(
+                    fontFamily: 'Signika Negative',
+                    color: AppColors.primary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  )),
+              SizedBox(height: 2),
+              Text('Panel Admin UMKM',
+                  style: TextStyle(
+                    fontFamily: 'Signika Negative',
+                    color: AppColors.textBrown,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  )),
+            ],
+          ),
           GestureDetector(
-            onTap: () => Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const HalamanProfilAdmin())),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const HalamanProfilAdmin())),
             child: Container(
               width: 50,
               height: 50,
@@ -320,6 +306,7 @@ class _AppHeader extends StatelessWidget {
 }
 
 // ─── PAGE LABEL ───────────────────────────────────────────────────────────────
+
 class _PageLabel extends StatelessWidget {
   const _PageLabel();
 
@@ -330,7 +317,7 @@ class _PageLabel extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.primary, width: 2), // <-- Pakai oranye
+          border: Border.all(color: AppColors.primary, width: 2),
           borderRadius: BorderRadius.circular(6),
         ),
         child: const Text('LAPORAN',
@@ -346,6 +333,7 @@ class _PageLabel extends StatelessWidget {
 }
 
 // ─── LAPORAN CARD ─────────────────────────────────────────────────────────────
+
 class _LaporanCard extends StatefulWidget {
   final LaporanBulan laporan;
   final bool initiallyExpanded;
@@ -392,7 +380,7 @@ class _LaporanCardState extends State<_LaporanCard>
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
       elevation: 4,
-      shadowColor: AppColors.shadow, // <-- Pakai shadow AppColors
+      shadowColor: AppColors.shadow,
       child: Column(
         children: [
           // Header kartu
@@ -427,13 +415,24 @@ class _LaporanCardState extends State<_LaporanCard>
                       ],
                     ),
                   ),
-                  _PrintButton(bulan: l.bulan),
+                  // ─── Tombol cetak dari cetak_laporan.dart ───────────
+                  CetakLaporanButton(
+                    bulan: l.bulan,
+                    totalTransaksi: l.totalTransaksi,
+                    totalPendapatan: l.totalPendapatan,
+                    rataPerHari: l.rataPerHari,
+                    details: l.details.map((d) => {
+                      'tanggal': d.tanggal,
+                      'jumlah': d.jumlah,
+                      'pendapatan': d.pendapatan,
+                    }).toList(),
+                  ),
                 ],
               ),
             ),
           ),
 
-          // Detail yang bisa expand/collapse
+          // Detail expand/collapse
           SizeTransition(
             sizeFactor: _anim,
             child: Column(
@@ -445,10 +444,7 @@ class _LaporanCardState extends State<_LaporanCard>
                     children: [
                       _StatPill(label: 'Transaksi', value: '${l.totalTransaksi}x'),
                       const SizedBox(width: 8),
-                      _StatPill(
-                        label: 'Rata/Hari',
-                        value: formatRupiah(l.rataPerHari),
-                      ),
+                      _StatPill(label: 'Rata/Hari', value: formatRupiah(l.rataPerHari)),
                       const SizedBox(width: 8),
                       _StatPill(label: 'Total', value: formatRupiah(l.totalPendapatan)),
                     ],
@@ -465,6 +461,7 @@ class _LaporanCardState extends State<_LaporanCard>
 }
 
 // ─── CARD ICON ────────────────────────────────────────────────────────────────
+
 class _CardIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -472,7 +469,7 @@ class _CardIcon extends StatelessWidget {
       width: 42,
       height: 42,
       decoration: BoxDecoration(
-        color: AppColors.bgUtama, // <-- Krem
+        color: AppColors.bgUtama,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -487,45 +484,8 @@ class _CardIcon extends StatelessWidget {
   }
 }
 
-// ─── PRINT BUTTON ─────────────────────────────────────────────────────────────
-class _PrintButton extends StatelessWidget {
-  final String bulan;
-  const _PrintButton({required this.bulan});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Mencetak laporan $bulan...'),
-            backgroundColor: AppColors.info, // <-- Info Biru
-          ),
-        );
-      },
-      child: Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          color: AppColors.info, // <-- Info Biru AppColors
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: const Center(
-          child: Icon(Icons.print_rounded, color: Colors.white, size: 18),
-        ),
-      ),
-    );
-  }
-}
-
 // ─── STAT PILL ────────────────────────────────────────────────────────────────
+
 class _StatPill extends StatelessWidget {
   final String label;
   final String value;
@@ -537,7 +497,7 @@ class _StatPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: AppColors.bgCard, // <-- Pakai krem terang
+          color: AppColors.bgCard,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -565,9 +525,20 @@ class _StatPill extends StatelessWidget {
 }
 
 // ─── LAPORAN TABLE ────────────────────────────────────────────────────────────
+
 class _LaporanTable extends StatelessWidget {
   final LaporanBulan laporan;
   const _LaporanTable({required this.laporan});
+
+  static const _tableHeadStyle = TextStyle(
+    fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textWhite,
+  );
+  static const _tableRowStyle = TextStyle(
+    fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textDark,
+  );
+  static const _tableTotalStyle = TextStyle(
+    fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textWhite,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -575,7 +546,7 @@ class _LaporanTable extends StatelessWidget {
       children: [
         // Header tabel
         Container(
-          color: AppColors.primary, // <-- Oranye
+          color: AppColors.primary,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: const Row(
             children: [
@@ -592,7 +563,7 @@ class _LaporanTable extends StatelessWidget {
           final d = entry.value;
           return Container(
             decoration: BoxDecoration(
-              color: i.isEven ? Colors.white : AppColors.bgCard, // <-- Selang seling putih & krem terang
+              color: i.isEven ? Colors.white : AppColors.bgCard,
               border: const Border(bottom: BorderSide(color: AppColors.bgUtama)),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -609,7 +580,7 @@ class _LaporanTable extends StatelessWidget {
         // Baris total
         Container(
           decoration: const BoxDecoration(
-            color: AppColors.primaryDark, // <-- Pakai Oranye Gelap
+            color: AppColors.primaryDark,
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
@@ -624,14 +595,4 @@ class _LaporanTable extends StatelessWidget {
       ],
     );
   }
-
-  static const _tableHeadStyle = TextStyle(
-    fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textWhite,
-  );
-  static const _tableRowStyle = TextStyle(
-    fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textDark,
-  );
-  static const _tableTotalStyle = TextStyle(
-    fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textWhite,
-  );
 }
