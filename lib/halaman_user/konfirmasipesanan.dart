@@ -57,7 +57,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
  Future<void> _prosesPesanan(List<dynamic> cartItems, int totalHarga) async {
     if (_namaController.text.isEmpty || _telpController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Lengkapi Nama dan Nomor Telepon!")),
+        const SnackBar(content: Text("Lengkapi Nama dan Nomor Telepon!", style: TextStyle(fontFamily: 'Signika Negative'))),
       );
       return;
     }
@@ -65,7 +65,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
     // TAMBAHAN: Validasi keamanan memastikan ID User tidak kosong/nol
     if (currentUserId.isEmpty || currentUserId == "0") {
        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Sesi login tidak valid, silakan login ulang.")),
+        const SnackBar(content: Text("Sesi login tidak valid, silakan login ulang.", style: TextStyle(fontFamily: 'Signika Negative'))),
       );
       return;
     }
@@ -84,7 +84,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
 
     if (response['status'] == 'sukses') {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Pesanan Berhasil Dibuat! 🚀"), backgroundColor: AppColors.success), // Pakai warna sukses baru
+        const SnackBar(content: Text("Pesanan Berhasil Dibuat! 🚀", style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)), backgroundColor: AppColors.success), 
       );
       
       // Pindah ke halaman Bukti Pesanan dan bawa SEMUA datanya
@@ -101,7 +101,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal: ${response['pesan']}"), backgroundColor: AppColors.error), // Pakai warna error baru
+        SnackBar(content: Text("Gagal: ${response['pesan']}", style: const TextStyle(fontFamily: 'Signika Negative')), backgroundColor: AppColors.error), 
       );
     }
   }
@@ -153,10 +153,10 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                       child: Text(
                         'Konfirmasi Pesanan',
                         style: TextStyle(
+                          fontFamily: 'Signika Negative', // <-- FONT DIUBAH DARI SERIF
                           color: AppColors.textWhite,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'Serif',
                         ),
                       ),
                     ),
@@ -176,7 +176,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                   children: [
                     const Text(
                       "Detail Pesanan",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
+                      style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
                     ),
                     const SizedBox(height: 10),
 
@@ -217,11 +217,12 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                             children: [
                               const Text(
                                 "Total Pembayaran",
-                                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
+                                style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textDark),
                               ),
                               Text(
                                 "Rp $totalHarga",
                                 style: const TextStyle(
+                                  fontFamily: 'Signika Negative',
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                   color: AppColors.primary, // Oranye warna utama
@@ -236,7 +237,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                     const SizedBox(height: 25),
                     const Text(
                       "Informasi Pengiriman",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
+                      style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
                     ),
                     const SizedBox(height: 10),
 
@@ -269,6 +270,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                           : const Text(
                               "Pesan Sekarang",
                               style: TextStyle(
+                                fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
                                 color: AppColors.textWhite,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -300,11 +302,11 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark),
+                style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark),
               ),
               Text(
                 qty,
-                style: const TextStyle(color: AppColors.textHint, fontSize: 12), // Menggunakan warna abu dari AppColors
+                style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 12), // Menggunakan warna abu dari AppColors
               ),
             ],
           ),
@@ -312,6 +314,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
         Text(
           price,
           style: const TextStyle(
+            fontFamily: 'Signika Negative',
             fontWeight: FontWeight.bold,
             fontSize: 14,
             color: AppColors.primary, // Warna oranye utama
@@ -324,10 +327,10 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
   Widget _buildTextField(String hint, IconData icon, Color iconColor, TextEditingController controller) {
     return TextField(
       controller: controller,
-      style: const TextStyle(color: AppColors.textDark),
+      style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 13),
+        hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 13),
         prefixIcon: Icon(icon, color: iconColor, size: 22),
         fillColor: AppColors.bgCard, // Disamakan dengan warna cream terang di AppColors
         filled: true,

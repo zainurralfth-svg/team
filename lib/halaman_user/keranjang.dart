@@ -78,7 +78,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Gagal: ${response['pesan']}")));
+      ).showSnackBar(SnackBar(content: Text("Gagal: ${response['pesan']}", style: const TextStyle(fontFamily: 'Signika Negative'))));
     }
   }
 
@@ -86,12 +86,12 @@ class _KeranjangPageState extends State<KeranjangPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Hapus Item"),
-        content: const Text("Apakah Anda yakin ingin menghapus item ini dari keranjang?"),
+        title: const Text("Hapus Item", style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
+        content: const Text("Apakah Anda yakin ingin menghapus item ini dari keranjang?", style: TextStyle(fontFamily: 'Signika Negative')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Batal"),
+            child: const Text("Batal", style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey)),
           ),
           TextButton(
             onPressed: () async {
@@ -102,16 +102,16 @@ class _KeranjangPageState extends State<KeranjangPage> {
               if (res['status'] == 'sukses') {
                 _fetchCartData();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Item berhasil dihapus")),
+                  const SnackBar(content: Text("Item berhasil dihapus", style: TextStyle(fontFamily: 'Signika Negative'))),
                 );
               } else {
                 setState(() => _isLoading = false);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Gagal: ${res['pesan']}")),
+                  SnackBar(content: Text("Gagal: ${res['pesan']}", style: const TextStyle(fontFamily: 'Signika Negative'))),
                 );
               }
             },
-            child: const Text("Hapus", style: TextStyle(color: Colors.red)),
+            child: const Text("Hapus", style: TextStyle(fontFamily: 'Signika Negative', color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -170,6 +170,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
               child: Text(
                 "Keranjangmu masih kosong 🛒",
                 style: TextStyle(
+                  fontFamily: 'Signika Negative',
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
@@ -189,6 +190,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                     const Text(
                       'Pesanan',
                       style: TextStyle(
+                        fontFamily: 'Signika Negative',
                         color: AppColors.textDark,
                         fontSize: 22,
                         fontWeight: FontWeight.w600,
@@ -216,6 +218,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                     const Text(
                       'Catatan Pesanan',
                       style: TextStyle(
+                        fontFamily: 'Signika Negative',
                         color: AppColors.textDark,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -229,9 +232,10 @@ class _KeranjangPageState extends State<KeranjangPage> {
                         border: Border.all(color: AppColors.primary),
                       ),
                       child: const TextField(
+                        style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark),
                         decoration: InputDecoration(
                           hintText: 'Tambahkan Catatan (opsional)',
-                          hintStyle: TextStyle(color: AppColors.textHint),
+                          hintStyle: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint),
                           prefixIcon: Icon(
                             Icons.edit_note,
                             color: AppColors.primary,
@@ -263,11 +267,11 @@ class _KeranjangPageState extends State<KeranjangPage> {
                             children: [
                               Text(
                                 '$_totalItem Item',
-                                style: const TextStyle(fontSize: 14, color: AppColors.textDark),
+                                style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 14, color: AppColors.textDark),
                               ),
                               const Text(
                                 'Subtotal',
-                                style: TextStyle(fontSize: 14, color: AppColors.textDark),
+                                style: TextStyle(fontFamily: 'Signika Negative', fontSize: 14, color: AppColors.textDark),
                               ),
                             ],
                           ),
@@ -275,6 +279,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                           Text(
                             'Rp $_totalHarga',
                             style: const TextStyle(
+                              fontFamily: 'Signika Negative',
                               color: AppColors.primary, // Warna oranye utama untuk harga
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -314,6 +319,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                             child: Text(
                               'Konfirmasi Pesanan',
                               style: TextStyle(
+                                fontFamily: 'Signika Negative',
                                 color: AppColors.textDark,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -387,13 +393,14 @@ class _KeranjangPageState extends State<KeranjangPage> {
               children: [
                 Text(
                   nama,
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
+                  style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textDark),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   harga,
                   style: const TextStyle(
+                    fontFamily: 'Signika Negative',
                     color: AppColors.primary, // Oranye utama
                     fontWeight: FontWeight.bold,
                   ),
@@ -405,7 +412,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                       onTap: () => _updateJumlah(idProduk, -1),
                       child: _buildQtyBtn('-'),
                     ),
-                    SizedBox(width: 30, child: Center(child: Text('$jumlah', style: const TextStyle(color: AppColors.textDark)))),
+                    SizedBox(width: 30, child: Center(child: Text('$jumlah', style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark)))),
                     GestureDetector(
                       onTap: () => _updateJumlah(idProduk, 1),
                       child: _buildQtyBtn('+'),
@@ -438,7 +445,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
         borderRadius: BorderRadius.circular(5),
       ),
       child: Center(
-        child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
+        child: Text(title, style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textDark)),
       ),
     );
   }

@@ -42,15 +42,17 @@ class _HalamanProfilState extends State<HalamanProfil> {
     try {
       final response = await ApiService.getProfil(currentUserId);
       if (response['status'] == 'sukses') {
-        setState(() {
-          _userData = response['data'];
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _userData = response['data'];
+            _isLoading = false;
+          });
+        }
       } else {
-        setState(() => _isLoading = false);
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -58,21 +60,21 @@ class _HalamanProfilState extends State<HalamanProfil> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Logout'),
-        content: const Text('Apakah kamu yakin ingin keluar dari aplikasi?'),
+        title: const Text('Konfirmasi Logout', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
+        content: const Text('Apakah kamu yakin ingin keluar dari aplikasi?', style: TextStyle(fontFamily: 'Signika Negative')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+            child: const Text('Batal', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey, fontWeight: FontWeight.bold)),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
               SharedPreferences prefs = await SharedPreferences.getInstance();
               await prefs.clear();
-              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+              if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
             },
-            child: const Text('Logout', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)), // Pakai merah error baru
+            child: const Text('Logout', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.error, fontWeight: FontWeight.bold)), // Pakai merah error baru
           ),
         ],
       ),
@@ -88,7 +90,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
         backgroundColor: AppColors.primary, // Pakai oranye utama
         elevation: 0,
         centerTitle: true, 
-        title: const Text('Profil Anda', style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold)),
+        title: const Text('Profil Anda', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: AppColors.textWhite),
       ),
       body: _isLoading
@@ -141,7 +143,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
                     child: ElevatedButton.icon(
                       onPressed: _prosesLogout,
                       icon: const Icon(Icons.logout, color: AppColors.textWhite),
-                      label: const Text('LOGOUT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite, letterSpacing: 1.5)),
+                      label: const Text('LOGOUT', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite, letterSpacing: 1.5)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error, // Warna tombol merah error
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -154,7 +156,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
             ),
             
       // ==============================================================
-      // INI PERUBAHANNYA: MANGGIL CUSTOM NAVBAR PELANGGAN (INDEKS 2 = Profil)
+      // MANGGIL CUSTOM NAVBAR PELANGGAN (INDEKS 2 = Profil)
       // ==============================================================
       bottomNavigationBar: CustomUserNavbar(
         currentIndex: 2, // Posisi 2 = Halaman Profil
@@ -184,9 +186,9 @@ class _HalamanProfilState extends State<HalamanProfil> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(fontSize: 12, color: textColor.withOpacity(0.6))),
+              Text(label, style: TextStyle(fontFamily: 'Signika Negative', fontSize: 12, color: textColor.withOpacity(0.6))),
               const SizedBox(height: 4),
-              Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor)),
+              Text(value, style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.bold, color: textColor)),
             ],
           ),
         ),

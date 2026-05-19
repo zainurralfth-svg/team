@@ -156,8 +156,8 @@ class _CekPesananPageState extends State<CekPesananPage> {
             unselectedLabelColor: Colors.white54,
             labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Signika Negative'),
             tabs: [
-              Tab(text: 'Sedang Aktif'),
-              Tab(text: 'Riwayat'),
+              Tab(text: 'Saat Ini'),
+              Tab(text: 'Riwayat Pesanan'),
             ],
           ),
         ),

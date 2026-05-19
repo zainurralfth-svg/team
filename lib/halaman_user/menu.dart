@@ -85,12 +85,16 @@ class _MenuPageState extends State<MenuPage> {
   Future<void> _ambilDataMenu() async {
     try {
       final data = await ApiService.getMenu();
-      setState(() {
-        _menuDariDatabase = data;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _menuDariDatabase = data;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -102,8 +106,6 @@ class _MenuPageState extends State<MenuPage> {
         currentUserId = prefs.getString('id_user') ?? "0";
       });
 
-      print("🚨 BUNG! ID USER DI MENU SEKARANG ADALAH: $currentUserId");
-
       // Setelah dapat ID asli, baru kita hitung keranjangnya
       _ambilDataKeranjang(); 
     }
@@ -112,11 +114,12 @@ class _MenuPageState extends State<MenuPage> {
   // FUNGSI BARU: Mengambil jumlah item yang ada di keranjang dari database
   Future<void> _ambilDataKeranjang() async {
     try {
-      // Pastikan method getKeranjang tersedia di ApiService Anda
       final data = await ApiService.getKeranjang(currentUserId);
-      setState(() {
-        _cartItemCount = data.length;
-      });
+      if (mounted) {
+        setState(() {
+          _cartItemCount = data.length;
+        });
+      }
     } catch (e) {
       debugPrint("Gagal mengambil data keranjang: $e");
     }
@@ -153,11 +156,11 @@ class _MenuPageState extends State<MenuPage> {
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Image.asset(
-          'assets/images/tulisanmenu.png',
+          'assets/images/tulisan tampilan awal.png',
           height: 40,
           errorBuilder: (context, error, stackTrace) => const Text(
             'PUDDINGKU',
-            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite),
+            style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite),
           ),
         ),
         actions: [
@@ -189,7 +192,7 @@ class _MenuPageState extends State<MenuPage> {
                       constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                       child: Text(
                         '$_cartItemCount',
-                        style: const TextStyle(color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -210,11 +213,14 @@ class _MenuPageState extends State<MenuPage> {
                 borderRadius: BorderRadius.circular(20),
                 child: Image.asset(
                   'assets/images/$activeBanner',
-                  width: double.infinity, height: 180, fit: BoxFit.cover,
+                  width: double.infinity, 
+                  height: 180, 
+                  // INI PERBAIKANNYA BIAR GAK KEPOTONG ATASNYA BRO
+                  fit: BoxFit.fitWidth, 
                   errorBuilder: (c, e, s) => Container(
                     width: double.infinity, height: 180,
                     decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.4), borderRadius: BorderRadius.circular(20)),
-                    child: Center(child: Text('Banner $activeName', style: const TextStyle(color: AppColors.textWhite, fontSize: 20, fontWeight: FontWeight.bold))),
+                    child: Center(child: Text('Banner $activeName', style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 20, fontWeight: FontWeight.bold))),
                   ),
                 ),
               ),
@@ -228,10 +234,10 @@ class _MenuPageState extends State<MenuPage> {
                     _searchQuery = value.toLowerCase(); 
                   });
                 },
-                style: const TextStyle(color: AppColors.textDark), // Tambah warna font ketikan
+                style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark), // Tambah warna font ketikan
                 decoration: InputDecoration(
                   hintText: 'Search Produk',
-                  hintStyle: const TextStyle(color: AppColors.textHint),
+                  hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint),
                   prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   filled: true, fillColor: AppColors.textWhite,
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
@@ -260,7 +266,7 @@ class _MenuPageState extends State<MenuPage> {
                         child: Center(
                           child: Text(
                             _categories[index],
-                            style: TextStyle(color: isActive ? AppColors.textWhite : AppColors.primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
+                            style: TextStyle(fontFamily: 'Signika Negative', color: isActive ? AppColors.textWhite : AppColors.primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
                           ),
                         ),
                       ),
@@ -273,7 +279,7 @@ class _MenuPageState extends State<MenuPage> {
               Center(
                 child: Text(
                   activeName.toUpperCase(),
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textBrown, letterSpacing: 2), 
+                  style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textBrown, letterSpacing: 2), 
                 ),
               ),
               const SizedBox(height: 16),
@@ -295,7 +301,7 @@ class _MenuPageState extends State<MenuPage> {
                   }).toList();
 
                   if (produkFilter.isEmpty) {
-                    return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text("Produk tidak ditemukan.", style: TextStyle(color: AppColors.textBrown, fontWeight: FontWeight.bold))));
+                    return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text("Produk tidak ditemukan.", style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontWeight: FontWeight.bold))));
                   }
 
                   return GridView.builder(
@@ -334,7 +340,7 @@ class _MenuPageState extends State<MenuPage> {
       ),    
             
       // ==============================================================
-      // INI PERUBAHANNYA: MANGGIL CUSTOM NAVBAR PELANGGAN (INDEKS 1 = Produk)
+      // MANGGIL CUSTOM NAVBAR PELANGGAN (INDEKS 1 = Produk)
       // ==============================================================
       bottomNavigationBar: CustomUserNavbar(
         currentIndex: 1, // Posisi 1 = Halaman Produk
@@ -386,22 +392,24 @@ class _MenuPageState extends State<MenuPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(name, style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 13, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
-                Text(price, style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)), 
+                Text(price, style: TextStyle(fontFamily: 'Signika Negative', color: textColor.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)), 
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
                       onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description, stok),
-                      child: const Text('Details', style: TextStyle(fontSize: 10, decoration: TextDecoration.underline, color: AppColors.primaryDark, fontWeight: FontWeight.w600)), 
+                      child: const Text('Details', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 10, decoration: TextDecoration.underline, color: AppColors.primaryDark, fontWeight: FontWeight.w600)), 
                     ),
                     GestureDetector(
                       onTap: () async {
                         var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
 
-                        print("🚨 RESPON DARI XAMPP: $response");
+                        debugPrint("🚨 RESPON DARI XAMPP: $response");
+
+                        if (!mounted) return;
 
                         if (response['status'] == 'sukses') {
                           setState(() {
@@ -412,7 +420,7 @@ class _MenuPageState extends State<MenuPage> {
                           
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('$name ditambahkan pada keranjang! 🛒', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+                              content: Text('$name ditambahkan pada keranjang! 🛒', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
                               backgroundColor: AppColors.success, 
                               behavior: SnackBarBehavior.floating, 
                               margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20), 
@@ -424,7 +432,7 @@ class _MenuPageState extends State<MenuPage> {
                           ScaffoldMessenger.of(context).clearSnackBars();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Gagal: ${response['pesan']}'), 
+                              content: Text('Gagal: ${response['pesan']}', style: const TextStyle(fontFamily: 'Signika Negative')), 
                               backgroundColor: AppColors.error, 
                               behavior: SnackBarBehavior.floating,
                               margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
@@ -436,7 +444,7 @@ class _MenuPageState extends State<MenuPage> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(color: btnColor, borderRadius: BorderRadius.circular(10)),
-                        child: const Text('+ Order', style: TextStyle(color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold)),
+                        child: const Text('+ Order', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],

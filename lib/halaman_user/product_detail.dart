@@ -121,6 +121,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                       Text(
                         widget.name,
                         style: const TextStyle(
+                          fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
@@ -135,6 +136,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                         widget.description,
                         textAlign: TextAlign.justify,
                         style: const TextStyle(
+                          fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
                           fontSize: 13,
                           color: AppColors.textBrown, // Pakai teks coklat
                           height: 1.65,
@@ -146,6 +148,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                       const Text(
                         'Harga',
                         style: TextStyle(
+                          fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
@@ -157,7 +160,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                       // Nilai harga dari halaman menu
                       Text(
                         widget.price,
-                        style: const TextStyle(fontSize: 15, color: AppColors.textBrown), // Pakai teks coklat
+                        style: const TextStyle(
+                          fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
+                          fontSize: 15, 
+                          color: AppColors.textBrown,
+                        ), // Pakai teks coklat
                       ),
                       const SizedBox(height: 14),
 
@@ -165,6 +172,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                       const Text(
                         'Stock',
                         style: TextStyle(
+                          fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
@@ -178,13 +186,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                       Text.rich(
                         TextSpan(
                           text: '${widget.stok} ',
-                          style: const TextStyle(fontSize: 15, color: AppColors.textBrown), // Pakai teks coklat
+                          style: const TextStyle(
+                            fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
+                            fontSize: 15, 
+                            color: AppColors.textBrown,
+                          ), // Pakai teks coklat
                           children: [
                             TextSpan(
                               text: (int.tryParse(widget.stok) ?? 0) > 0
                                   ? '(tersedia)'
                                   : '(habis)',
                               style: TextStyle(
+                                fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
                                 fontStyle: FontStyle.italic,
                                 color: (int.tryParse(widget.stok) ?? 0) > 0
                                     ? AppColors.success // Pakai warna hijau seragam
@@ -222,7 +235,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                 ),
                 child: const Text(
                   'Back',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: TextStyle(
+                    fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),
