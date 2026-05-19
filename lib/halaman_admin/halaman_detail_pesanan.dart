@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../Widget/custom_text.dart';
+import '../Core/Colour.dart';
 
 class HalamanDetailPesanan extends StatelessWidget {
   final Map<String, dynamic> dataPesanan;
@@ -19,7 +21,7 @@ class HalamanDetailPesanan extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: bgCream,
+      backgroundColor: AppColors.bgUtama,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,14 +42,14 @@ class HalamanDetailPesanan extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Rincian Pesanan Lengkap',
-                      style: TextStyle(fontFamily: 'Signika Negative', fontSize: 26, fontWeight: FontWeight.bold, color: primaryOrange),
-                    ),
+                    CustomText('Rincian Pesanan Lengkap',
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary),
                     const SizedBox(height: 5),
                     Text(
                       'ID Pesanan: #${dataPesanan['id_pesanan'] ?? '-'}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 14, color: AppColors.textHint, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
 
@@ -62,7 +64,7 @@ class HalamanDetailPesanan extends StatelessWidget {
                         children: [
                           _buildDetailRow('Nama Pelanggan', dataPesanan['nama_pemesan'] ?? 'Tidak diketahui'),
                           const Divider(height: 20),
-                          _buildDetailRow('Waktu Order', dataPesanan['tanggal_pesanan'] ?? 'Baru saja'),
+                        _buildDetailRow('Waktu Order', dataPesanan['created_at'] ?? 'Waktu tidak diketahui'),
                           const Divider(height: 20),
                           _buildDetailRow('Status Saat Ini', dataPesanan['status_pesanan'] ?? 'PROSES', isStatus: true),
                         ],

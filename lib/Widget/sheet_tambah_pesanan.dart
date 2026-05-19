@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../Backend/API_service.dart';
 import 'dart:convert'; // Wajib ditambahkan agar bisa mengubah array jadi teks JSON
+import '../Widget/custom_text.dart';
 
 class SheetTambahPesanan extends StatefulWidget {
   const SheetTambahPesanan({super.key});
@@ -122,15 +123,10 @@ class _SheetTambahPesananState extends State<SheetTambahPesanan> {
                   ),
                 ),
                 const SizedBox(width: 15),
-                const Text(
-                  'Tambah pesanan',
-                  style: TextStyle(
-                    fontFamily: 'Signika Negative',
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
+                CustomText('Tambah Pesanan',
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,)
               ],
             ),
             const SizedBox(height: 20),
