@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; // Palet 14 Warna Baru
+import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
 
 class TampilanAwal extends StatelessWidget {
   const TampilanAwal({super.key});
@@ -137,13 +138,14 @@ class TampilanAwal extends StatelessWidget {
                               ],
                             ),
                             child: const Center(
-                              child: Text(
+                              // ==========================================
+                              // TEKS TOMBOL SEKARANG PAKAI CUSTOM TEXT!
+                              // ==========================================
+                              child: CustomText(
                                 'Get Started',
-                                style: TextStyle(
-                                  color: AppColors.textWhite, // Teks putih
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                color: AppColors.textWhite, // Teks putih
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),

@@ -3,9 +3,10 @@ import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ==============================================================
-// IMPORT CLASS MODELS OOP
+// IMPORT CLASS MODELS OOP & CUSTOM TEXT
 // ==============================================================
 import '../Models/user.dart';
+import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -55,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
                 Icon(Icons.error_outline, color: AppColors.textWhite, size: 24), 
                 SizedBox(width: 12),
                 Expanded(
-                  child: Text('Username dan Password tidak boleh kosong!', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600)),
+                  child: CustomText('Username dan Password tidak boleh kosong!', color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -74,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
       if (hasil['status'] == 'sukses') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(hasil['pesan'], style: const TextStyle(fontFamily: 'Signika Negative')), 
+            content: CustomText(hasil['pesan']), 
             backgroundColor: AppColors.success, // Menggunakan warna hijau sukses baru
             behavior: SnackBarBehavior.floating,
           ),
@@ -119,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(hasil['pesan'] ?? 'Login Gagal', style: const TextStyle(fontFamily: 'Signika Negative')), 
+            content: CustomText(hasil['pesan'] ?? 'Login Gagal'), 
             backgroundColor: AppColors.error, 
             behavior: SnackBarBehavior.floating,
           ),
@@ -129,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
       print("Error Server: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Gagal terhubung ke server! Cek koneksi / XAMPP.', style: TextStyle(fontFamily: 'Signika Negative')), 
+          content: CustomText('Gagal terhubung ke server! Cek koneksi / XAMPP.'), 
           backgroundColor: AppColors.error, 
           behavior: SnackBarBehavior.floating,
         ),
@@ -210,16 +211,14 @@ class _LoginPageState extends State<LoginPage> {
             // =====================================
             // INI DIA PERUBAHAN FONT OLEO SCRIPT NYA
             // =====================================
-            const Text(
+            const CustomText(
               'Selamat Datang', 
-              style: TextStyle(
-                fontFamily: 'Oleo Script', // Pakai font Oleo Script 
-                color: AppColors.textDark, 
-                fontSize: 38, 
-                fontWeight: FontWeight.w900, 
-              )
+              isOleo: true, // <-- PANGGIL SAKLARNYA!
+              color: AppColors.textDark, 
+              fontSize: 38, 
+              fontWeight: FontWeight.w900, 
             ),
-            const Text('Login Untuk Mulai Memesan', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark, fontSize: 18)),
+            const CustomText('Login Untuk Mulai Memesan', color: AppColors.textDark, fontSize: 18),
             const SizedBox(height: 30),
 
             Container(
@@ -237,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
                   _buildInputField('Password', '******', Icons.lock, _passwordController, isPassword: true),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/lupa-password'),
-                    child: const Text('Lupa password?', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 14, decoration: TextDecoration.underline)),
+                    child: const CustomText('Lupa password?', color: AppColors.textWhite, fontSize: 14, decoration: TextDecoration.underline),
                   ),
                 ],
               ),
@@ -252,7 +251,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                     onPressed: _handleLogin,
-                    child: const Text('LOGIN', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), 
+                    child: const CustomText('LOGIN', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20), 
                   ),
                 ),
                 SizedBox(
@@ -261,9 +260,9 @@ class _LoginPageState extends State<LoginPage> {
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                     onPressed: () {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      Navigator.pushNamed(context, '/register'); // <-- Ganti ke /register kalau mau pindah ke halaman register
+                      Navigator.pushNamed(context, '/register'); 
                     },
-                    child: const Text('REGISTER', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)), 
+                    child: const CustomText('REGISTER', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20), 
                   ),
                 ),
               ],
@@ -290,7 +289,7 @@ class _LoginPageState extends State<LoginPage> {
             child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
           const SizedBox(width: 10),
-          const Text('Puddingku', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)), 
+          const CustomText('Puddingku', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold), 
         ],
       ),
     );
@@ -302,7 +301,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)), 
+          CustomText(label, color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600), 
           const SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(12)), 

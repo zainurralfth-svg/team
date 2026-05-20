@@ -6,6 +6,9 @@ import '../Backend/api_service.dart';
 import 'profil_pengguna.dart';
 import '../Widget/custom_user_navbar.dart'; 
 
+// IMPORT COMPONENT CUSTOM TEXT KITA BRO!
+import '../Widget/custom_text.dart'; 
+
 class CekPesananPage extends StatefulWidget {
   const CekPesananPage({super.key});
 
@@ -90,7 +93,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat pesanan: $e'), backgroundColor: AppColors.error),
+        SnackBar(content: CustomText('Gagal memuat pesanan: $e'), backgroundColor: AppColors.error),
       );
     }
   }
@@ -100,10 +103,10 @@ class _CekPesananPageState extends State<CekPesananPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Batalkan Pesanan?', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('Yakin nih mau batalin pesanan puddingnya? 🥺'),
+        title: const CustomText('Batalkan Pesanan?', fontWeight: FontWeight.bold),
+        content: const CustomText('Yakin nih mau batalin pesanan puddingnya? 🥺'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Nggak Jadi', style: TextStyle(color: Colors.grey))),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const CustomText('Nggak Jadi', color: Colors.grey)),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () async {
@@ -115,17 +118,17 @@ class _CekPesananPageState extends State<CekPesananPage> {
               
               if (response['status'] == 'sukses') {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Pesanan berhasil dibatalkan.'), backgroundColor: AppColors.success),
+                  const SnackBar(content: CustomText('Pesanan berhasil dibatalkan.'), backgroundColor: AppColors.success),
                 );
                 _fetchPesananUser(); // Refresh data
               } else {
                 setState(() => _isLoading = false);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Gagal: ${response['pesan']}'), backgroundColor: AppColors.error),
+                  SnackBar(content: CustomText('Gagal: ${response['pesan']}'), backgroundColor: AppColors.error),
                 );
               }
             },
-            child: const Text('Ya, Batalkan', style: TextStyle(color: Colors.white)),
+            child: const CustomText('Ya, Batalkan', color: Colors.white),
           ),
         ],
       ),
@@ -144,9 +147,11 @@ class _CekPesananPageState extends State<CekPesananPage> {
           elevation: 0,
           toolbarHeight: 70,
           iconTheme: const IconThemeData(color: AppColors.textWhite),
-          title: const Text(
+          title: const CustomText(
             'Pesanan Saya',
-            style: TextStyle(color: AppColors.textWhite, fontSize: 24, fontFamily: 'Oleo Script', fontWeight: FontWeight.bold),
+            color: AppColors.textWhite, 
+            fontSize: 24, 
+            fontWeight: FontWeight.bold,
           ),
           centerTitle: true,
           bottom: const TabBar(
@@ -154,7 +159,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
             indicatorWeight: 4,
             labelColor: AppColors.textWhite,
             unselectedLabelColor: Colors.white54,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Signika Negative'),
+            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16), // Hapus fontFamily biar ikut global/theme
             tabs: [
               Tab(text: 'Saat Ini'),
               Tab(text: 'Pesanan Selesai'),
@@ -182,7 +187,6 @@ class _CekPesananPageState extends State<CekPesananPage> {
             if (index == 0) {
               // Biarin kosong
             } else if (index == 1) {
-              // UBAH JADI INI BIAR GAK ERROR POP!
               Navigator.pushReplacementNamed(context, '/menu'); 
             } else if (index == 2) {
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProfil()));
@@ -202,9 +206,11 @@ class _CekPesananPageState extends State<CekPesananPage> {
           children: [
             Icon(isRiwayat ? Icons.history : Icons.shopping_bag_outlined, size: 60, color: AppColors.textHint.withOpacity(0.5)),
             const SizedBox(height: 10),
-            Text(
+            CustomText(
               isRiwayat ? 'Belum ada riwayat pesanan.' : 'Belum ada pesanan aktif nih.',
-              style: const TextStyle(color: AppColors.textHint, fontSize: 16, fontWeight: FontWeight.bold),
+              color: AppColors.textHint, 
+              fontSize: 16, 
+              fontWeight: FontWeight.bold,
             ),
           ],
         ),
@@ -263,8 +269,8 @@ class _CekPesananPageState extends State<CekPesananPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('#$idPesanan', style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold)),
-              Text(waktuTampil, style: const TextStyle(color: AppColors.textHint, fontSize: 12, fontWeight: FontWeight.bold)), // Tampil waktu pintar
+              CustomText('#$idPesanan', color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
+              CustomText(waktuTampil, color: AppColors.textHint, fontSize: 12, fontWeight: FontWeight.bold), // Tampil waktu pintar
             ],
           ),
           const Divider(color: AppColors.bgInput, thickness: 1, height: 25),
@@ -279,7 +285,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
                   const Icon(Icons.fastfood_rounded, size: 16, color: AppColors.primaryDark),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(produk, style: const TextStyle(color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.w600)),
+                    child: CustomText(produk, color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -295,14 +301,14 @@ class _CekPesananPageState extends State<CekPesananPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Total Bayar', style: TextStyle(color: AppColors.textHint, fontSize: 12)),
-                  Text(totalHarga, style: const TextStyle(color: AppColors.textDark, fontSize: 16, fontWeight: FontWeight.bold)),
+                  const CustomText('Total Bayar', color: AppColors.textHint, fontSize: 12),
+                  CustomText(totalHarga, color: AppColors.textDark, fontSize: 16, fontWeight: FontWeight.bold),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text('Status', style: TextStyle(color: AppColors.textHint, fontSize: 12)),
+                  const CustomText('Status', color: AppColors.textHint, fontSize: 12),
                   Row(
                     children: [
                       Container(width: 8, height: 8, decoration: BoxDecoration(color: warnaStatus, shape: BoxShape.circle)),
@@ -310,7 +316,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(color: AppColors.bgUtama, borderRadius: BorderRadius.circular(5)),
-                        child: Text(status, style: const TextStyle(color: AppColors.textDark, fontSize: 10, fontWeight: FontWeight.bold)),
+                        child: CustomText(status, color: AppColors.textDark, fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -330,7 +336,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: () => _batalkanPesanan(idPesanan),
-                child: const Text('Batalkan Pesanan', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+                child: const CustomText('Batalkan Pesanan', color: AppColors.error, fontWeight: FontWeight.bold),
               ),
             ),
           ] else if (!isRiwayat && status == 'PROSES') ...[
@@ -339,10 +345,12 @@ class _CekPesananPageState extends State<CekPesananPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(color: AppColors.info.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-              child: const Text(
+              child: const CustomText(
                 'Pesanan sedang disiapkan, tidak bisa dibatalkan.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.info, fontSize: 12, fontWeight: FontWeight.bold),
+                color: AppColors.info, 
+                fontSize: 12, 
+                fontWeight: FontWeight.bold,
               ),
             ),
           ]

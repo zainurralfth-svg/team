@@ -6,6 +6,9 @@ import '../Backend/API_Service.dart';
 // PASTIKAN IMPORT FILE NAVBAR CUSTOM LO DISINI YAH BRO!
 import '../Widget/custom_user_navbar.dart';
 
+// IMPORT COMPONENT CUSTOM TEXT KITA BRO!
+import '../Widget/custom_text.dart';
+
 class HalamanProfil extends StatefulWidget {
   const HalamanProfil({super.key});
 
@@ -60,12 +63,12 @@ class _HalamanProfilState extends State<HalamanProfil> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Logout', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
-        content: const Text('Apakah kamu yakin ingin keluar dari aplikasi?', style: TextStyle(fontFamily: 'Signika Negative')),
+        title: const CustomText('Konfirmasi Logout', fontWeight: FontWeight.bold),
+        content: const CustomText('Apakah kamu yakin ingin keluar dari aplikasi?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Batal', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey, fontWeight: FontWeight.bold)),
+            child: const CustomText('Batal', color: Colors.grey, fontWeight: FontWeight.bold),
           ),
           TextButton(
             onPressed: () async {
@@ -74,7 +77,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
               await prefs.clear();
               if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
             },
-            child: const Text('Logout', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.error, fontWeight: FontWeight.bold)), // Pakai merah error baru
+            child: const CustomText('Logout', color: AppColors.error, fontWeight: FontWeight.bold), // Pakai merah error baru
           ),
         ],
       ),
@@ -90,7 +93,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
         backgroundColor: AppColors.primary, // Pakai oranye utama
         elevation: 0,
         centerTitle: true, 
-        title: const Text('Profil Anda', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold)),
+        title: const CustomText('Profil Anda', color: AppColors.textWhite, fontWeight: FontWeight.bold),
         iconTheme: const IconThemeData(color: AppColors.textWhite),
       ),
       body: _isLoading
@@ -143,7 +146,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
                     child: ElevatedButton.icon(
                       onPressed: _prosesLogout,
                       icon: const Icon(Icons.logout, color: AppColors.textWhite),
-                      label: const Text('LOGOUT', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite, letterSpacing: 1.5)),
+                      label: const CustomText('LOGOUT', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error, // Warna tombol merah error
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -186,9 +189,9 @@ class _HalamanProfilState extends State<HalamanProfil> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(fontFamily: 'Signika Negative', fontSize: 12, color: textColor.withOpacity(0.6))),
+              CustomText(label, fontSize: 12, color: textColor.withOpacity(0.6)),
               const SizedBox(height: 4),
-              Text(value, style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.bold, color: textColor)),
+              CustomText(value, fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
             ],
           ),
         ),

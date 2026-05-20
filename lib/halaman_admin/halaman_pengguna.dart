@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import '../Backend/API_Service.dart';
-import '../Core/Colour.dart'; 
-import 'admin.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../Core/Colour.dart';
+import '../Backend/API_Service.dart'; 
 import 'halaman_laporan.dart';
-import 'riwayat_pesanan.dart';
+import 'admin.dart';
 import 'halaman_produk.dart';
 import 'halaman_profil_admin.dart';
+import 'riwayat_pesanan.dart';
 import '../Widget/custom_admin_navbar.dart';
+import '../Widget/custom_text.dart'; // <-- IMPORT CUSTOM TEXT
 
 class HalamanPengguna extends StatefulWidget {
   const HalamanPengguna({super.key});
@@ -42,7 +44,6 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      print("Gagal fetch data pengguna: $e");
     }
   }
 
@@ -63,49 +64,23 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          'Hapus Pengguna',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'Apakah Anda Yakin ingin Menghapus Akun "$namaUser"?\n\nBatalkan Jika Tidak Ingin Menghapus Akun.',
-        ),
+        title: const CustomText('Hapus Pengguna', fontWeight: FontWeight.bold),
+        content: CustomText('Yakin hapus "$namaUser"?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const CustomText('Batal', color: Colors.grey)),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Menghapus $namaUser...'))
-              );
               final response = await ApiService.hapusPengguna(idUser);
               if (response['status'] == 'sukses') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Berhasil dihapus! ✅'),
-                    backgroundColor: AppColors.success, // <-- Hijau success
-                  ),
-                );
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: CustomText('Berhasil!'), backgroundColor: AppColors.success));
                 setState(() => _isLoading = true);
                 _fetchDataPengguna();
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Gagal menghapus: ${response['pesan'] ?? 'Error'}',
-                    ),
-                    backgroundColor: AppColors.error, // <-- Merah error
-                  ),
-                );
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: CustomText('Gagal: ${response['pesan']}'), backgroundColor: AppColors.error));
               }
             },
-            child: const Text(
-              'Hapus',
-              style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold), // <-- Merah error
-            ),
+            child: const CustomText('Hapus', color: AppColors.error, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -115,12 +90,11 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgUtama, // <-- Latar belakang utama krem
+      backgroundColor: AppColors.bgUtama,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // === HEADER: PuddingKu & Profile ===
             Padding(
               padding: const EdgeInsets.fromLTRB(25, 20, 25, 10),
               child: Row(
@@ -129,346 +103,101 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      CustomText('PuddingKu', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                       SizedBox(height: 2),
-                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
+                      CustomText('Panel Admin UMKM', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600),
                     ],
                   ),
-                  // FOTO PROFIL (Sudah diseragamkan 50x50)
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HalamanProfilAdmin(),
-                        ),
-                      );
-                    },
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfilAdmin())),
                     child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.textWhite,
-                        image: DecorationImage(
-                          image: AssetImage('assets/images/profil admin.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                      width: 45, height: 45,
+                      decoration: const BoxDecoration(shape: BoxShape.circle, image: DecorationImage(image: AssetImage('assets/images/profil admin.png'), fit: BoxFit.cover)),
                     ),
                   ),
                 ],
               ),
             ),
 
-            // === TITLE: Daftar Pengguna ===
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-              child: Text(
-                'Daftar Pengguna',
-                style: TextStyle(
-                  color: AppColors.textBrown, // <-- Teks coklat tua
-                  fontSize: 34,
-                  fontFamily: 'Signika Negative',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+              child: CustomText('Daftar Pengguna', fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textDark),
             ),
 
-            // === SEARCH BAR ===
+            // SEARCH BAR
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
               child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.textWhite, // <-- Pakai putih biar bersih
-                  borderRadius: BorderRadius.circular(35),
-                ),
+                decoration: BoxDecoration(color: AppColors.textWhite, borderRadius: BorderRadius.circular(30)),
                 child: TextField(
                   controller: _searchController,
                   onChanged: _filterSearch,
-                  style: const TextStyle(
-                    fontFamily: 'Signika Negative',
-                    color: AppColors.textDark,
-                    fontSize: 18,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Search..',
-                    hintStyle: const TextStyle(
-                      color: AppColors.textHint, // <-- Teks abu-abu
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Signika Negative',
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: AppColors.primary, // <-- Ikon oranye utama
-                      size: 35,
-                    ),
+                  decoration: const InputDecoration(
+                    hintText: 'Search...',
+                    prefixIcon: Icon(Icons.search, color: AppColors.primary),
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                    contentPadding: EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 10),
-
-            // === USER LIST ===
             Expanded(
               child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary), // <-- Loading oranye
-                    )
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                   : _filteredData.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "Tidak ada pengguna ditemukan.",
-                        style: TextStyle(
-                          color: AppColors.textHint, // <-- Teks abu-abu
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    )
+                  ? const Center(child: CustomText("Tidak ada pengguna.", color: AppColors.textHint))
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 25,
-                        vertical: 10,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                       itemCount: _filteredData.length,
-                      itemBuilder: (context, index) {
-                        final user = _filteredData[index];
-                        return _buildUserCard(user);
-                      },
+                      itemBuilder: (context, index) => _buildUserCard(_filteredData[index]),
                     ),
             ),
           ],
         ),
       ),
-
-      // === BOTTOM NAVIGATION BAR ===
       bottomNavigationBar: CustomBottomNavbar(
         currentIndex: 4,
         onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanLaporan()),
-            );
-          }
-          if (index == 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanProduk()),
-            );
-          }
-          if (index == 2) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeAdmin()),
-            );
-          }
-          if (index == 3) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HalamanRiwayat()), // Pastikan nama kelas Halaman Riwayat benar
-            );
-          }
-          if (index == 4) {
-            // Already here
-          }
+          if (index == 0) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanLaporan()));
+          if (index == 1) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProduk()));
+          if (index == 2) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeAdmin()));
+          if (index == 3) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanRiwayat()));
         },
       ),
     );
   }
 
+  // WIDGET KARTU USER YANG SUDAH DI-RESIZE LEBIH KECIL
   Widget _buildUserCard(dynamic item) {
-    String idUser = item['id']?.toString() ?? '';
-    String namaLengkap = item['nama'] ?? 'Tanpa Nama';
-    String hurufDepan = namaLengkap.isNotEmpty
-        ? namaLengkap[0].toUpperCase()
-        : '?';
-    String telepon = item['phone'] ?? 'Tidak ada no HP';
-    String username = item['username'] ?? 'Tidak ada username';
-    // String roleDB = item['role'] ?? 'user';
-
-    String status = "User";
-    Color warnaStatus = AppColors.success; // <-- Hijau sukses
-
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(18),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12), // Padding dikurangi
       decoration: BoxDecoration(
-        color: AppColors.textWhite, // <-- Latar kartu putih
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow, // <-- Pakai shadow dari AppColors
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppColors.textWhite,
+        borderRadius: BorderRadius.circular(15), // Border lebih melengkung halus
+        boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 5, offset: const Offset(0, 2))],
       ),
-      child: Stack(
+      child: Row(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar with Stylized Initial
-              Container(
-                width: 55,
-                height: 55,
-                decoration: BoxDecoration(
-                  color: AppColors.bgUtama, // <-- Background krem
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3), // <-- Border oranye
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    hurufDepan,
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.primary, // <-- Teks inisial oranye
-                      fontFamily: 'Signika Negative',
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // User Name
-                    Text(
-                      namaLengkap,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textDark, // <-- Teks hitam pekat
-                        fontFamily: 'Sora',
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Phone Number
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.phone_callback_rounded,
-                          color: AppColors.success, // <-- Ikon hijau
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.bgInput, // <-- Background kotak abu-abu
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            telepon,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textHint, // <-- Teks abu-abu
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Email / Username
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.mail_outline_rounded,
-                          color: AppColors.error, // <-- Ikon merah
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.bgInput, // <-- Background kotak abu-abu
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            username,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textHint, // <-- Teks abu-abu
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Container(
+            width: 45, height: 45, // Ukuran avatar dikurangi
+            decoration: BoxDecoration(color: AppColors.bgUtama, borderRadius: BorderRadius.circular(10)),
+            child: Center(child: CustomText(item['nama']?[0].toUpperCase() ?? '?', color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.w900)),
           ),
-
-          // Status Badge (Top Right-ish)
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.bgUtama, // <-- Krem
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.circle, color: warnaStatus, size: 8),
-                  const SizedBox(width: 5),
-                  Text(
-                    status,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.textDark, // <-- Teks hitam pekat
-                    ),
-                  ),
-                ],
-              ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(item['nama'] ?? '-', fontSize: 15, fontWeight: FontWeight.bold),
+                CustomText(item['phone'] ?? '-', fontSize: 12, color: AppColors.textHint),
+              ],
             ),
           ),
-
-          // Delete Icon (Bottom Right)
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: GestureDetector(
-              onTap: () {
-                if (idUser.isNotEmpty) {
-                  _konfirmasiHapus(idUser, namaLengkap);
-                }
-              },
-              child: Image.asset(
-                'assets/icons/trash.png',
-                width: 35,
-                height: 35,
-                errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.delete_outline_rounded,
-                  color: AppColors.error, // <-- Pakai merah AppColors
-                  size: 35,
-                ),
-              ),
-            ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 22),
+            onPressed: () => _konfirmasiHapus(item['id'].toString(), item['nama']),
           ),
         ],
       ),

@@ -7,6 +7,7 @@ import 'halaman_profil_admin.dart';
 import 'halaman_produk.dart';
 import 'halaman_laporan.dart';
 import '../Widget/custom_admin_navbar.dart';
+import '../Widget/custom_text.dart';
 
 class HalamanRiwayat extends StatefulWidget {
   const HalamanRiwayat({super.key});
@@ -39,15 +40,13 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
       final data = await ApiService.getPesanan();
       setState(() {
         _listPesanan = data.where((item) {
-          String status = item['status_pesanan'] ?? '';
+          String status = (item['status_pesanan'] ?? '').toString().toUpperCase();
           return status == 'SELESAI' || status == 'DIBATALKAN';
         }).toList();
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
       print("Error fetching pesanan: $e");
     }
   }
@@ -72,161 +71,83 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            // ==========================================
-            // 1. HEADER
-            // ==========================================
+            // HEADER
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      CustomText('PuddingKu', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                       SizedBox(height: 2),
-                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
+                      CustomText('Panel Admin UMKM', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600),
                     ],
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HalamanProfilAdmin(),
-                        ),
-                      );
-                    },
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfilAdmin())),
                     child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: const BoxDecoration(
-                        color: AppColors.textWhite,
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: AssetImage('assets/images/profil admin.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                      width: 50, height: 50,
+                      decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle, image: DecorationImage(image: AssetImage('assets/images/profil admin.png'), fit: BoxFit.cover)),
                     ),
                   ),
                 ],
               ),
             ),
 
-            // ==========================================
-            // 2. SEARCH BAR
-            // ==========================================
+            // SEARCH BAR (Ikon di Kiri)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                decoration: BoxDecoration(
-                  color: AppColors.textWhite,
-                  borderRadius: BorderRadius.circular(30),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(color: AppColors.textWhite, borderRadius: BorderRadius.circular(30)),
                 child: Row(
                   children: [
+                    const Icon(Icons.search, color: AppColors.primary), // Ikon dipindah ke Kiri
+                    const SizedBox(width: 10),
                     Expanded(
                       child: TextField(
                         controller: _searchController,
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value.toLowerCase();
-                          });
-                        },
-                        decoration: const InputDecoration(
-                          hintText: 'Search...',
-                          hintStyle: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          border: InputBorder.none,
-                        ),
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 16,
-                        ),
+                        onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+                        decoration: const InputDecoration(hintText: 'Search...', border: InputBorder.none),
+                        style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 16),
                       ),
                     ),
-                    _searchQuery.isNotEmpty
-                        ? GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _searchController.clear();
-                                _searchQuery = '';
-                              });
-                            },
-                            child: const Icon(Icons.close, color: AppColors.primary),
-                          )
-                        : const Icon(Icons.search, color: AppColors.primary),
+                    if (_searchQuery.isNotEmpty)
+                      GestureDetector(
+                        onTap: () {
+                          setState(() { _searchController.clear(); _searchQuery = ''; });
+                        },
+                        child: const Icon(Icons.close, color: AppColors.primary),
+                      ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 10),
 
-            // ==========================================
-            // 3. LABEL RIWAYAT PESANAN
-            // ==========================================
-            Container(
-              width: double.infinity,
+            // LABEL RIWAYAT
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: const Text(
-                'Riwayat Pesanan',
-                style: TextStyle(
-                  color: AppColors.primaryDark,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: const CustomText('Riwayat Pesanan', color: AppColors.primaryDark, fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
-            // ==========================================
-            // 4. DAFTAR RIWAYAT PESANAN
-            // ==========================================
+            // LIST
             Expanded(
               child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                      ),
-                    )
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                   : _filteredList.isEmpty
-                      ? Center(
-                          child: Text(
-                            _searchQuery.isNotEmpty
-                                ? 'Tidak ada hasil untuk "$_searchQuery"'
-                                : 'Belum ada riwayat pesanan',
-                            style: const TextStyle(
-                              color: AppColors.textHint,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )
-                      : RefreshIndicator(
-                          color: AppColors.primary,
-                          onRefresh: _fetchDataPesanan,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 5,
-                            ),
-                            itemCount: _filteredList.length,
-                            itemBuilder: (context, index) {
-                              return _buildOrderCard(_filteredList[index]);
-                            },
-                          ),
+                      ? Center(child: CustomText(_searchQuery.isNotEmpty ? 'Tidak ada hasil' : 'Belum ada riwayat', color: AppColors.textHint, fontWeight: FontWeight.bold))
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                          itemCount: _filteredList.length,
+                          itemBuilder: (context, index) => _buildOrderCard(_filteredList[index]),
                         ),
             ),
           ],
         ),
       ),
-
       bottomNavigationBar: CustomBottomNavbar(
         currentIndex: 3,
         onTap: (index) {
@@ -239,54 +160,14 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     );
   }
 
-  // ==========================================
-  // FUNGSI BUILD ORDER CARD
-  // ==========================================
   Widget _buildOrderCard(Map<String, dynamic> item) {
-    String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
-    String ringkasan = item['ringkasan_pesanan'] ?? 'Detail Kosong';
-    String harga = 'Rp ${item['total_harga'] ?? 0}';
-    String status = item['status_pesanan'] ?? 'PROSES';
-
-    String waktuLengkap = item['tanggal_pesan'] ?? '';
-
-    String tanggal = '';
-    String jam = '';
-
-    if (waktuLengkap.length >= 10) {
-      List<String> bagian = waktuLengkap.substring(0, 10).split('-');
-      if (bagian.length == 3) {
-        List<String> namaBulan = [
-          '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-        ];
-        int bulanIndex = int.tryParse(bagian[1]) ?? 0;
-        tanggal = '${bagian[2]} ${namaBulan[bulanIndex]} ${bagian[0]}';
-      }
-    }
-
-    if (waktuLengkap.length > 11) {
-      jam = waktuLengkap.substring(11, 16);
-    }
-
-    Color statusColor = status == 'SELESAI'
-        ? AppColors.success
-        : (status == 'DIBATALKAN' ? AppColors.error : AppColors.info);
+    String status = (item['status_pesanan'] ?? 'PROSES').toString().toUpperCase();
+    Color statusColor = status == 'SELESAI' ? AppColors.success : AppColors.error;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: AppColors.textWhite,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(color: AppColors.textWhite, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 5, offset: const Offset(0, 3))]),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -295,103 +176,25 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  tanggal,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textHint,
-                  ),
-                ),
-                const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      namaPemesan,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
-                      ),
-                    ),
+                    CustomText(item['nama_pemesan'] ?? 'Tanpa Nama', fontSize: 16, fontWeight: FontWeight.bold),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.bgCard,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.circle, color: statusColor, size: 10),
-                          const SizedBox(width: 4),
-                          Text(
-                            status == 'SELESAI' ? 'Selesai' : 'Dibatalkan',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(10)),
+                      child: Row(children: [Icon(Icons.circle, color: statusColor, size: 10), const SizedBox(width: 4), CustomText(status == 'SELESAI' ? 'Selesai' : 'Dibatalkan', fontSize: 10, fontWeight: FontWeight.bold)]),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  ringkasan,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textBrown,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: List.generate(
-                    100,
-                    (index) => Expanded(
-                      child: Container(
-                        height: 1,
-                        color: index % 2 == 0
-                            ? AppColors.textHint.withOpacity(0.5)
-                            : Colors.transparent,
-                      ),
-                    ),
-                  ),
-                ),
+                CustomText(item['ringkasan_pesanan'] ?? '-', fontSize: 12, color: AppColors.textBrown, fontWeight: FontWeight.w600),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time,
-                          size: 14,
-                          color: AppColors.textHint,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          jam,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textHint,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      harga,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
+                    CustomText('Rp ${item['total_harga'] ?? 0}', fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+                    CustomText(item['tanggal_pesan']?.toString().substring(11, 16) ?? '', fontSize: 11, color: AppColors.textHint),
                   ],
                 ),
               ],

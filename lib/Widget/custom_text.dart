@@ -9,7 +9,9 @@ class CustomText extends StatelessWidget {
   final int? maxLines;
   final TextOverflow? overflow;
   final FontStyle? fontStyle;
-  final bool isOleo; // <--- INI KUNCI BARUNYA
+  final TextDecoration? decoration; // <-- INI YANG KELUPAAN TADI BRO
+  final double? letterSpacing;      // <-- Sekalian gue tambahin buat jarak huruf
+  final bool isOleo;
 
   const CustomText(
     this.text, {
@@ -21,6 +23,8 @@ class CustomText extends StatelessWidget {
     this.maxLines,
     this.overflow,
     this.fontStyle,
+    this.decoration,
+    this.letterSpacing,
     this.isOleo = false, // Default-nya false (jadi pake Signika)
   });
 
@@ -32,12 +36,13 @@ class CustomText extends StatelessWidget {
       maxLines: maxLines,
       overflow: overflow,
       style: TextStyle(
-        // LOGIKA PINDAH FONT OTOMATIS
         fontFamily: isOleo ? 'Oleo Script' : 'Signika Negative', 
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,
         fontStyle: fontStyle,
+        decoration: decoration, // <-- TERUS DIPANGGIL DI SINI
+        letterSpacing: letterSpacing,
       ),
     );
   }

@@ -8,6 +8,7 @@ import 'riwayat_pesanan.dart';
 import 'halaman_profil_admin.dart';
 import 'halaman_laporan.dart';
 import '../Widget/custom_admin_navbar.dart';
+import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
 
 class HalamanProduk extends StatefulWidget {
   const HalamanProduk({super.key});
@@ -71,7 +72,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                 child: Column(
                   children: [
                     Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)))),
-                    const Align(alignment: Alignment.centerLeft, child: Text('Tambah Produk', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary))), 
+                    const Align(alignment: Alignment.centerLeft, child: CustomText('Tambah Produk', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary)), 
                     const SizedBox(height: 20),
                     Expanded(
                       child: SingleChildScrollView(
@@ -88,7 +89,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                               initialValue: selectedKat,
                               decoration: _inputDeco('Pilih kategori...'),
                               icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.primary, size: 30),
-                              items: listKategoriInput.map((String k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)))).toList(),
+                              items: listKategoriInput.map((String k) => DropdownMenuItem(value: k, child: CustomText(k, fontWeight: FontWeight.bold))).toList(),
                               onChanged: (val) => setSheetState(() => selectedKat = val),
                               validator: (v) => v == null ? 'Kategori wajib dipilih' : null,
                             ),
@@ -114,7 +115,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
 
                             const SizedBox(height: 30),
                             Row(children: [
-                              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Batal', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey, fontWeight: FontWeight.w900)))),
+                              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const CustomText('Batal', color: Colors.grey, fontWeight: FontWeight.w900))),
                               const SizedBox(width: 12),
                               Expanded(child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), 
                                 onPressed: () async {
@@ -141,7 +142,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                                   } else {
                                     _snackbar('Gagal: ${hasil['pesan']}', AppColors.error);
                                   }
-                                }, child: const Text('Simpan', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.w900, fontSize: 16)))),
+                                }, child: const CustomText('Simpan', fontWeight: FontWeight.w900, fontSize: 16))),
                             ]),
                             const SizedBox(height: 30),
                           ],
@@ -187,7 +188,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                 child: Column(
                   children: [
                     Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)))),
-                    const Align(alignment: Alignment.centerLeft, child: Text('Edit Produk', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary))),
+                    const Align(alignment: Alignment.centerLeft, child: CustomText('Edit Produk', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary)),
                     const SizedBox(height: 20),
                     Expanded(
                       child: SingleChildScrollView(
@@ -204,7 +205,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                               initialValue: selectedKat,
                               decoration: _inputDeco('Pilih kategori...'),
                               icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.primary, size: 30),
-                              items: listKategoriInput.map((String k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)))).toList(),
+                              items: listKategoriInput.map((String k) => DropdownMenuItem(value: k, child: CustomText(k, fontWeight: FontWeight.bold))).toList(),
                               onChanged: (val) => setSheetState(() => selectedKat = val),
                               validator: (v) => v == null ? 'Kategori wajib dipilih' : null,
                             ),
@@ -230,7 +231,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
 
                             const SizedBox(height: 30),
                             Row(children: [
-                              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Batal', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey, fontWeight: FontWeight.w900)))),
+                              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const CustomText('Batal', color: Colors.grey, fontWeight: FontWeight.w900))),
                               const SizedBox(width: 12),
                               Expanded(child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), 
                                 onPressed: () async {
@@ -259,7 +260,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                                   } else {
                                     _snackbar('Gagal: ${hasil['pesan']}', AppColors.error);
                                   }
-                                }, child: const Text('Simpan', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.w900, fontSize: 16)))),
+                                }, child: const CustomText('Simpan', fontWeight: FontWeight.w900, fontSize: 16))),
                             ]),
                             const SizedBox(height: 30),
                           ],
@@ -281,10 +282,10 @@ class _HalamanProdukState extends State<HalamanProduk> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(children: [Icon(Icons.delete_outline, color: AppColors.error), SizedBox(width: 8), Text('Hapus Produk?', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold))]),
-        content: Text('Yakin ingin menghapus\n"${menuItems[i]['nama_produk']}"?', style: const TextStyle(fontFamily: 'Signika Negative')),
+        title: const Row(children: [Icon(Icons.delete_outline, color: AppColors.error), SizedBox(width: 8), CustomText('Hapus Produk?', fontWeight: FontWeight.bold)]),
+        content: CustomText('Yakin ingin menghapus\n"${menuItems[i]['nama_produk']}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey))),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const CustomText('Batal', color: Colors.grey)),
           ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))), 
             onPressed: () async {
               final idProduk = menuItems[i]['id_produk']?.toString() ?? '';
@@ -296,7 +297,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
               } else {
                 _snackbar('Gagal: ${hasil['pesan']}', AppColors.error);
               }
-            }, child: const Text('Hapus', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold))),
+            }, child: const CustomText('Hapus', fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -304,10 +305,10 @@ class _HalamanProdukState extends State<HalamanProduk> {
 
   void _snackbar(String msg, Color color) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg, style: const TextStyle(fontFamily: 'Signika Negative', color: Colors.white)), backgroundColor: color, behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: CustomText(msg, color: Colors.white), backgroundColor: color, behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))));
   }
 
-  Widget _label(String text) => Padding(padding: const EdgeInsets.only(bottom: 6), child: Text(text, style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.w900, fontSize: 15, color: AppColors.textDark)));
+  Widget _label(String text) => Padding(padding: const EdgeInsets.only(bottom: 6), child: CustomText(text, fontWeight: FontWeight.w900, fontSize: 15, color: AppColors.textDark));
 
   InputDecoration _inputDeco(String hint) => InputDecoration(hintText: hint, hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint), filled: true, fillColor: AppColors.bgInput, contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14), border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade200)), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade200)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.primary, width: 2)));
 
@@ -324,9 +325,9 @@ class _HalamanProdukState extends State<HalamanProduk> {
             children: [
               Icon(fileName.isNotEmpty ? Icons.check_circle : Icons.image_outlined, color: fileName.isNotEmpty ? AppColors.success : AppColors.textHint, size: 28),
               const SizedBox(width: 10),
-              Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300)), child: const Text('Pilih File', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 12, color: AppColors.textDark, fontWeight: FontWeight.bold))),
+              Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300)), child: const CustomText('Pilih File', fontSize: 12, color: AppColors.textDark, fontWeight: FontWeight.bold)),
               const SizedBox(width: 10),
-              Expanded(child: Text(fileName.isNotEmpty ? fileName : 'Belum ada file dipilih', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 12, color: fileName.isNotEmpty ? AppColors.success : Colors.grey, fontWeight: fileName.isNotEmpty ? FontWeight.bold : FontWeight.normal), overflow: TextOverflow.ellipsis)),
+              Expanded(child: CustomText(fileName.isNotEmpty ? fileName : 'Belum ada file dipilih', fontSize: 12, color: fileName.isNotEmpty ? AppColors.success : Colors.grey, fontWeight: fileName.isNotEmpty ? FontWeight.bold : FontWeight.normal, overflow: TextOverflow.ellipsis)),
             ],
           ),
         ),
@@ -347,7 +348,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
           children: [
             Icon(icon, size: 14, color: iconColor),
             const SizedBox(width: 4),
-            Text(title, style: TextStyle(fontFamily: 'Signika Negative', fontSize: 11, fontWeight: FontWeight.w900, color: textColor)),
+            CustomText(title, fontSize: 11, fontWeight: FontWeight.w900, color: textColor),
           ],
         ),
       ),
@@ -370,9 +371,9 @@ class _HalamanProdukState extends State<HalamanProduk> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      CustomText('PuddingKu', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                       SizedBox(height: 2),
-                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
+                      CustomText('Panel Admin UMKM', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600),
                     ],
                   ),
                   // INI BAGIAN FOTO PROFIL YANG UDAH DISERAGAMIN UKURANNYA
@@ -398,7 +399,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
             
             const Padding(
               padding: EdgeInsets.fromLTRB(20, 4, 20, 8),
-              child: Text('Manajemen Produk', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 0.5)), 
+              child: CustomText('Manajemen Produk', color: AppColors.primary, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 0.5), 
             ),
             
             Padding(
@@ -406,7 +407,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
               child: ElevatedButton.icon(
                 onPressed: _bukaSheetTambah, 
                 icon: const Icon(Icons.add, color: Colors.white, size: 24),
-                label: const Text('Tambah Produk', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)), 
+                label: const CustomText('Tambah Produk', color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900), 
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 0),
               ),
             ),
@@ -417,7 +418,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Daftar Menu', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary)), 
+                  const CustomText('Daftar Menu', fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary), 
                   Container(
                     height: 35, padding: const EdgeInsets.symmetric(horizontal: 14), 
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.primary, width: 2)),
@@ -427,7 +428,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                         icon: const Icon(Icons.filter_list_rounded, color: AppColors.primary, size: 20),
                         style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.primary),
                         onChanged: (val) { if (val != null) setState(() => kategoriTerpilih = val); },
-                        items: listKategoriFilter.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+                        items: listKategoriFilter.map((v) => DropdownMenuItem(value: v, child: CustomText(v))).toList(),
                       ),
                     ),
                   ),
@@ -464,7 +465,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
       return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Icon(Icons.fastfood_rounded, size: 60, color: Colors.grey.shade400),
         const SizedBox(height: 12),
-        const Text('Belum ada menu', style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey, fontSize: 16, fontWeight: FontWeight.bold)),
+        const CustomText('Belum ada menu', color: Colors.grey, fontSize: 16, fontWeight: FontWeight.bold),
       ]));
     }
 
@@ -488,9 +489,9 @@ class _HalamanProdukState extends State<HalamanProduk> {
                 Padding(
                   padding: const EdgeInsets.all(10.0), 
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(item['nama_produk'].toString().toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.textBrown)),
-                    Text('Rp ${item['harga']}', style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.textDark)),
-                    Text('Stok : ${item['stok'] ?? 0} pcs', style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey)),
+                    CustomText(item['nama_produk'].toString().toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis, fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.textBrown),
+                    CustomText('Rp ${item['harga']}', fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.textDark),
+                    CustomText('Stok : ${item['stok'] ?? 0} pcs', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey),
                     const SizedBox(height: 8),
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                       _smallBtn('Edit', Icons.edit, Colors.green.shade700, AppColors.textBrown, () => bukaSHeetEdit(menuItems.indexOf(item))),

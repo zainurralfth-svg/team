@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; // <-- Pastikan path AppColors lo bener
+import 'custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
 
 class CustomUserNavbar extends StatelessWidget {
   final int currentIndex;
@@ -76,13 +77,14 @@ class CustomUserNavbar extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 2),
-            Text(
+            // ==========================================
+            // TEKS NAVBAR SEKARANG PAKAI CUSTOM TEXT!
+            // ==========================================
+            CustomText(
               label,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             )
           ],
         ),
