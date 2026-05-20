@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../Core/Colour.dart'; 
 import '../Backend/api_service.dart'; 
 import 'profil_pengguna.dart';
-import '../Widget/custom_user_navbar.dart'; // <-- NAVBAR CUSTOM UDAH DIIMPORT
+import '../Widget/custom_user_navbar.dart'; 
 
 class CekPesananPage extends StatefulWidget {
   const CekPesananPage({super.key});
@@ -157,7 +157,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
             labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Signika Negative'),
             tabs: [
               Tab(text: 'Saat Ini'),
-              Tab(text: 'Riwayat Pesanan'),
+              Tab(text: 'Pesanan Selesai'),
             ],
           ),
         ),
