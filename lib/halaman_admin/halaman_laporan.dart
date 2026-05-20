@@ -6,7 +6,7 @@ import 'admin.dart';
 import 'halaman_profil_admin.dart';
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart';
-import '../Widget/custom_navbar.dart';
+import '../Widget/custom_admin_navbar.dart';
 import 'cetak_laporan.dart';
 
 // ─── MODEL ────────────────────────────────────────────────────────────────────

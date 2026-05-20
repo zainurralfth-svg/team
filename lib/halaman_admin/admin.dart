@@ -9,7 +9,7 @@ import 'riwayat_pesanan.dart';
 import 'halaman_laporan.dart';
 import 'halaman_pengguna.dart';
 import 'halaman_profil_admin.dart';
-import '../Widget/custom_navbar.dart';
+import '../Widget/custom_admin_navbar.dart';
 import '../Widget/order_card.dart';
 import '../Widget/sheet_tambah_pesanan.dart';
 import '../Widget/custom_text.dart';

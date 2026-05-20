@@ -7,7 +7,7 @@ import 'halaman_pengguna.dart';
 import 'riwayat_pesanan.dart'; 
 import 'halaman_profil_admin.dart';
 import 'halaman_laporan.dart';
-import '../Widget/custom_navbar.dart'; 
+import '../Widget/custom_admin_navbar.dart';
 
 class HalamanProduk extends StatefulWidget {
   const HalamanProduk({super.key});

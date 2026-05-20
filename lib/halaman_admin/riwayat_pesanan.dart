@@ -6,7 +6,7 @@ import 'admin.dart';
 import 'halaman_profil_admin.dart';
 import 'halaman_produk.dart';
 import 'halaman_laporan.dart';
-import '../Widget/custom_navbar.dart';
+import '../Widget/custom_admin_navbar.dart';
 
 class HalamanRiwayat extends StatefulWidget {
   const HalamanRiwayat({super.key});
