@@ -8,7 +8,7 @@ class ApiService {
   // Gunakan 10.0.2.2 untuk running di Emulator Android
   // Gunakan IP Address laptop (misal: 192.168.1.5) untuk HP Fisik
   // =========================================================
-  static const String baseUrl = "http://172.16.115.215/api_puddingku";
+  static const String baseUrl = "http://localhost/api_puddingku";
 
   // =========================================================
   // HELPER: Decode JSON aman agar aplikasi tidak crash

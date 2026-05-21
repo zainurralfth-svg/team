@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Core/Colour.dart';
-import '../Widget/custom_text.dart'; // <-- IMPORT CUSTOM TEXT
+import '../Widget/custom_text.dart';
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
 String formatRupiahCetak(int value) {
@@ -16,6 +17,25 @@ String formatRupiahCetak(int value) {
     count++;
   }
   return 'Rp ${result.toString().split('').reversed.join()}';
+}
+
+// ─── SHARED PREFS KEY ─────────────────────────────────────────────────────────
+const String kDownloadedBulanKey = 'downloaded_bulan';
+
+/// Simpan bulan yang sudah di-download ke SharedPreferences
+Future<void> simpanBulanDownloaded(String bulan) async {
+  final prefs = await SharedPreferences.getInstance();
+  final existing = prefs.getStringList(kDownloadedBulanKey) ?? [];
+  if (!existing.contains(bulan)) {
+    existing.add(bulan);
+    await prefs.setStringList(kDownloadedBulanKey, existing);
+  }
+}
+
+/// Ambil semua bulan yang sudah di-download
+Future<List<String>> getBulanDownloaded() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getStringList(kDownloadedBulanKey) ?? [];
 }
 
 // ─── PRINT BUTTON ─────────────────────────────────────────────────────────────
@@ -174,13 +194,18 @@ class CetakLaporanButton extends StatelessWidget {
         try {
           final doc = await _buildPdf();
           final bytes = await doc.save();
-          await Printing.layoutPdf(
-            onLayout: (_) async => bytes,
-            name: 'Laporan_${bulan.replaceAll(' ', '_')}.pdf',
+          await Printing.sharePdf(
+            bytes: bytes,
+            filename: 'Laporan_${bulan.replaceAll(" ", "_")}.pdf',
           );
+          // Tandai bulan ini sudah di-download → riwayat bulan ini akan hilang
+          await simpanBulanDownloaded(bulan);
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: CustomText('Gagal membuat PDF: $e', color: Colors.white), backgroundColor: Colors.red));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: CustomText('Gagal mengunduh PDF: $e', color: Colors.white),
+              backgroundColor: Colors.red,
+            ));
           }
         }
       },
@@ -192,7 +217,7 @@ class CetakLaporanButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: const Offset(0, 2))],
         ),
-        child: const Center(child: Icon(Icons.print_rounded, color: Colors.white, size: 18)),
+        child: const Center(child: Icon(Icons.download_rounded, color: Colors.white, size: 18)),
       ),
     );
   }
