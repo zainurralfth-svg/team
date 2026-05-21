@@ -9,10 +9,10 @@ import 'riwayat_pesanan.dart';
 import 'halaman_laporan.dart';
 import 'halaman_pengguna.dart';
 import 'halaman_profil_admin.dart';
-import '../Widget/custom_navbar.dart';
+import '../Widget/custom_admin_navbar.dart';
 import '../Widget/order_card.dart';
 import '../Widget/sheet_tambah_pesanan.dart';
-import '../Widget/custom_text.dart';
+import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
 
 class HomeAdmin extends StatefulWidget {
   const HomeAdmin({super.key});
@@ -77,8 +77,9 @@ class _HomeAdminState extends State<HomeAdmin> {
             hitungBatalSaatIni > _jumlahBatalSebelumnya) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text(
+              content: CustomText(
                 '⚠️ Notifikasi: Ada pelanggan yang membatalkan pesanan! Cek Riwayat.',
+                color: Colors.white,
               ),
               backgroundColor: AppColors.error,
               duration: Duration(seconds: 5),
@@ -152,7 +153,7 @@ class _HomeAdminState extends State<HomeAdmin> {
       if (response['status'] == 'sukses') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Pesanan berhasil di-update ke $statusBaru ✓'),
+            content: CustomText('Pesanan berhasil di-update ke $statusBaru ✓', color: Colors.white),
             backgroundColor: AppColors.success,
           ),
         );
@@ -160,7 +161,7 @@ class _HomeAdminState extends State<HomeAdmin> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal: ${response['pesan']}'),
+            content: CustomText('Gagal: ${response['pesan']}', color: Colors.white),
             backgroundColor: AppColors.error,
           ),
         );
@@ -169,7 +170,7 @@ class _HomeAdminState extends State<HomeAdmin> {
       debugPrint("Error update status: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Sistem Error: $e'),
+          content: CustomText('Sistem Error: $e', color: Colors.white),
           backgroundColor: AppColors.error,
           duration: const Duration(seconds: 4),
         ),
@@ -199,27 +200,11 @@ class _HomeAdminState extends State<HomeAdmin> {
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'PuddingKu',
-                        style: TextStyle(
-                          color: AppColors.primaryDark,
-                          fontSize: 24,
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      Text(
-                        'Panel Admin UMKM',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 12,
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+                    children: [
+                      CustomText('PuddingKu', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                      SizedBox(height: 2),
+                      CustomText('Panel Admin UMKM', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600),
+                    ]
                   ),
                   GestureDetector(
                     onTap: () => Navigator.push(
@@ -272,36 +257,27 @@ class _HomeAdminState extends State<HomeAdmin> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  const CustomText(
                                     'Selamat pagi, Admin',
-                                    style: TextStyle(
-                                      color: AppColors.textWhite,
-                                      fontSize: 12,
-                                      fontFamily: 'Plus Jakarta Sans',
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    color: AppColors.textWhite,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(
+                                  CustomText(
                                     _namaAdmin,
-                                    style: const TextStyle(
-                                      color: AppColors.textWhite,
-                                      fontSize: 22,
-                                      fontFamily: 'Sora',
-                                      fontWeight: FontWeight.w800,
-                                    ),
+                                    color: AppColors.textWhite,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                   const SizedBox(height: 2),
-                                  Text(
+                                  CustomText(
                                     DateFormat(
                                       'EEEE, d MMMM yyyy',
                                       'id_ID',
                                     ).format(DateTime.now()),
-                                    style: const TextStyle(
-                                      color: AppColors.textWhite,
-                                      fontSize: 11,
-                                      fontFamily: 'Plus Jakarta Sans',
-                                    ),
+                                    color: AppColors.textWhite,
+                                    fontSize: 11,
                                   ),
                                   const SizedBox(height: 15),
                                   Wrap(
@@ -331,22 +307,18 @@ class _HomeAdminState extends State<HomeAdmin> {
                                       color: Colors.black.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(5),
                                     ),
-                                    child: Text(
+                                    child: CustomText(
                                       formatRupiah(_pendapatanBulanIni),
-                                      style: const TextStyle(
-                                        color: AppColors.textWhite,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      color: AppColors.textWhite,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  const Text(
+                                  const CustomText(
                                     'Pendapatan bulan ini',
-                                    style: TextStyle(
-                                      color: AppColors.textWhite,
-                                      fontSize: 10,
-                                    ),
+                                    color: AppColors.textWhite,
+                                    fontSize: 10,
                                   ),
                                   const SizedBox(height: 15),
                                   Container(
@@ -360,22 +332,17 @@ class _HomeAdminState extends State<HomeAdmin> {
                                     ),
                                     child: Column(
                                       children: [
-                                        Text(
+                                        CustomText(
                                           '$_jumlahPesananHariIni',
-                                          style: const TextStyle(
-                                            color: AppColors.textWhite,
-                                            fontSize: 26,
-                                            fontFamily: 'Sora',
-                                            fontWeight: FontWeight.w800,
-                                          ),
+                                          color: AppColors.textWhite,
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.w800,
                                         ),
-                                        const Text(
+                                        const CustomText(
                                           'Pesanan\nHari Ini',
                                           textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: AppColors.textWhite,
-                                            fontSize: 10,
-                                          ),
+                                          color: AppColors.textWhite,
+                                          fontSize: 10,
                                         ),
                                       ],
                                     ),
@@ -412,21 +379,19 @@ class _HomeAdminState extends State<HomeAdmin> {
                           ),
                           child: Row(
                             children: const [
-                              Text(
+                              CustomText(
                                 '+',
-                                style: TextStyle(
-                                  color: AppColors.textWhite,
-                                  fontSize: 50,
-                                  fontFamily: 'Signika Negative',
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                color: AppColors.textWhite,
+                                fontSize: 50,
+                                fontWeight: FontWeight.bold,
                               ),
                               SizedBox(width: 15),
                               CustomText(
                                 'Tambah pesanan',
-                              color: AppColors.textWhite, 
-                              fontSize: 32, 
-                              fontWeight: FontWeight.bold), 
+                                color: AppColors.textWhite, 
+                                fontSize: 32, 
+                                fontWeight: FontWeight.bold,
+                              ), 
                             ],
                           ),
                         ),
@@ -444,19 +409,17 @@ class _HomeAdminState extends State<HomeAdmin> {
                         const Center(
                           child: Padding(
                             padding: EdgeInsets.all(20.0),
-                            child: Text(
+                            child: CustomText(
                               "Yey! Belum ada antrean pesanan.",
-                              style: TextStyle(
-                                color: AppColors.textHint,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              color: AppColors.textHint,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         )
                       else ...[
                         // SECTION 1: BUTUH KONFIRMASI (MENUNGGU)
                         if (_pesananMenunggu.isNotEmpty) ...[
-                         CustomText('Butuh Konfirmasi Pesanan ⚠️',
+                         const CustomText('Butuh Konfirmasi Pesanan ⚠️',
                          color: AppColors.error,
                          fontSize: 24,
                          fontWeight: FontWeight.bold,),
@@ -500,7 +463,7 @@ class _HomeAdminState extends State<HomeAdmin> {
 
                         // SECTION 2: SEDANG DIPROSES
                         if (_pesananProses.isNotEmpty) ...[
-                          CustomText('Sedang Menunggu',
+                          const CustomText('Sedang Menunggu',
                           color: AppColors.info,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,),
@@ -587,14 +550,11 @@ class _HomeAdminState extends State<HomeAdmin> {
         color: Colors.white.withOpacity(0.18),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Text(
+      child: CustomText(
         text,
-        style: const TextStyle(
-          color: AppColors.textWhite,
-          fontSize: 10,
-          fontFamily: 'Plus Jakarta Sans',
-          fontWeight: FontWeight.bold,
-        ),
+        color: AppColors.textWhite,
+        fontSize: 10,
+        fontWeight: FontWeight.bold,
       ),
     );
   }

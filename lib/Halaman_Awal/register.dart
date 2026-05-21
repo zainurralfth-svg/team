@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import '../Backend/API_Service.dart'; 
+import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
 
 class RegisterPage extends StatefulWidget { 
   const RegisterPage({super.key}); 
@@ -56,7 +57,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 Icon(Icons.error_outline, color: AppColors.textWhite, size: 24),
                 SizedBox(width: 12),
                 Expanded(
-                  child: Text('Semua data register harus diisi!', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600)),
+                  child: CustomText('Semua data register harus diisi!', color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -74,7 +75,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (hasil['status'] == 'sukses') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(hasil['pesan'], style: const TextStyle(fontFamily: 'Signika Negative')), 
+            content: CustomText(hasil['pesan']), 
             backgroundColor: AppColors.success, // Menggunakan hijau sukses baru
             behavior: SnackBarBehavior.floating,
           ),
@@ -94,7 +95,7 @@ class _RegisterPageState extends State<RegisterPage> {
         // Tampilkan error dari server (misal: Username sudah dipakai)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(hasil['pesan'], style: const TextStyle(fontFamily: 'Signika Negative')), 
+            content: CustomText(hasil['pesan']), 
             backgroundColor: AppColors.error, // Menggunakan merah error baru
             behavior: SnackBarBehavior.floating,
           ),
@@ -104,7 +105,7 @@ class _RegisterPageState extends State<RegisterPage> {
       // Penanganan error jika server mati atau IP salah
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Gagal terhubung ke server! Cek koneksi / XAMPP.', style: TextStyle(fontFamily: 'Signika Negative')), 
+          content: CustomText('Gagal terhubung ke server! Cek koneksi / XAMPP.'), 
           backgroundColor: AppColors.error, // Menggunakan merah error baru
           behavior: SnackBarBehavior.floating,
         ),
@@ -186,16 +187,14 @@ class _RegisterPageState extends State<RegisterPage> {
             // =====================================
             // INI PERUBAHAN FONT OLEO SCRIPT NYA
             // =====================================
-            const Text(
+            const CustomText(
               'Register', 
-              style: TextStyle(
-                fontFamily: 'Oleo Script', // Pakai font Oleo Script 
-                color: AppColors.textDark, 
-                fontSize: 38, 
-                fontWeight: FontWeight.w900, 
-              )
+              isOleo: true, // <-- PANGGIL SAKLARNYA!
+              color: AppColors.textDark, 
+              fontSize: 38, 
+              fontWeight: FontWeight.w900, 
             ),
-            const Text('Register Untuk Membuat Akun', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark, fontSize: 18)),
+            const CustomText('Register Untuk Membuat Akun', color: AppColors.textDark, fontSize: 18),
             const SizedBox(height: 30),
 
             // Container Background Form
@@ -225,7 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                 onPressed: _prosesRegister,
-                child: const Text('REGISTER', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20)),
+                child: const CustomText('REGISTER', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20),
               ),
             ),
           ],
@@ -251,7 +250,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
           const SizedBox(width: 10),
-          const Text('Puddingku', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
+          const CustomText('Puddingku', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold),
         ],
       ),
     );
@@ -264,7 +263,7 @@ class _RegisterPageState extends State<RegisterPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)),
+          CustomText(label, color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600),
           const SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(12)), // Background kolom input
