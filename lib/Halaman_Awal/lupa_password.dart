@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import '../Backend/API_Service.dart'; 
+import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
 
 class LupaPasswordPage extends StatefulWidget {
   const LupaPasswordPage({super.key});
@@ -45,6 +46,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
       animType: AnimType.bottomSlide,
       title: 'Berhasil!',
       desc: 'Password kamu sudah diperbarui. Silakan login kembali!',
+      // Awesome Dialog butuh objek TextStyle, jadi tetap pakai TextStyle
       titleTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 20),
       descTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16),
       btnOkText: "Siap, Login!",
@@ -169,7 +171,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
           children: [
             const Icon(Icons.error_outline, color: AppColors.textWhite),
             const SizedBox(width: 12),
-            Expanded(child: Text(_errorMessage!, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold))),
+            Expanded(child: CustomText(_errorMessage!, color: AppColors.textWhite, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -187,21 +189,20 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             // =====================================
             // INI PERUBAHAN FONT OLEO SCRIPT NYA
             // =====================================
-            Text(
+            CustomText(
               _isPhoneVerified ? 'Buat Password Baru' : 'Reset Password', 
+              isOleo: true, // <-- PANGGIL SAKLARNYA DARI CUSTOMTEXT
               textAlign: TextAlign.center, 
-              style: const TextStyle(
-                fontFamily: 'Oleo Script', // Pakai font Oleo Script
-                color: AppColors.textDark, 
-                fontSize: 38, 
-                fontWeight: FontWeight.w900, 
-              )
+              color: AppColors.textDark, 
+              fontSize: 38, 
+              fontWeight: FontWeight.w900, 
             ),
             const SizedBox(height: 10),
-            Text(
+            CustomText(
               _isPhoneVerified ? 'Nomor terverifikasi! Masukkan Password Baru Anda.' : 'Masukkan Nomor Telepon Yang Terdaftar Di Akun Anda.', 
               textAlign: TextAlign.center, 
-              style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark, fontSize: 16)
+              color: AppColors.textDark, 
+              fontSize: 16,
             ),
             const SizedBox(height: 30),
 
@@ -232,7 +233,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                 onPressed: _prosesReset, 
-                child: Text(_isPhoneVerified ? 'SIMPAN PASSWORD' : 'CEK NOMOR TELEPON', style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 18)),
+                child: CustomText(_isPhoneVerified ? 'SIMPAN PASSWORD' : 'CEK NOMOR TELEPON', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 18),
               ),
             ),
           ],
@@ -258,7 +259,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
           ),
           const SizedBox(width: 10),
-          const Text('Puddingku', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold)),
+          const CustomText('Puddingku', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold),
         ],
       ),
     );
@@ -269,7 +270,7 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600)),
+        CustomText(label, color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600),
         const SizedBox(height: 10),
         Container(
           // Mengubah warna background menjadi abu-abu jika parameter enabled = false

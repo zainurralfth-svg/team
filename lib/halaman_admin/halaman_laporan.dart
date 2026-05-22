@@ -6,7 +6,7 @@ import 'admin.dart';
 import 'halaman_profil_admin.dart';
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart';
-import '../Widget/custom_navbar.dart';
+import '../Widget/custom_admin_navbar.dart';
 import 'cetak_laporan.dart';
 
 // ─── MODEL ────────────────────────────────────────────────────────────────────
@@ -206,7 +206,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
             ElevatedButton(
               onPressed: _loadData,
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
+              child: const Text('Coba Lagi', style: TextStyle(color: AppColors.textWhite)),
             ),
           ],
         ),
@@ -225,8 +225,8 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
             ElevatedButton.icon(
               onPressed: _loadData,
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              icon: const Icon(Icons.refresh, color: Colors.white),
-              label: const Text('Muat Ulang', style: TextStyle(color: Colors.white)),
+              icon: const Icon(Icons.refresh, color: AppColors.textWhite),
+              label: const Text('Muat Ulang', style: TextStyle(color: AppColors.textWhite)),
             ),
           ],
         ),
@@ -295,7 +295,7 @@ class _AppHeader extends StatelessWidget {
                   image: AssetImage('assets/images/profil admin.png'),
                   fit: BoxFit.cover,
                 ),
-                color: Colors.white,
+                color: AppColors.textWhite,
               ),
             ),
           ),
@@ -377,7 +377,7 @@ class _LaporanCardState extends State<_LaporanCard>
   Widget build(BuildContext context) {
     final l = widget.laporan;
     return Material(
-      color: Colors.white,
+      color: AppColors.textWhite,
       borderRadius: BorderRadius.circular(16),
       elevation: 4,
       shadowColor: AppColors.shadow,
@@ -563,7 +563,7 @@ class _LaporanTable extends StatelessWidget {
           final d = entry.value;
           return Container(
             decoration: BoxDecoration(
-              color: i.isEven ? Colors.white : AppColors.bgCard,
+              color: i.isEven ? AppColors.textWhite : AppColors.bgCard,
               border: const Border(bottom: BorderSide(color: AppColors.bgUtama)),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

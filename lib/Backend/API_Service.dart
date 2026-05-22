@@ -188,7 +188,6 @@ class ApiService {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/hapus_menu.php"),
-        // ✅ PERBAIKAN: Diubah menjadi id_produk agar sesuai dengan kolom database
         body: {"id_produk": idMenu},
       );
       return _safeDecodeMap(response.body);
@@ -302,6 +301,21 @@ class ApiService {
   }
 
   // ==========================================
+  // 4B. HAPUS PESANAN (UNTUK CETAK LAPORAN)
+  // ==========================================
+  static Future<Map<String, dynamic>> deletePesanan(String idPesanan) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$baseUrl/hapus_pesanan.php"),
+        body: {"id": idPesanan},
+      );
+      return _safeDecodeMap(response.body);
+    } catch (e) {
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
+  }
+
+  // ==========================================
   // 5. PROFIL PENGGUNA
   // ==========================================
   static Future<Map<String, dynamic>> getProfil(String idUser) async {
@@ -327,8 +341,8 @@ class ApiService {
       var response = await http.post(
         Uri.parse("$baseUrl/update_status_pesanan.php"),
         body: {
-          "id": idPesanan, // UBAH dari "id_pesanan" jadi "id"
-          "status": statusBaru, // UBAH dari "status_pesanan" jadi "status"
+          "id": idPesanan,
+          "status": statusBaru,
         },
       );
       return _safeDecodeMap(response.body);
@@ -376,7 +390,6 @@ class ApiService {
   // ==========================================
   static Future<List<dynamic>> getProduk() async {
     try {
-      // PERHATIKAN: Arahkan ke api_menu.php milik abang
       var response = await http.get(Uri.parse("$baseUrl/api_menu.php"));
       return _safeDecodeList(response.body);
     } catch (e) {
@@ -397,32 +410,14 @@ class ApiService {
         body: {
           "nama_pemesan": dataPesanan['nama_pemesan'].toString(),
           "no_telp": dataPesanan['no_telp'].toString(),
-          "keranjang": dataPesanan['keranjang']
-              .toString(), // ✅ WAJIB DIUBAH KE "keranjang"
+          "keranjang": dataPesanan['keranjang'].toString(),
           "total_harga": dataPesanan['total_harga'].toString(),
           "status_pesanan": dataPesanan['status_pesanan'].toString(),
         },
       );
-
       return _safeDecodeMap(response.body);
     } catch (e) {
       return {"status": "error", "pesan": "Koneksi API gagal: $e"};
     }
   }
-
-// ==========================================
-// 4B. HAPUS PESANAN (UNTUK CETAK LAPORAN)
-// ==========================================
-static Future<Map<String, dynamic>> deletePesanan(String idPesanan) async {
-  try {
-    var response = await http.post(
-      Uri.parse("$baseUrl/hapus_pesanan.php"),
-      body: {"id": idPesanan},
-    );
-    return _safeDecodeMap(response.body);
-  } catch (e) {
-    return {"status": "error", "pesan": "Koneksi gagal: $e"};
-  }
-}
-
 }
