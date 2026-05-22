@@ -319,9 +319,6 @@ class ApiService {
   // ==========================================
   // 6. UPDATE STATUS PESANAN (UNTUK ADMIN)
   // ==========================================
-  // ==========================================
-  // 6. UPDATE STATUS PESANAN (UNTUK ADMIN)
-  // ==========================================
   static Future<Map<String, dynamic>> updateStatusPesanan(
     String idPesanan,
     String statusBaru,
@@ -412,4 +409,20 @@ class ApiService {
       return {"status": "error", "pesan": "Koneksi API gagal: $e"};
     }
   }
+
+// ==========================================
+// 4B. HAPUS PESANAN (UNTUK CETAK LAPORAN)
+// ==========================================
+static Future<Map<String, dynamic>> deletePesanan(String idPesanan) async {
+  try {
+    var response = await http.post(
+      Uri.parse("$baseUrl/hapus_pesanan.php"),
+      body: {"id": idPesanan},
+    );
+    return _safeDecodeMap(response.body);
+  } catch (e) {
+    return {"status": "error", "pesan": "Koneksi gagal: $e"};
+  }
+}
+
 }

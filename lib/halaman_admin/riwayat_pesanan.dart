@@ -41,7 +41,12 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
         _listPesanan = data.where((item) {
           String status = item['status_pesanan'] ?? '';
           return status == 'SELESAI' || status == 'DIBATALKAN';
-        }).toList();
+        }).toList()
+          ..sort((a, b) {
+            String tanggalA = a['tanggal_pesan'] ?? '';
+            String tanggalB = b['tanggal_pesan'] ?? '';
+            return tanggalB.compareTo(tanggalA);
+          });
         _isLoading = false;
       });
     } catch (e) {
@@ -85,9 +90,26 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      Text(
+                        'PuddingKu',
+                        style: TextStyle(
+                          fontFamily: 'Signika Negative',
+                          color: AppColors.primary,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                       SizedBox(height: 2),
-                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text(
+                        'Panel Admin UMKM',
+                        style: TextStyle(
+                          fontFamily: 'Signika Negative',
+                          color: AppColors.textBrown,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                   GestureDetector(
@@ -244,9 +266,22 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   // ==========================================
   Widget _buildOrderCard(Map<String, dynamic> item) {
     String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
-    String ringkasan = item['ringkasan_pesanan'] ?? 'Detail Kosong';
+    String ringkasanLengkap = item['ringkasan_pesanan'] ?? 'Detail Kosong';
     String harga = 'Rp ${item['total_harga'] ?? 0}';
     String status = item['status_pesanan'] ?? 'PROSES';
+
+    // Pisahkan ringkasan menjadi list per barang
+    List<String> daftarItem = ringkasanLengkap
+        .split(', ')
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    bool isExpanded = item['_isExpanded'] ?? false;
+
+    // Tampilkan 2 item pertama jika belum di-expand
+    List<String> tampilItem = isExpanded
+        ? daftarItem
+        : daftarItem.take(2).toList();
 
     String waktuLengkap = item['tanggal_pesan'] ?? '';
 
@@ -295,6 +330,8 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
+                // Tanggal
                 Text(
                   tanggal,
                   style: const TextStyle(
@@ -303,6 +340,8 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   ),
                 ),
                 const SizedBox(height: 4),
+
+                // Nama pemesan & status
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -341,15 +380,76 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  ringkasan,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textBrown,
-                    fontWeight: FontWeight.w600,
+
+                // ==========================================
+                // DAFTAR BARANG PER BARIS (EXPANDABLE)
+                // ==========================================
+                ...tampilItem.map((barang) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Icon(
+                          Icons.circle,
+                          size: 5,
+                          color: AppColors.textBrown,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          barang,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textBrown,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 10),
+                )),
+
+                // Tombol expand/collapse jika barang > 2
+                if (daftarItem.length > 2)
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        item['_isExpanded'] = !isExpanded;
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 2, bottom: 4),
+                      child: Row(
+                        children: [
+                          Text(
+                            isExpanded
+                                ? 'Sembunyikan'
+                                : '+${daftarItem.length - 2} barang lainnya',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          Icon(
+                            isExpanded
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 6),
+
+                // Garis putus-putus
                 Row(
                   children: List.generate(
                     100,
@@ -364,6 +464,8 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   ),
                 ),
                 const SizedBox(height: 10),
+
+                // Jam & total harga
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

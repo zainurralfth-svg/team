@@ -3,11 +3,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../Core/Colour.dart';
-
-// ─── MODEL (copy dari halaman_laporan.dart, atau bisa di-import jika sudah ada) ─
-// Jika TransaksiDetail & LaporanBulan sudah ada di halaman_laporan.dart,
-// hapus bagian ini dan ganti dengan import ke file tersebut.
-// Contoh: import 'halaman_laporan.dart' show TransaksiDetail, LaporanBulan, formatRupiah;
+import '../Backend/api_service.dart';
+import 'halaman_laporan.dart';
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
 String formatRupiahCetak(int value) {
@@ -29,7 +26,6 @@ class CetakLaporanButton extends StatelessWidget {
   final int totalPendapatan;
   final int rataPerHari;
   final List<Map<String, dynamic>> details;
-  // detail item: {'tanggal': String, 'jumlah': int, 'pendapatan': int}
 
   const CetakLaporanButton({
     super.key,
@@ -40,6 +36,48 @@ class CetakLaporanButton extends StatelessWidget {
     required this.details,
   });
 
+  // ─── Fetch lalu hapus semua pesanan SELESAI bulan ini ────────────────────────
+  Future<void> _hapusPesananBulan() async {
+    const namaBulan = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    ];
+
+    final rawPesanan = await ApiService.getPesanan();
+
+    for (final item in rawPesanan) {
+      final String status = (
+        item['status_pesanan'] ?? item['status'] ?? ''
+      ).toString().toLowerCase().trim();
+
+      if (status != 'selesai') continue;
+
+      final String? rawTanggal =
+          item['tanggal_pesanan'] ?? item['created_at'] ?? item['tanggal'];
+      if (rawTanggal == null || rawTanggal.isEmpty) continue;
+
+      DateTime tgl;
+      try {
+        tgl = DateTime.parse(rawTanggal.split(' ')[0]);
+      } catch (_) {
+        continue;
+      }
+
+      final String kunciBulan = '${namaBulan[tgl.month]} ${tgl.year}';
+      if (kunciBulan != bulan) continue;
+
+      final dynamic id = item['id'] ?? item['id_pesanan'];
+      if (id == null) continue;
+
+      try {
+        await ApiService.deletePesanan(id.toString());
+      } catch (_) {
+        // lanjut ke pesanan berikutnya meski satu gagal
+      }
+    }
+  }
+
+  // ─── Build PDF ───────────────────────────────────────────────────────────────
   Future<pw.Document> _buildPdf() async {
     final doc = pw.Document();
 
@@ -273,13 +311,67 @@ class CetakLaporanButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
+        // ── Konfirmasi sebelum cetak & hapus ──────────────────────
+        final konfirmasi = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            title: const Text(
+              'Cetak & Hapus Laporan?',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              'Laporan $bulan akan dicetak lalu semua pesanan bulan ini '
+              'akan dihapus dari sistem. Lanjutkan?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Batal'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Ya, Cetak',
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
+
+        if (konfirmasi != true) return;
+
         try {
+          // 1. Buat & tampilkan PDF
           final doc = await _buildPdf();
           final bytes = await doc.save();
           await Printing.layoutPdf(
             onLayout: (_) async => bytes,
             name: 'Laporan_${bulan.replaceAll(' ', '_')}.pdf',
           );
+
+          // 2. Hapus pesanan bulan ini dari API
+          await _hapusPesananBulan();
+
+          // 3. Push-replace ke HalamanLaporan baru → initState ulang & fetch data baru
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Laporan $bulan berhasil dicetak & dihapus.'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const HalamanLaporan()),
+            );
+          }
         } catch (e) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
