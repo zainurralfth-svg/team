@@ -7,6 +7,7 @@ import 'halaman_profil_admin.dart';
 import 'halaman_produk.dart';
 import 'halaman_laporan.dart';
 import '../Widget/custom_admin_navbar.dart';
+import 'cetak_laporan.dart' show getBulanDownloaded;
 
 class HalamanRiwayat extends StatefulWidget {
   const HalamanRiwayat({super.key});
@@ -24,11 +25,24 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
 
   // ✅ FIX: Pakai Set untuk tracking index yang di-expand, bukan item['_isExpanded']
   final Set<int> _expandedIndexes = {};
+  Map<String, DateTime> _downloadedBulan = {};
 
   @override
   void initState() {
     super.initState();
     _fetchDataPesanan();
+    _loadDownloadedBulan();
+  }
+
+  Future<void> _loadDownloadedBulan() async {
+    final map = await getBulanDownloaded();
+    setState(() => _downloadedBulan = map);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadDownloadedBulan();
   }
 
   @override
@@ -38,6 +52,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   }
 
   Future<void> _fetchDataPesanan() async {
+    await _loadDownloadedBulan();
     try {
       final data = await ApiService.getPesanan();
       setState(() {
@@ -59,9 +74,29 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     }
   }
 
+  bool _isBulanDownloaded(dynamic item) {
+    const namaBulan = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    ];
+    final String? rawTanggal = item['tanggal_pesan'] ?? item['tanggal_pesanan'] ?? item['created_at'];
+    if (rawTanggal == null || rawTanggal.isEmpty) return false;
+    try {
+      final tglPesanan = DateTime.parse(rawTanggal.split(' ')[0]);
+      final kunciBulan = '${namaBulan[tglPesanan.month]} ${tglPesanan.year}';
+      final waktuDownload = _downloadedBulan[kunciBulan];
+      if (waktuDownload == null) return false;
+      // Hanya sembunyikan pesanan yang selesai SEBELUM waktu download
+      return tglPesanan.isBefore(waktuDownload);
+    } catch (_) {
+      return false;
+    }
+  }
+
   List<dynamic> get _filteredList {
-    if (_searchQuery.isEmpty) return _listPesanan;
-    return _listPesanan.where((item) {
+    final baseList = _listPesanan.where((item) => !_isBulanDownloaded(item)).toList();
+    if (_searchQuery.isEmpty) return baseList;
+    return baseList.where((item) {
       final nama = (item['nama_pemesan'] ?? '').toLowerCase();
       final ringkasan = (item['ringkasan_pesanan'] ?? '').toLowerCase();
       final status = (item['status_pesanan'] ?? '').toLowerCase();

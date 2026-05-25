@@ -2,9 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Core/Colour.dart';
 import '../Backend/api_service.dart';
 import 'halaman_laporan.dart';
+
+// ─── SHARED PREFS ─────────────────────────────────────────────────────────────
+const String kDownloadedBulanKey = 'downloaded_bulan';
+
+Future<void> simpanBulanDownloaded(String bulan) async {
+  final prefs = await SharedPreferences.getInstance();
+  final existing = prefs.getStringList(kDownloadedBulanKey) ?? [];
+  final waktuDownload = DateTime.now().toIso8601String();
+  final entry = '$bulan|$waktuDownload';
+  // Hapus entry lama untuk bulan ini kalau ada, ganti dengan yang baru
+  existing.removeWhere((e) => e.startsWith('$bulan|'));
+  existing.add(entry);
+  await prefs.setStringList(kDownloadedBulanKey, existing);
+}
+
+/// Kembalikan Map: { "Mei 2026": DateTime(waktu_download) }
+Future<Map<String, DateTime>> getBulanDownloaded() async {
+  final prefs = await SharedPreferences.getInstance();
+  final list = prefs.getStringList(kDownloadedBulanKey) ?? [];
+  final Map<String, DateTime> result = {};
+  for (final entry in list) {
+    final parts = entry.split('|');
+    if (parts.length == 2) {
+      try {
+        result[parts[0]] = DateTime.parse(parts[1]);
+      } catch (_) {}
+    }
+  }
+  return result;
+}
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
 String formatRupiahCetak(int value) {
@@ -311,62 +342,16 @@ class CetakLaporanButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        // ── Konfirmasi sebelum cetak & hapus ──────────────────────
-        final konfirmasi = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
-            title: const Text(
-              'Cetak & Hapus Laporan?',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            content: Text(
-              'Laporan $bulan akan dicetak lalu semua pesanan bulan ini '
-              'akan dihapus dari sistem. Lanjutkan?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Batal'),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Ya, Cetak',
-                    style: TextStyle(color: Colors.white)),
-              ),
-            ],
-          ),
-        );
-
-        if (konfirmasi != true) return;
-
         try {
-          // 1. Buat & tampilkan PDF
           final doc = await _buildPdf();
           final bytes = await doc.save();
-          await Printing.layoutPdf(
-            onLayout: (_) async => bytes,
-            name: 'Laporan_${bulan.replaceAll(' ', '_')}.pdf',
+          await Printing.sharePdf(
+            bytes: bytes,
+            filename: 'Laporan_${bulan.replaceAll(" ", "_")}.pdf',
           );
-
-          // 2. Hapus pesanan bulan ini dari API
+          await simpanBulanDownloaded(bulan);
           await _hapusPesananBulan();
-
-          // 3. Push-replace ke HalamanLaporan baru → initState ulang & fetch data baru
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Laporan $bulan berhasil dicetak & dihapus.'),
-                backgroundColor: AppColors.success,
-              ),
-            );
-
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (_) => const HalamanLaporan()),
@@ -376,7 +361,7 @@ class CetakLaporanButton extends StatelessWidget {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Gagal membuat PDF: $e'),
+                content: Text('Gagal mengunduh PDF: $e'),
                 backgroundColor: Colors.red,
               ),
             );
@@ -398,7 +383,7 @@ class CetakLaporanButton extends StatelessWidget {
           ],
         ),
         child: const Center(
-          child: Icon(Icons.print_rounded, color: Colors.white, size: 18),
+          child: Icon(Icons.download_rounded, color: Colors.white, size: 18),
         ),
       ),
     );
