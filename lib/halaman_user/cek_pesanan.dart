@@ -5,8 +5,6 @@ import '../Core/Colour.dart';
 import '../Backend/api_service.dart'; 
 import 'profil_pengguna.dart';
 import '../Widget/custom_user_navbar.dart'; 
-
-// IMPORT COMPONENT CUSTOM TEXT KITA BRO!
 import '../Widget/custom_text.dart'; 
 
 class CekPesananPage extends StatefulWidget {
@@ -29,22 +27,28 @@ class _CekPesananPageState extends State<CekPesananPage> {
     _fetchPesananUser();
   }
 
-  // Format Rupiah Helper
   String formatRupiah(dynamic angka) {
     if (angka == null) return "Rp 0";
     int value = int.tryParse(angka.toString()) ?? 0;
     return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
   }
 
-  // =========================================================
-  // MESIN WAKTU: Bikin tanggal jadi "5 menit lalu", dll
-  // =========================================================
   String _formatWaktu(Map<String, dynamic> item) {
-    String? rawTime = item['tanggal_pesanan'] ?? item['created_at'] ?? item['tanggal'] ?? item['waktu'];
+    String status = (item['status_pesanan'] ?? '').toString().toUpperCase();
+    String? rawTime;
+
+    if (status == 'SELESAI' || status == 'DIBATALKAN') {
+      rawTime = item['updated_at'] ?? item['tanggal_pesanan'] ?? item['created_at'];
+    } else {
+      rawTime = item['tanggal_pesanan'] ?? item['created_at'] ?? item['waktu'];
+    }
+
     if (rawTime == null || rawTime.isEmpty) return 'Baru saja';
+
     try {
       DateTime orderTime = DateTime.parse(rawTime);
       Duration diff = DateTime.now().difference(orderTime);
+
       if (diff.inMinutes < 1) return 'Baru saja';
       if (diff.inMinutes < 60) return '${diff.inMinutes} mnt lalu';
       if (diff.inHours < 24) return '${diff.inHours} jam lalu';
@@ -54,7 +58,6 @@ class _CekPesananPageState extends State<CekPesananPage> {
     }
   }
 
-  // Tarik data pesanan KHUSUS akun ini aja
   Future<void> _fetchPesananUser() async {
     setState(() => _isLoading = true);
     try {
@@ -67,14 +70,11 @@ class _CekPesananPageState extends State<CekPesananPage> {
       }
 
       final semuaPesanan = await ApiService.getPesanan();
-
-      // 1. Filter cuma pesanan milik user ini
       final pesananSaya = semuaPesanan.where((p) => p['id_user'].toString() == _currentUserId).toList();
 
       List<dynamic> aktif = [];
       List<dynamic> riwayat = [];
 
-      // 2. Pisahkan ke Aktif dan Riwayat
       for (var p in pesananSaya) {
         String status = p['status_pesanan']?.toString().toUpperCase() ?? 'MENUNGGU';
         if (status == 'SELESAI' || status == 'DIBATALKAN') {
@@ -92,13 +92,14 @@ class _CekPesananPageState extends State<CekPesananPage> {
 
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: CustomText('Gagal memuat pesanan: $e'), backgroundColor: AppColors.error),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: CustomText('Gagal memuat pesanan: $e', color: Colors.white), backgroundColor: AppColors.error),
+        );
+      }
     }
   }
 
-  // Fungsi Batalkan Pesanan oleh User
   Future<void> _batalkanPesanan(String idPesanan) async {
     showDialog(
       context: context,
@@ -113,19 +114,22 @@ class _CekPesananPageState extends State<CekPesananPage> {
               Navigator.pop(ctx);
               setState(() => _isLoading = true);
               
-              // Tembak API update status jadi DIBATALKAN
               final response = await ApiService.updateStatusPesanan(idPesanan, 'DIBATALKAN');
               
               if (response['status'] == 'sukses') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: CustomText('Pesanan berhasil dibatalkan.'), backgroundColor: AppColors.success),
-                );
-                _fetchPesananUser(); // Refresh data
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: CustomText('Pesanan berhasil dibatalkan.', color: Colors.white), backgroundColor: AppColors.success),
+                  );
+                }
+                _fetchPesananUser();
               } else {
                 setState(() => _isLoading = false);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: CustomText('Gagal: ${response['pesan']}'), backgroundColor: AppColors.error),
-                );
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: CustomText('Gagal: ${response['pesan']}', color: Colors.white), backgroundColor: AppColors.error),
+                  );
+                }
               }
             },
             child: const CustomText('Ya, Batalkan', color: Colors.white),
@@ -138,7 +142,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2, // 2 Tab: Aktif & Riwayat
+      length: 2, 
       child: Scaffold(
         backgroundColor: AppColors.bgUtama,
         appBar: AppBar(
@@ -147,19 +151,14 @@ class _CekPesananPageState extends State<CekPesananPage> {
           elevation: 0,
           toolbarHeight: 70,
           iconTheme: const IconThemeData(color: AppColors.textWhite),
-          title: const CustomText(
-            'Pesanan Saya',
-            color: AppColors.textWhite, 
-            fontSize: 24, 
-            fontWeight: FontWeight.bold,
-          ),
+          title: const CustomText('Pesanan Saya', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold),
           centerTitle: true,
           bottom: const TabBar(
             indicatorColor: AppColors.accent,
             indicatorWeight: 4,
             labelColor: AppColors.textWhite,
             unselectedLabelColor: Colors.white54,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16), // Hapus fontFamily biar ikut global/theme
+            labelStyle: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 16),
             tabs: [
               Tab(text: 'Saat Ini'),
               Tab(text: 'Pesanan Selesai'),
@@ -170,17 +169,10 @@ class _CekPesananPageState extends State<CekPesananPage> {
             ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
             : TabBarView(
                 children: [
-                  // TAB 1: PESANAN AKTIF
                   _buildListPesanan(_pesananAktif, isRiwayat: false),
-                  
-                  // TAB 2: RIWAYAT PESANAN
                   _buildListPesanan(_pesananRiwayat, isRiwayat: true),
                 ],
               ),
-
-        // ==============================================================
-        // FOOTER SUDAH PAKAI CUSTOM NAVBAR
-        // ==============================================================
         bottomNavigationBar: CustomUserNavbar(
           currentIndex: 0,
           onTap: (index) {
@@ -197,7 +189,6 @@ class _CekPesananPageState extends State<CekPesananPage> {
     );
   }
 
-  // WIDGET BUILDER UNTUK LIST
   Widget _buildListPesanan(List<dynamic> listData, {required bool isRiwayat}) {
     if (listData.isEmpty) {
       return Center(
@@ -208,9 +199,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
             const SizedBox(height: 10),
             CustomText(
               isRiwayat ? 'Belum ada riwayat pesanan.' : 'Belum ada pesanan aktif nih.',
-              color: AppColors.textHint, 
-              fontSize: 16, 
-              fontWeight: FontWeight.bold,
+              color: AppColors.textHint, fontSize: 16, fontWeight: FontWeight.bold,
             ),
           ],
         ),
@@ -231,27 +220,27 @@ class _CekPesananPageState extends State<CekPesananPage> {
     );
   }
 
-  // WIDGET KARTU PESANAN
   Widget _buildOrderCard(Map<String, dynamic> dataPesanan, bool isRiwayat) {
-    String idPesanan = dataPesanan['id_pesanan']?.toString() ?? '-';
+    // TANGGUNG JAWAB FIX: TAMPILIN KODE RESI ASLI DARI DATABASE
+    String idTampil = dataPesanan['kode_resi']?.toString() ?? '-';
+    // Tetap simpan ID asli buat API
+    String idDatabase = dataPesanan['id_pesanan']?.toString() ?? '';
     
-    // Perbaikan biar nggak kosong melompong
     String statusRaw = dataPesanan['status_pesanan']?.toString().toUpperCase() ?? '';
     String status = statusRaw.isEmpty ? 'MENUNGGU' : statusRaw; 
     
     String totalHarga = formatRupiah(dataPesanan['total_harga']);
-    String waktuTampil = _formatWaktu(dataPesanan); // <-- Panggil mesin waktu di sini!
+    String waktuTampil = _formatWaktu(dataPesanan); 
     
     List<String> listProduk = [];
     if (dataPesanan['ringkasan_pesanan'] != null) {
       listProduk = dataPesanan['ringkasan_pesanan'].toString().split(RegExp(r',\s*'));
     }
 
-    // Tentukan warna status
-    Color warnaStatus = AppColors.primary; // Orange untuk MENUNGGU
-    if (status == 'PROSES') warnaStatus = AppColors.info; // Biru
-    if (status == 'SELESAI') warnaStatus = AppColors.success; // Hijau
-    if (status == 'DIBATALKAN') warnaStatus = AppColors.error; // Merah
+    Color warnaStatus = AppColors.primary;
+    if (status == 'PROSES') warnaStatus = AppColors.info;
+    if (status == 'SELESAI') warnaStatus = AppColors.success;
+    if (status == 'DIBATALKAN') warnaStatus = AppColors.error;
 
     return Container(
       width: double.infinity,
@@ -265,17 +254,15 @@ class _CekPesananPageState extends State<CekPesananPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Kartu: ID & Tanggal/Waktu
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              CustomText('#$idPesanan', color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
-              CustomText(waktuTampil, color: AppColors.textHint, fontSize: 12, fontWeight: FontWeight.bold), // Tampil waktu pintar
+              CustomText(idTampil, color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
+              CustomText(waktuTampil, color: AppColors.textHint, fontSize: 12, fontWeight: FontWeight.bold),
             ],
           ),
           const Divider(color: AppColors.bgInput, thickness: 1, height: 25),
           
-          // List Item
           ...listProduk.map((produk) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
@@ -294,7 +281,6 @@ class _CekPesananPageState extends State<CekPesananPage> {
           
           const Divider(color: AppColors.bgInput, height: 20),
 
-          // Footer Kartu: Total Harga & Status
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -325,7 +311,6 @@ class _CekPesananPageState extends State<CekPesananPage> {
             ],
           ),
 
-          // LOGIKA TOMBOL BATAL (ALA SHOPEE)
           if (!isRiwayat && status == 'MENUNGGU') ...[
             const SizedBox(height: 15),
             SizedBox(
@@ -335,7 +320,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
                   side: const BorderSide(color: AppColors.error),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                onPressed: () => _batalkanPesanan(idPesanan),
+                onPressed: () => _batalkanPesanan(idDatabase),
                 child: const CustomText('Batalkan Pesanan', color: AppColors.error, fontWeight: FontWeight.bold),
               ),
             ),

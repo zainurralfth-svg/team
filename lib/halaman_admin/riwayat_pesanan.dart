@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart';
 import 'halaman_pengguna.dart';
@@ -8,6 +9,7 @@ import 'halaman_produk.dart';
 import 'halaman_laporan.dart';
 import '../Widget/custom_admin_navbar.dart';
 import 'cetak_laporan.dart' show getBulanDownloaded;
+import '../Widget/custom_text.dart'; 
 
 class HalamanRiwayat extends StatefulWidget {
   const HalamanRiwayat({super.key});
@@ -23,7 +25,6 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // ✅ FIX: Pakai Set untuk tracking index yang di-expand, bukan item['_isExpanded']
   final Set<int> _expandedIndexes = {};
   Map<String, DateTime> _downloadedBulan = {};
 
@@ -61,12 +62,15 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
           return status == 'SELESAI' || status == 'DIBATALKAN';
         }).toList()
           ..sort((a, b) {
-            String tanggalA = a['tanggal_pesan'] ?? '';
-            String tanggalB = b['tanggal_pesan'] ?? '';
-            return tanggalB.compareTo(tanggalA);
+            // FIX SORTING: Prioritaskan updated_at, kalau kosong baru pakai tanggal_pesan
+            String waktuA = a['updated_at'] ?? a['tanggal_pesan'] ?? '';
+            String waktuB = b['updated_at'] ?? b['tanggal_pesan'] ?? '';
+            
+            // Urutkan dari yang terbaru (Descending)
+            return waktuB.compareTo(waktuA);
           });
         _isLoading = false;
-        _expandedIndexes.clear(); // Reset expand saat refresh
+        _expandedIndexes.clear();
       });
     } catch (e) {
       setState(() => _isLoading = false);
@@ -86,7 +90,6 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
       final kunciBulan = '${namaBulan[tglPesanan.month]} ${tglPesanan.year}';
       final waktuDownload = _downloadedBulan[kunciBulan];
       if (waktuDownload == null) return false;
-      // Hanya sembunyikan pesanan yang selesai SEBELUM waktu download
       return tglPesanan.isBefore(waktuDownload);
     } catch (_) {
       return false;
@@ -106,6 +109,37 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     }).toList();
   }
 
+  String formatRupiah(dynamic angka) {
+    if (angka == null) return "Rp 0";
+    int value = int.tryParse(angka.toString()) ?? 0;
+    return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
+  }
+
+  String _formatWaktu(Map<String, dynamic> item) {
+    String status = (item['status_pesanan'] ?? '').toString().toUpperCase();
+    String? rawTime;
+
+    if (status == 'SELESAI' || status == 'DIBATALKAN') {
+      rawTime = item['updated_at'] ?? item['tanggal_pesanan'] ?? item['tanggal_pesan'] ?? item['created_at'];
+    } else {
+      rawTime = item['tanggal_pesanan'] ?? item['tanggal_pesan'] ?? item['created_at'] ?? item['waktu'];
+    }
+
+    if (rawTime == null || rawTime.isEmpty) return 'Baru saja';
+
+    try {
+      DateTime orderTime = DateTime.parse(rawTime);
+      Duration diff = DateTime.now().difference(orderTime);
+
+      if (diff.inMinutes < 1) return 'Baru saja';
+      if (diff.inMinutes < 60) return '${diff.inMinutes} mnt lalu';
+      if (diff.inHours < 24) return '${diff.inHours} jam lalu';
+      return '${diff.inDays} hari lalu';
+    } catch (e) {
+      return rawTime.length > 15 ? rawTime.substring(0, 15) : rawTime;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,8 +148,6 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            // 1. HEADER
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
               child: Row(
@@ -125,9 +157,9 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PuddingKu', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      CustomText('PuddingKu', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5, isOleo: true),
                       SizedBox(height: 2),
-                      Text('Panel Admin UMKM', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600)),
+                      CustomText('Panel Admin UMKM', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600),
                     ],
                   ),
                   GestureDetector(
@@ -147,8 +179,6 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                 ],
               ),
             ),
-
-            // 2. SEARCH BAR
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Container(
@@ -160,6 +190,8 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                 ),
                 child: Row(
                   children: [
+                    const Icon(Icons.search, color: AppColors.primary),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: TextField(
                         controller: _searchController,
@@ -171,49 +203,42 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                         },
                         decoration: const InputDecoration(
                           hintText: 'Search...',
-                          hintStyle: TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
                           border: InputBorder.none,
                         ),
-                        style: const TextStyle(color: AppColors.primary, fontSize: 16),
+                        style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 16),
                       ),
                     ),
-                    _searchQuery.isNotEmpty
-                        ? GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _searchController.clear();
-                                _searchQuery = '';
-                                _expandedIndexes.clear();
-                              });
-                            },
-                            child: const Icon(Icons.close, color: AppColors.primary),
-                          )
-                        : const Icon(Icons.search, color: AppColors.primary),
+                    if (_searchQuery.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                              _expandedIndexes.clear();
+                            });
+                          },
+                          child: const Icon(Icons.close, color: AppColors.primary),
+                        ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 10),
-
-            // 3. LABEL
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: const Text('Riwayat Pesanan',
-                  style: TextStyle(color: AppColors.primaryDark, fontSize: 20, fontWeight: FontWeight.bold)),
+              child: const CustomText('Riwayat Pesanan', color: AppColors.primaryDark, fontSize: 20, fontWeight: FontWeight.bold),
             ),
-
-            // 4. DAFTAR
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                   : _filteredList.isEmpty
                       ? Center(
-                          child: Text(
+                          child: CustomText(
                             _searchQuery.isNotEmpty
                                 ? 'Tidak ada hasil untuk "$_searchQuery"'
                                 : 'Belum ada riwayat pesanan',
-                            style: const TextStyle(color: AppColors.textHint, fontWeight: FontWeight.bold),
+                            color: AppColors.textHint, fontWeight: FontWeight.bold,
                           ),
                         )
                       : RefreshIndicator(
@@ -243,35 +268,21 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     );
   }
 
-  // ==========================================
-  // FUNGSI BUILD ORDER CARD
-  // ==========================================
   Widget _buildOrderCard(Map<String, dynamic> item, int index) {
+    // TANGGUNG JAWAB FIX: TAMPILIN KODE RESI ASLI DARI DATABASE
+    String idTampil = item['kode_resi']?.toString() ?? '-';
+
     String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
     String ringkasanLengkap = item['ringkasan_pesanan'] ?? 'Detail Kosong';
-    String harga = 'Rp ${item['total_harga'] ?? 0}';
+    String harga = formatRupiah(item['total_harga']);
     String status = item['status_pesanan'] ?? 'PROSES';
 
     List<String> daftarItem = ringkasanLengkap.split(', ').where((e) => e.isNotEmpty).toList();
 
-    // ✅ FIX: Pakai _expandedIndexes, bukan item['_isExpanded']
     bool isExpanded = _expandedIndexes.contains(index);
     List<String> tampilItem = isExpanded ? daftarItem : daftarItem.take(2).toList();
 
-    String waktuLengkap = item['tanggal_pesan'] ?? '';
-    String tanggal = '';
-    String jam = '';
-
-    if (waktuLengkap.length >= 10) {
-      List<String> bagian = waktuLengkap.substring(0, 10).split('-');
-      if (bagian.length == 3) {
-        List<String> namaBulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        int bulanIndex = int.tryParse(bagian[1]) ?? 0;
-        tanggal = '${bagian[2]} ${namaBulan[bulanIndex]} ${bagian[0]}';
-      }
-    }
-    if (waktuLengkap.length > 11) jam = waktuLengkap.substring(11, 16);
+    String waktuTampil = _formatWaktu(item);
 
     Color statusColor = status == 'SELESAI'
         ? AppColors.success
@@ -293,48 +304,45 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
-                // Tanggal
-                Text(tanggal, style: const TextStyle(fontSize: 11, color: AppColors.textHint)),
-                const SizedBox(height: 4),
-
-                // Nama & Status
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(namaPemesan, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark)),
+                    CustomText(idTampil, color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold),
+                    CustomText(waktuTampil, fontSize: 11, color: AppColors.textHint, fontWeight: FontWeight.bold),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CustomText(namaPemesan, fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(10)),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         Icon(Icons.circle, color: statusColor, size: 10),
                         const SizedBox(width: 4),
-                        Text(status == 'SELESAI' ? 'Selesai' : 'Dibatalkan',
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                        CustomText(status == 'SELESAI' ? 'Selesai' : 'Dibatalkan',
+                            fontSize: 10, fontWeight: FontWeight.bold),
                       ]),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-
-                // Daftar barang
                 ...tampilItem.map((barang) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     const Padding(padding: EdgeInsets.only(top: 4),
                         child: Icon(Icons.circle, size: 5, color: AppColors.textBrown)),
                     const SizedBox(width: 6),
-                    Expanded(child: Text(barang,
-                        style: const TextStyle(fontSize: 12, color: AppColors.textBrown, fontWeight: FontWeight.w600))),
+                    Expanded(child: CustomText(barang,
+                        fontSize: 12, color: AppColors.textBrown, fontWeight: FontWeight.w600)),
                   ]),
                 )),
-
-                // Tombol expand
                 if (daftarItem.length > 2)
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        // ✅ FIX: Toggle index di Set, bukan ubah Map item
                         if (isExpanded) {
                           _expandedIndexes.remove(index);
                         } else {
@@ -345,32 +353,22 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 2, bottom: 4),
                       child: Row(children: [
-                        Text(
+                        CustomText(
                           isExpanded ? 'Sembunyikan' : '+${daftarItem.length - 2} barang lainnya',
-                          style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600),
+                          fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600,
                         ),
                         const SizedBox(width: 2),
                         Icon(isExpanded ? Icons.expand_less : Icons.expand_more, size: 14, color: AppColors.primary),
                       ]),
                     ),
                   ),
-
                 const SizedBox(height: 6),
-
-                // Garis putus-putus
                 _buildDashedLine(),
                 const SizedBox(height: 10),
-
-                // Jam & Harga
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Row(children: [
-                      const Icon(Icons.access_time, size: 14, color: AppColors.textHint),
-                      const SizedBox(width: 4),
-                      Text(jam, style: const TextStyle(fontSize: 11, color: AppColors.textHint)),
-                    ]),
-                    Text(harga, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                    CustomText(harga, fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
                   ],
                 ),
               ],
@@ -381,7 +379,6 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     );
   }
 
-  // ✅ Method class, bukan di dalam Column
   Widget _buildDashedLine() {
     return Row(
       children: List.generate(100, (i) => Expanded(

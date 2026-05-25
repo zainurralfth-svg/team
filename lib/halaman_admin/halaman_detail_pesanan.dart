@@ -1,18 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../Widget/custom_text.dart';
 import '../Core/Colour.dart';
 
 class HalamanDetailPesanan extends StatelessWidget {
   final Map<String, dynamic> dataPesanan;
 
-  // Menerima lemparan data lengkap dari halaman beranda admin
   const HalamanDetailPesanan({super.key, required this.dataPesanan});
+
+  String formatRupiah(dynamic angka) {
+    if (angka == null) return "Rp 0";
+    int value = int.tryParse(angka.toString()) ?? 0;
+    return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
+  }
 
   @override
   Widget build(BuildContext context) {
+    String idTampil = dataPesanan['kode_resi']?.toString() ?? '-';
     
+    // Logika Status: Kalau null/kosong, ganti jadi BUTUH KONFIRMASI
+    String statusRaw = dataPesanan['status_pesanan']?.toString().toUpperCase() ?? '';
+    if (statusRaw.isEmpty) statusRaw = 'BUTUH KONFIRMASI';
 
-    // Contoh pemisahan string jika pesanan banyak dipisah koma (misal: "Pudding Taro x1, Dessert Box x2")
+    String totalHarga = formatRupiah(dataPesanan['total_harga']);
+
+    // Logika Pisah Tanggal & Jam
+    String fullWaktu = dataPesanan['created_at']?.toString() ?? '';
+    String tglOrder = fullWaktu.isNotEmpty && fullWaktu.contains(' ') ? fullWaktu.split(' ')[0] : fullWaktu;
+    String jamOrder = fullWaktu.isNotEmpty && fullWaktu.contains(' ') ? fullWaktu.split(' ')[1] : '-';
+
     List<String> listProduk = [];
     if (dataPesanan['ringkasan_pesanan'] != null) {
       listProduk = dataPesanan['ringkasan_pesanan'].toString().split(', ');
@@ -24,54 +40,49 @@ class HalamanDetailPesanan extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── TOMBOL KEMBALI SIMPEL ──
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary, size: 28),
-                onPressed: () => Navigator.pop(context), // Balik ke Home Admin
+                onPressed: () => Navigator.pop(context),
               ),
             ),
-
-            // ── KONTEN UTAMA DETAIL ──
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomText('Rincian Pesanan Lengkap',
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary),
+                    const CustomText('Rincian Pesanan', fontSize: 26, fontWeight: FontWeight.bold, color: AppColors.primary),
                     const SizedBox(height: 5),
-                    Text(
-                      'ID Pesanan: #${dataPesanan['id_pesanan'] ?? '-'}',
-                      style: const TextStyle(fontSize: 14, color: AppColors.textHint, fontWeight: FontWeight.bold),
-                    ),
+                    CustomText('ID Pesanan: $idTampil', fontSize: 14, color: AppColors.textHint, fontWeight: FontWeight.bold),
                     const SizedBox(height: 20),
 
-                    // ── KARTU INFORMASI PELANGGAN ──
                     _buildSectionTitle('Data Pemesan'),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                      decoration: BoxDecoration(color: AppColors.textWhite, borderRadius: BorderRadius.circular(16)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildDetailRow('Nama Pelanggan', dataPesanan['nama_pemesan'] ?? 'Tidak diketahui'),
-                          const Divider(height: 20),
-                        _buildDetailRow('Waktu Order', dataPesanan['created_at'] ?? 'Waktu tidak diketahui'),
-                          const Divider(height: 20),
-                          _buildDetailRow('Status Saat Ini', dataPesanan['status_pesanan'] ?? 'PROSES', isStatus: true),
+                          const Divider(height: 20, color: AppColors.bgInput),
+                          // Tanggal dan Jam dipisah biar rapi
+                          Row(
+                            children: [
+                              Expanded(child: _buildDetailRow('Tanggal Order', tglOrder)),
+                              Expanded(child: _buildDetailRow('Waktu Order', jamOrder)),
+                            ],
+                          ),
+                          const Divider(height: 20, color: AppColors.bgInput),
+                          _buildDetailRow('Status Saat Ini', statusRaw, isStatus: true),
                         ],
                       ),
                     ),
                     const SizedBox(height: 25),
 
-                    // ── KARTU ITEM-ITEM YANG DIBELI (Bisa memanjang ke bawah tanpa batasan) ──
-                    _buildSectionTitle('Item Produk Yang Dibeli'),
+                    _buildSectionTitle('Item Produk'),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -84,12 +95,7 @@ class HalamanDetailPesanan extends StatelessWidget {
                               children: [
                                 const Icon(Icons.cake_rounded, color: AppColors.primary, size: 20),
                                 const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    produk,
-                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
-                                  ),
-                                ),
+                                Expanded(child: CustomText(produk, fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark)),
                               ],
                             ),
                           );
@@ -98,7 +104,6 @@ class HalamanDetailPesanan extends StatelessWidget {
                     ),
                     const SizedBox(height: 25),
 
-                    // ── TOTAL PEMBAYARAN ──
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(18),
@@ -106,11 +111,8 @@ class HalamanDetailPesanan extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Total Bayar:', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text(
-                            dataPesanan['total_harga']?.toString() ?? 'Rp 0',
-                            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
-                          ),
+                          const CustomText('Total Bayar:', color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.bold),
+                          CustomText(totalHarga, color: AppColors.textWhite, fontSize: 20, fontWeight: FontWeight.w900),
                         ],
                       ),
                     ),
@@ -125,29 +127,29 @@ class HalamanDetailPesanan extends StatelessWidget {
     );
   }
 
-  // Komponen pembantu untuk Judul Bagian
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFC17F3E))),
+      child: CustomText(title, fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textBrown),
     );
   }
 
-  // Komponen pembantu baris data detail
   Widget _buildDetailRow(String label, String value, {bool isStatus = false}) {
+    Color textColor = AppColors.textDark;
+    if (isStatus) {
+      if (value == 'SELESAI') textColor = AppColors.success;
+      else if (value == 'DIBATALKAN') textColor = AppColors.error;
+      else if (value == 'MENUNGGU') textColor = AppColors.primary;
+      else if (value == 'BUTUH KONFIRMASI') textColor = AppColors.textHint; // Status baru
+      else textColor = AppColors.info;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        CustomText(label, fontSize: 12, color: AppColors.textHint),
         const SizedBox(height: 2),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16, 
-            fontWeight: FontWeight.bold, 
-            color: isStatus ? const Color(0xFF2196F3) : const Color(0xFF2D2D2D)
-          ),
-        ),
+        CustomText(value, fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
       ],
     );
   }
