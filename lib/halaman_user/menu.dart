@@ -371,21 +371,47 @@ class _MenuPageState extends State<MenuPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: GestureDetector(
-              onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description, stok),
-              child: Hero(
-                tag: 'product-$name',
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                  child: Image.network(
-                    imgUrl,
-                    width: double.infinity, fit: BoxFit.cover,
-                    errorBuilder: (c, e, s) => Container(color: btnColor.withOpacity(0.2), child: Center(child: Icon(Icons.fastfood, color: btnColor, size: 40))),
+  child: GestureDetector(
+    onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description, stok),
+    child: Hero(
+      tag: 'product-$name',
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+            child: Image.network(
+              imgUrl,
+              width: double.infinity, fit: BoxFit.cover,
+              errorBuilder: (c, e, s) => Container(color: btnColor.withOpacity(0.2), child: Center(child: Icon(Icons.fastfood, color: btnColor, size: 40))),
+            ),
+          ),
+          // Badge "Habis" di pojok kiri atas kalau stok 0
+          if ((int.tryParse(stok) ?? 0) <= 0)
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.error,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Habis',
+                  style: TextStyle(
+                    fontFamily: 'Signika Negative',
+                    color: AppColors.textWhite,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ),
-          ),
+        ],
+      ),
+    ),
+  ),
+),
 
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -404,47 +430,62 @@ class _MenuPageState extends State<MenuPage> {
                       child: const Text('Details', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 10, decoration: TextDecoration.underline, color: AppColors.primaryDark, fontWeight: FontWeight.w600)), 
                     ),
                     GestureDetector(
-                      onTap: () async {
-                        var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
-
-                        debugPrint("🚨 RESPON DARI XAMPP: $response");
-
-                        if (!mounted) return;
-
-                        if (response['status'] == 'sukses') {
-                          setState(() {
-                            _cartItemCount++; 
-                          });
-
-                          ScaffoldMessenger.of(context).clearSnackBars(); 
-                          
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('$name ditambahkan pada keranjang! 🛒', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                              backgroundColor: AppColors.success, 
-                              behavior: SnackBarBehavior.floating, 
-                              margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20), 
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), 
-                              duration: const Duration(milliseconds: 1500), 
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Gagal: ${response['pesan']}', style: const TextStyle(fontFamily: 'Signika Negative')), 
-                              backgroundColor: AppColors.error, 
-                              behavior: SnackBarBehavior.floating,
-                              margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                              duration: const Duration(seconds: 2)
-                            )
-                          );
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: btnColor, borderRadius: BorderRadius.circular(10)),
-                        child: const Text('+ Order', style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold)),
+                    onTap: (int.tryParse(stok) ?? 0) <= 0
+                    ? () {
+                    // Stok habis — tampilkan snackbar, gak bisa order
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                     SnackBar(
+                       content: Text('$name sedang kehabisan stok 😔', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+                       backgroundColor: AppColors.error,
+                       behavior: SnackBarBehavior.floating,
+                       margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                       duration: const Duration(milliseconds: 1800),
+                      ),
+                     );
+                    }
+                    : () async {
+                    // Stok ada — lanjut order seperti biasa
+                    var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
+                    if (!mounted) return;
+                    if (response['status'] == 'sukses') {
+                    setState(() => _cartItemCount++);
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                     SnackBar(
+                      content: Text('$name ditambahkan pada keranjang! 🛒', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+                      backgroundColor: AppColors.success,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      duration: const Duration(milliseconds: 1500),
+                      ),
+                     );
+                    } else {
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                     SnackBar(
+                      content: Text('Gagal: ${response['pesan']}', style: const TextStyle(fontFamily: 'Signika Negative')),
+                      backgroundColor: AppColors.error,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                      duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                       child: Container(
+                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                       decoration: BoxDecoration(
+                       // Kalau habis, tombol jadi abu-abu
+                       color: (int.tryParse(stok) ?? 0) <= 0 ? Colors.grey.shade400 : btnColor,
+                       borderRadius: BorderRadius.circular(10),
+                       ),
+                       child: Text(
+                       (int.tryParse(stok) ?? 0) <= 0 ? 'Habis' : '+ Order',
+                        style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ],

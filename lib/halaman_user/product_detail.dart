@@ -183,29 +183,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
 
                       // Nilai stok + keterangan tersedia/habis
                       // Jika stok > 0 tampil hijau "(tersedia)", jika 0 tampil merah "(habis)"
-                      Text.rich(
-                        TextSpan(
-                          text: '${widget.stok} ',
-                          style: const TextStyle(
-                            fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
-                            fontSize: 15, 
-                            color: AppColors.textBrown,
-                          ), // Pakai teks coklat
+                     Builder(
+                      builder: (context) {
+                      // Clamp: stok gak boleh tampil negatif, minimal 0
+                      final int stokAngka = (int.tryParse(widget.stok) ?? 0).clamp(0, 999999);
+                      final bool tersedia = stokAngka > 0;
+                      return Text.rich(
+                       TextSpan(
+                       text: '$stokAngka ',
+                         style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, color: AppColors.textBrown),
                           children: [
-                            TextSpan(
-                              text: (int.tryParse(widget.stok) ?? 0) > 0
-                                  ? '(tersedia)'
-                                  : '(habis)',
-                              style: TextStyle(
-                                fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
-                                fontStyle: FontStyle.italic,
-                                color: (int.tryParse(widget.stok) ?? 0) > 0
-                                    ? AppColors.success // Pakai warna hijau seragam
-                                    : AppColors.error,    // Pakai warna merah seragam
-                              ),
+                          TextSpan(
+                          text: tersedia ? '(tersedia)' : '(habis)',
+                            style: TextStyle(
+                            fontFamily: 'Signika Negative',
+                            fontStyle: FontStyle.italic,
+                            color: tersedia ? AppColors.success : AppColors.error,
                             ),
+                           ),
                           ],
-                        ),
+                         ),
+                        );
+                       },
                       ),
                       const SizedBox(height: 30),
                     ],
