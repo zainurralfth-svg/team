@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart'; // Palet 14 Warna Baru
-import 'profil_pengguna.dart';
 import 'konfirmasipesanan.dart'; // Pastikan file ini sudah ada
-import 'package:shared_preferences/shared_preferences.dart';
-
-// PASTIKAN IMPORT FILE NAVBAR CUSTOM LO DISINI YAH BRO!
 import '../Widget/custom_user_navbar.dart';
+import '../Widget/custom_text.dart'; 
 
 class KeranjangPage extends StatefulWidget {
   const KeranjangPage({super.key});
@@ -26,7 +24,6 @@ class _KeranjangPageState extends State<KeranjangPage> {
     _loadUserIdAndFetchCart();
   }
 
-  // Fungsi untuk mengambil ID dari brankas memori HP
   Future<void> _loadUserIdAndFetchCart() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (mounted) {
@@ -34,12 +31,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
         currentUserId = prefs.getString('id_user') ?? "0";
       });
     }
-    _fetchCartData(); // Setelah ID dapat, baru ambil data keranjang ke XAMPP
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+    _fetchCartData(); 
   }
 
   Future<void> _fetchCartData() async {
@@ -76,9 +68,9 @@ class _KeranjangPageState extends State<KeranjangPage> {
       await _fetchCartData();
     } else {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Gagal: ${response['pesan']}", style: const TextStyle(fontFamily: 'Signika Negative'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: CustomText("Gagal: ${response['pesan']}", color: Colors.white)),
+      );
     }
   }
 
@@ -86,12 +78,12 @@ class _KeranjangPageState extends State<KeranjangPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Hapus Item", style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)),
-        content: const Text("Apakah Anda yakin ingin menghapus item ini dari keranjang?", style: TextStyle(fontFamily: 'Signika Negative')),
+        title: const CustomText("Hapus Item", fontWeight: FontWeight.bold),
+        content: const CustomText("Apakah Anda yakin ingin menghapus item ini dari keranjang?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Batal", style: TextStyle(fontFamily: 'Signika Negative', color: Colors.grey)),
+            child: const CustomText("Batal", color: Colors.grey),
           ),
           TextButton(
             onPressed: () async {
@@ -102,16 +94,16 @@ class _KeranjangPageState extends State<KeranjangPage> {
               if (res['status'] == 'sukses') {
                 _fetchCartData();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Item berhasil dihapus", style: TextStyle(fontFamily: 'Signika Negative'))),
+                  const SnackBar(content: CustomText("Item berhasil dihapus", color: Colors.white)),
                 );
               } else {
                 setState(() => _isLoading = false);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Gagal: ${res['pesan']}", style: const TextStyle(fontFamily: 'Signika Negative'))),
+                  SnackBar(content: CustomText("Gagal: ${res['pesan']}", color: Colors.white)),
                 );
               }
             },
-            child: const Text("Hapus", style: TextStyle(fontFamily: 'Signika Negative', color: Colors.red, fontWeight: FontWeight.bold)),
+            child: const CustomText("Hapus", color: Colors.red, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -121,10 +113,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
   int get _totalHarga {
     int total = 0;
     for (var item in _cartItems) {
-      String hargaStr = item['harga'].toString().replaceAll(
-        RegExp(r'[^0-9]'),
-        '',
-      );
+      String hargaStr = item['harga'].toString().replaceAll(RegExp(r'[^0-9]'), '');
       int harga = int.tryParse(hargaStr) ?? 0;
       int jumlah = int.tryParse(item['jumlah'].toString()) ?? 0;
       total += (harga * jumlah);
@@ -143,20 +132,18 @@ class _KeranjangPageState extends State<KeranjangPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgUtama, // Background krem dari Colour.dart
+      backgroundColor: AppColors.bgUtama, 
       appBar: AppBar(
-        backgroundColor: AppColors.primary, // Diseragamkan pakai warna utama oranye coklat
+        backgroundColor: AppColors.primary, 
         elevation: 0,
         toolbarHeight: 80,
         iconTheme: const IconThemeData(color: AppColors.textWhite),
-        title: const Text(
+        title: const CustomText(
           'Keranjang',
-          style: TextStyle(
-            color: AppColors.textWhite,
-            fontSize: 28,
-            fontFamily: 'Oleo Script',
-            fontWeight: FontWeight.w700,
-          ),
+          color: AppColors.textWhite,
+          fontSize: 24, // FIX: Ukuran disamakan dengan Pesanan Saya
+          fontWeight: FontWeight.bold,
+          // FIX: isOleo dihapus biar default pakai Signika
         ),
         centerTitle: true,
       ),
@@ -167,14 +154,11 @@ class _KeranjangPageState extends State<KeranjangPage> {
             )
           : _cartItems.isEmpty
           ? const Center(
-              child: Text(
+              child: CustomText(
                 "Keranjangmu masih kosong 🛒",
-                style: TextStyle(
-                  fontFamily: 'Signika Negative',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
               ),
             )
           : RefreshIndicator(
@@ -187,14 +171,11 @@ class _KeranjangPageState extends State<KeranjangPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    const CustomText(
                       'Pesanan',
-                      style: TextStyle(
-                        fontFamily: 'Signika Negative',
-                        color: AppColors.textDark,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      color: AppColors.textDark,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
                     ),
                     const SizedBox(height: 15),
                     ListView.builder(
@@ -208,21 +189,16 @@ class _KeranjangPageState extends State<KeranjangPage> {
                           item['nama_produk'] ?? 'Tanpa Nama',
                           'Rp ${item['harga']}',
                           int.tryParse(item['jumlah'].toString()) ?? 1,
-                          Uri.encodeFull(
-                            "${ApiService.baseUrl}/uploads/${item['gambar']}",
-                          ),
+                          Uri.encodeFull("${ApiService.baseUrl}/uploads/${item['gambar']}"),
                         );
                       },
                     ),
                     const SizedBox(height: 25),
-                    const Text(
+                    const CustomText(
                       'Catatan Pesanan',
-                      style: TextStyle(
-                        fontFamily: 'Signika Negative',
-                        color: AppColors.textDark,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      color: AppColors.textDark,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold, // Ditebelin dikit
                     ),
                     const SizedBox(height: 10),
                     Container(
@@ -232,7 +208,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                         border: Border.all(color: AppColors.primary),
                       ),
                       child: const TextField(
-                        style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark),
+                        style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark), 
                         decoration: InputDecoration(
                           hintText: 'Tambahkan Catatan (opsional)',
                           hintStyle: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint),
@@ -253,7 +229,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.shadow, // Panggil shadow dari Colour.dart
+                            color: AppColors.shadow,
                             blurRadius: 5,
                             offset: const Offset(0, 2),
                           ),
@@ -265,25 +241,24 @@ class _KeranjangPageState extends State<KeranjangPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
+                              CustomText(
                                 '$_totalItem Item',
-                                style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 14, color: AppColors.textDark),
+                                fontSize: 14, 
+                                color: AppColors.textDark,
                               ),
-                              const Text(
+                              const CustomText(
                                 'Subtotal',
-                                style: TextStyle(fontFamily: 'Signika Negative', fontSize: 14, color: AppColors.textDark),
+                                fontSize: 14, 
+                                color: AppColors.textDark,
                               ),
                             ],
                           ),
                           const SizedBox(height: 10),
-                          Text(
+                          CustomText(
                             'Rp $_totalHarga',
-                            style: const TextStyle(
-                              fontFamily: 'Signika Negative',
-                              color: AppColors.primary, // Warna oranye utama untuk harga
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            color: AppColors.primary,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                           ),
                         ],
                       ),
@@ -311,19 +286,16 @@ class _KeranjangPageState extends State<KeranjangPage> {
                           width: 240,
                           height: 45,
                           decoration: BoxDecoration(
-                            color: AppColors.accent, // Warna kuning aksen untuk tombol checkout
+                            color: AppColors.accent, 
                             borderRadius: BorderRadius.circular(25),
-                            border: Border.all(color: AppColors.textDark), // Border gelap tegas
+                            border: Border.all(color: AppColors.textDark), 
                           ),
                           child: const Center(
-                            child: Text(
+                            child: CustomText(
                               'Konfirmasi Pesanan',
-                              style: TextStyle(
-                                fontFamily: 'Signika Negative',
-                                color: AppColors.textDark,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              color: AppColors.textDark,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -334,32 +306,10 @@ class _KeranjangPageState extends State<KeranjangPage> {
                 ),
               ),
             ),
-
-      // ==============================================================
-      // INI PERUBAHANNYA: MANGGIL CUSTOM NAVBAR PELANGGAN (INDEKS -1 = GAK ADA YANG NYALA)
-      // ==============================================================
-      bottomNavigationBar: CustomUserNavbar(
-        currentIndex: -1, // Sengaja -1 biar nggak ada bunderan putih (karena ini hal. keranjang)
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/cek_pesanan');
-          } else if (index == 1) {
-            Navigator.pushReplacementNamed(context, '/menu'); 
-          } else if (index == 2) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProfil()));
-          }
-        },
-      ),
     );
   }
 
-  Widget _buildCartCard(
-    String idProduk,
-    String nama,
-    String harga,
-    int jumlah,
-    String imgUrl,
-  ) {
+  Widget _buildCartCard(String idProduk, String nama, String harga, int jumlah, String imgUrl) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(12),
@@ -368,7 +318,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow, // Ganti ke shadow standar Colour.dart
+            color: AppColors.shadow, 
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -391,19 +341,20 @@ class _KeranjangPageState extends State<KeranjangPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                CustomText(
                   nama,
-                  style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textDark),
+                  fontSize: 16, // FIX: Ukuran digedein biar tebelnya sama kayak Pesanan
+                  fontWeight: FontWeight.bold, 
+                  color: AppColors.textDark,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
+                const SizedBox(height: 2), // Kasih jarak dikit biar rapi
+                CustomText(
                   harga,
-                  style: const TextStyle(
-                    fontFamily: 'Signika Negative',
-                    color: AppColors.primary, // Oranye utama
-                    fontWeight: FontWeight.bold,
-                  ),
+                  fontSize: 14, // FIX: Font harga disamain gedenya
+                  color: AppColors.primary, 
+                  fontWeight: FontWeight.bold,
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -412,7 +363,12 @@ class _KeranjangPageState extends State<KeranjangPage> {
                       onTap: () => _updateJumlah(idProduk, -1),
                       child: _buildQtyBtn('-'),
                     ),
-                    SizedBox(width: 30, child: Center(child: Text('$jumlah', style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark)))),
+                    SizedBox(
+                      width: 30, 
+                      child: Center(
+                        child: CustomText('$jumlah', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark) // Angka juga digedein
+                      )
+                    ),
                     GestureDetector(
                       onTap: () => _updateJumlah(idProduk, 1),
                       child: _buildQtyBtn('+'),
@@ -422,7 +378,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                       onTap: () => _hapusItem(idProduk),
                       child: const Icon(
                         Icons.delete_outline,
-                        color: AppColors.error, // Ganti ikon tempat sampah jadi merah error Colour.dart
+                        color: AppColors.error, 
                         size: 24,
                       ),
                     ),
@@ -441,11 +397,11 @@ class _KeranjangPageState extends State<KeranjangPage> {
       width: 25,
       height: 25,
       decoration: BoxDecoration(
-        color: AppColors.bgInput, // Warna background tombol +/- pakai abu dari bgInput
+        color: AppColors.bgInput, 
         borderRadius: BorderRadius.circular(5),
       ),
       child: Center(
-        child: Text(title, style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textDark)),
+        child: CustomText(title, fontWeight: FontWeight.bold, color: AppColors.textDark),
       ),
     );
   }
