@@ -221,9 +221,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
   }
 
   Widget _buildOrderCard(Map<String, dynamic> dataPesanan, bool isRiwayat) {
-    // TANGGUNG JAWAB FIX: TAMPILIN KODE RESI ASLI DARI DATABASE
     String idTampil = dataPesanan['kode_resi']?.toString() ?? '-';
-    // Tetap simpan ID asli buat API
     String idDatabase = dataPesanan['id_pesanan']?.toString() ?? '';
     
     String statusRaw = dataPesanan['status_pesanan']?.toString().toUpperCase() ?? '';
@@ -231,6 +229,10 @@ class _CekPesananPageState extends State<CekPesananPage> {
     
     String totalHarga = formatRupiah(dataPesanan['total_harga']);
     String waktuTampil = _formatWaktu(dataPesanan); 
+    
+    // TAMBAHAN: Tarik data catatan dari database
+    // Pastikan nama 'catatan' ini sama dengan nama kolom di database lu ya!
+    String catatan = dataPesanan['catatan']?.toString() ?? ''; 
     
     List<String> listProduk = [];
     if (dataPesanan['ringkasan_pesanan'] != null) {
@@ -278,6 +280,26 @@ class _CekPesananPageState extends State<CekPesananPage> {
               ),
             );
           }),
+          
+          // TAMBAHAN: Tampilan Catatan Pesanan
+          if (catatan.isNotEmpty && catatan != 'null') ...[
+            const SizedBox(height: 4),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.edit_note, size: 16, color: AppColors.textHint), // Icon kecil buat catatan
+                const SizedBox(width: 8),
+                Expanded(
+                  child: CustomText(
+                    'Catatan: $catatan', 
+                    color: AppColors.textHint, // Pakai warna agak redup biar beda sama menu utama
+                    fontSize: 13, 
+                    fontStyle: FontStyle.italic, // Dibikin miring biar kerasa kayak notes
+                  ),
+                ),
+              ],
+            ),
+          ],
           
           const Divider(color: AppColors.bgInput, height: 20),
 

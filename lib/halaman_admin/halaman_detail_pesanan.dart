@@ -29,6 +29,9 @@ class HalamanDetailPesanan extends StatelessWidget {
     String tglOrder = fullWaktu.isNotEmpty && fullWaktu.contains(' ') ? fullWaktu.split(' ')[0] : fullWaktu;
     String jamOrder = fullWaktu.isNotEmpty && fullWaktu.contains(' ') ? fullWaktu.split(' ')[1] : '-';
 
+    // TAMBAHAN: Tarik data catatan
+    String catatan = dataPesanan['catatan']?.toString() ?? ''; 
+
     List<String> listProduk = [];
     if (dataPesanan['ringkasan_pesanan'] != null) {
       listProduk = dataPesanan['ringkasan_pesanan'].toString().split(', ');
@@ -102,6 +105,41 @@ class HalamanDetailPesanan extends StatelessWidget {
                         }).toList(),
                       ),
                     ),
+                    
+                    // ============================================================
+                    // TAMBAHAN: Kotak Khusus Catatan Pelanggan
+                    // ============================================================
+                    if (catatan.isNotEmpty && catatan != 'null') ...[
+                      const SizedBox(height: 25),
+                      _buildSectionTitle('Catatan dari Pelanggan'),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.textWhite, 
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.primary, width: 1.5), // Border tegas biar admin notice
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.edit_note_rounded, color: AppColors.primary, size: 26),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: CustomText(
+                                '"$catatan"', // Dikasih tanda kutip biar kerasa kayak pesan langsung
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600, // Agak ditebelin
+                                fontStyle: FontStyle.italic,
+                                color: AppColors.textDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    // ============================================================
+
                     const SizedBox(height: 25),
 
                     Container(

@@ -141,9 +141,8 @@ class _KeranjangPageState extends State<KeranjangPage> {
         title: const CustomText(
           'Keranjang',
           color: AppColors.textWhite,
-          fontSize: 24, // FIX: Ukuran disamakan dengan Pesanan Saya
+          fontSize: 24, 
           fontWeight: FontWeight.bold,
-          // FIX: isOleo dihapus biar default pakai Signika
         ),
         centerTitle: true,
       ),
@@ -194,34 +193,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                       },
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(
-                      'Catatan Pesanan',
-                      color: AppColors.textDark,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold, // Ditebelin dikit
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.textWhite,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.primary),
-                      ),
-                      child: const TextField(
-                        style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark), 
-                        decoration: InputDecoration(
-                          hintText: 'Tambahkan Catatan (opsional)',
-                          hintStyle: TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint),
-                          prefixIcon: Icon(
-                            Icons.edit_note,
-                            color: AppColors.primary,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(vertical: 15),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
+                    // KOLOM CATATAN SUDAH DIHAPUS DARI SINI
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -343,16 +315,16 @@ class _KeranjangPageState extends State<KeranjangPage> {
               children: [
                 CustomText(
                   nama,
-                  fontSize: 16, // FIX: Ukuran digedein biar tebelnya sama kayak Pesanan
+                  fontSize: 16, 
                   fontWeight: FontWeight.bold, 
                   color: AppColors.textDark,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2), // Kasih jarak dikit biar rapi
+                const SizedBox(height: 2), 
                 CustomText(
                   harga,
-                  fontSize: 14, // FIX: Font harga disamain gedenya
+                  fontSize: 14, 
                   color: AppColors.primary, 
                   fontWeight: FontWeight.bold,
                 ),
@@ -366,7 +338,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                     SizedBox(
                       width: 30, 
                       child: Center(
-                        child: CustomText('$jumlah', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark) // Angka juga digedein
+                        child: CustomText('$jumlah', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark) 
                       )
                     ),
                     GestureDetector(

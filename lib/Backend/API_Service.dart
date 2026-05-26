@@ -287,12 +287,18 @@ class ApiService {
     String idUser,
     String nama,
     String noTelp,
+    String catatan, // <-- TAMBAHAN 1: Menerima catatan dari KonfirmasiPage
   ) async {
     try {
       var url = Uri.parse('$baseUrl/checkout.php');
       var response = await http.post(
         url,
-        body: {'id_user': idUser, 'nama_pemesan': nama, 'no_telp': noTelp},
+        body: {
+          'id_user': idUser, 
+          'nama_pemesan': nama, 
+          'no_telp': noTelp,
+          'catatan': catatan, // <-- TAMBAHAN 2: Ngirim catatan ke checkout.php
+        },
       );
       return _safeDecodeMap(response.body);
     } catch (e) {

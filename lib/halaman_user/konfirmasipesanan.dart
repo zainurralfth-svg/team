@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // <-- TAMBAHAN INI
+import 'package:shared_preferences/shared_preferences.dart'; 
 import '../Backend/api_service.dart';
-import '../Core/Colour.dart'; // Import gudang 14 warna kita
+import '../Core/Colour.dart'; 
 
 class KonfirmasiPage extends StatefulWidget {
   const KonfirmasiPage({super.key});
@@ -15,9 +15,12 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _telpController = TextEditingController();
   
+  // TAMBAHAN: Controller untuk Catatan
+  final TextEditingController _catatanController = TextEditingController(); 
+  
   bool _isLoadingProfile = true;
-  bool _isProcessing = false; // Tambahan untuk efek loading tombol
-  String currentUserId = ""; // Sesuai session login
+  bool _isProcessing = false; 
+  String currentUserId = ""; 
 
   @override
   void initState() {
@@ -25,14 +28,11 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
     _loadUserProfile(); 
   }
 
-  // FUNGSI PENGISI OTOMATIS BERDASARKAN DATA LOGIN DI MEMORI HP
   Future<void> _loadUserProfile() async {
     try {
-      // Buka brankas memori HP
       SharedPreferences prefs = await SharedPreferences.getInstance();
       
       setState(() {
-        // Ambil data langsung dari memori tanpa perlu loading ke API XAMPP
         currentUserId = prefs.getString('id_user') ?? "0";
         _namaController.text = prefs.getString('nama_user') ?? ''; 
         _telpController.text = prefs.getString('phone_user') ?? '';
@@ -48,6 +48,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
   void dispose() {
     _namaController.dispose();
     _telpController.dispose();
+    _catatanController.dispose(); // TAMBAHAN: Bersihkan memori controller catatan
     super.dispose();
   }
 
@@ -55,6 +56,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
   // FUNGSI PROSES PESANAN KE DATABASE & PINDAH HALAMAN
   // ============================================================
  Future<void> _prosesPesanan(List<dynamic> cartItems, int totalHarga) async {
+    // 1. Validasi Input
     if (_namaController.text.isEmpty || _telpController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Lengkapi Nama dan Nomor Telepon!", style: TextStyle(fontFamily: 'Signika Negative'))),
@@ -62,7 +64,6 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
       return;
     }
 
-    // TAMBAHAN: Validasi keamanan memastikan ID User tidak kosong/nol
     if (currentUserId.isEmpty || currentUserId == "0") {
        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Sesi login tidak valid, silakan login ulang.", style: TextStyle(fontFamily: 'Signika Negative'))),
@@ -71,60 +72,73 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
     }
 
     setState(() => _isProcessing = true);
-    // ... lanjut panggil API Checkout
-
-    // Memanggil API Checkout
-    var response = await ApiService.checkoutPesanan(
-      currentUserId, 
-      _namaController.text, 
-      _telpController.text
-    );
-
-    setState(() => _isProcessing = false);
-
-    if (response['status'] == 'sukses') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Pesanan Berhasil Dibuat! 🚀", style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)), backgroundColor: AppColors.success), 
-      );
+    
+    // 2. Bungkus pakai Try-Catch biar kalau API error nggak langsung mati
+    try {
+      print("Mengirim data ke API Checkout..."); // Cek di terminal muncul nggak
       
-      // Pindah ke halaman Bukti Pesanan dan bawa SEMUA datanya
-      Navigator.pushReplacementNamed(
-        context, 
-        '/bukti_pemesanan',
-        arguments: {
-          'kode_resi': response['kode_resi'],
-          'nama': _namaController.text,
-          'telp': _telpController.text,
-          'items': cartItems,
-          'total': totalHarga,
-        }
+      var response = await ApiService.checkoutPesanan(
+        currentUserId, 
+        _namaController.text, 
+        _telpController.text,
+        _catatanController.text,
       );
-    } else {
+
+      print("Response dari Server: $response"); // Ngecek balasan server sukses/gagal
+
+      setState(() => _isProcessing = false);
+
+      if (response['status'] == 'sukses') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Pesanan Berhasil Dibuat! 🚀", style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold)), backgroundColor: AppColors.success), 
+        );
+        
+        // Pindah ke halaman Bukti Pesanan
+        Navigator.pushReplacementNamed(
+          context, 
+          '/bukti_pemesanan',
+          arguments: {
+            'kode_resi': response['kode_resi'],
+            'nama': _namaController.text,
+            'telp': _telpController.text,
+            'catatan': _catatanController.text, 
+            'items': cartItems,
+            'total': totalHarga,
+          }
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Gagal: ${response['pesan']}", style: const TextStyle(fontFamily: 'Signika Negative')), backgroundColor: AppColors.error), 
+        );
+      }
+    } catch (e) {
+      // 3. Kalau API-nya yang ngadat/error, bakal ketahuan di sini
+      setState(() => _isProcessing = false);
+      print("Error Waktu Checkout: $e"); 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Gagal: ${response['pesan']}", style: const TextStyle(fontFamily: 'Signika Negative')), backgroundColor: AppColors.error), 
+        SnackBar(content: Text("Terjadi Kesalahan Server: $e", style: const TextStyle(fontFamily: 'Signika Negative')), backgroundColor: AppColors.error), 
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Menangkap data dari keranjang.dart
     final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
     final List<dynamic> cartItems = args?['items'] ?? [];
     final int totalHarga = args?['total'] ?? 0;
 
     return Scaffold(
-      backgroundColor: AppColors.bgUtama, // Disamakan dengan krem Colour.dart baru
+      backgroundColor: AppColors.bgUtama, 
       body: SafeArea(
         child: Column(
           children: [
             // ============================================================
-            // HEADER COKELAT (UDAH DISAMAIN SAMA KERANJANG)
+            // HEADER COKELAT
             // ============================================================
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               decoration: const BoxDecoration(
-                color: AppColors.primary, // Disamakan dengan oranye coklat Colour.dart
+                color: AppColors.primary, 
               ),
               child: Row(
                 children: [
@@ -133,7 +147,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                     child: const Icon(
                       Icons.arrow_back,
                       color: AppColors.textWhite,
-                      size: 26, // Dibuat polosan tanpa kotak
+                      size: 26, 
                     ),
                   ),
                   const Expanded(
@@ -141,14 +155,14 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                       child: Text(
                         'Konfirmasi Pesanan',
                         style: TextStyle(
-                          fontFamily: 'Oleo Script', // <-- FONT DISAMAKAN DENGAN KERANJANG
+                          fontFamily: 'Oleo Script', 
                           color: AppColors.textWhite,
                           fontSize: 22,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 26), // Biar text di tengah seimbang sama icon back
+                  const SizedBox(width: 26), 
                 ],
               ),
             ),
@@ -167,7 +181,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                     ),
                     const SizedBox(height: 10),
 
-                    // CONTAINER ITEM PESANAN (Dinamis dari Keranjang)
+                    // CONTAINER ITEM PESANAN
                     Container(
                       padding: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
@@ -175,9 +189,9 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.shadow, // Disamakan dengan bayangan Colour.dart
+                            color: AppColors.shadow, 
                             blurRadius: 10,
-                            offset: const Offset(0, 4), // Biar bayangannya ke bawah dikit
+                            offset: const Offset(0, 4), 
                           )
                         ],
                       ),
@@ -213,7 +227,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                                   fontFamily: 'Signika Negative',
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
-                                  color: AppColors.primary, // Oranye warna utama
+                                  color: AppColors.primary, 
                                 ),
                               ),
                             ],
@@ -229,25 +243,28 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                     ),
                     const SizedBox(height: 10),
 
-                    // TEXTFIELD (OTOMATIS SESUAI DATA REGISTRASI)
+                    // TEXTFIELD (NAMA, TELP, & CATATAN)
                     _buildTextField("Nama Lengkap", Icons.person, AppColors.primary, _namaController),
                     const SizedBox(height: 12),
                     _buildTextField("Nomor Telepon", Icons.phone, AppColors.primary, _telpController),
+                    const SizedBox(height: 12), // Jarak sebelum catatan
+                    
+                    // TAMBAHAN: Kolom Catatan Pesanan
+                    _buildNotesField("Tambahkan Jika Ada Catatan Untuk Pesanan Anda", Icons.edit_note, AppColors.primary, _catatanController),
 
                     const SizedBox(height: 40),
 
-                    // TOMBOL PESAN SEKARANG (Desain Utuh)
+                    // TOMBOL PESAN SEKARANG
                     Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary, // Warna oranye utama
+                          backgroundColor: AppColors.primary, 
                           padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25),
                           ),
                           elevation: 3,
                         ),
-                        // PERUBAHAN: Memanggil _prosesPesanan dan mencegah double click
                         onPressed: _isProcessing ? null : () => _prosesPesanan(cartItems, totalHarga),
                         child: _isProcessing 
                           ? const SizedBox(
@@ -258,7 +275,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                           : const Text(
                               "Pesan Sekarang",
                               style: TextStyle(
-                                fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
+                                fontFamily: 'Signika Negative', 
                                 color: AppColors.textWhite,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -294,7 +311,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
               ),
               Text(
                 qty,
-                style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 12), // Menggunakan warna abu dari AppColors
+                style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 12), 
               ),
             ],
           ),
@@ -305,7 +322,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
             fontFamily: 'Signika Negative',
             fontWeight: FontWeight.bold,
             fontSize: 14,
-            color: AppColors.primary, // Warna oranye utama
+            color: AppColors.primary, 
           ),
         ),
       ],
@@ -320,9 +337,42 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
         hintText: hint,
         hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 13),
         prefixIcon: Icon(icon, color: iconColor, size: 22),
-        fillColor: AppColors.bgCard, // Disamakan dengan warna cream terang di AppColors
+        fillColor: AppColors.bgCard, 
         filled: true,
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: AppColors.primary),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: AppColors.primary),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+      ),
+    );
+  }
+
+  // TAMBAHAN: Widget Helper khusus untuk Catatan biar multiline rapi
+  Widget _buildNotesField(String hint, IconData icon, Color iconColor, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      maxLines: 3, // Bikin kotaknya agak lebar ke bawah
+      style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 13),
+        // Pakai Padding biar iconnya tetep di atas kiri, nggak di tengah-tengah kotak yang gede
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(bottom: 45), 
+          child: Icon(icon, color: iconColor, size: 22),
+        ),
+        fillColor: AppColors.bgCard, 
+        filled: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(color: AppColors.primary),
