@@ -69,7 +69,10 @@ class _HomeAdminState extends State<HomeAdmin> {
         if (!_isAdminAction && _jumlahBatalSebelumnya != -1 && hitungBatalSaatIni > _jumlahBatalSebelumnya) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: CustomText('⚠️ Notifikasi: Ada pelanggan yang membatalkan pesanan! Cek Riwayat.', color: Colors.white),
+              content: CustomText(
+                '⚠️ Notifikasi: Ada pelanggan yang membatalkan pesanan! Cek Riwayat.',
+                color: Colors.white,
+              ),
               backgroundColor: AppColors.error,
               duration: Duration(seconds: 5),
             ),
@@ -95,12 +98,18 @@ class _HomeAdminState extends State<HomeAdmin> {
   String formatRupiah(dynamic angka) {
     if (angka == null) return "Rp 0";
     int value = int.tryParse(angka.toString()) ?? 0;
-    return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
+    return NumberFormat.currency(
+      locale: 'id',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    ).format(value);
   }
 
   String _formatWaktu(Map<String, dynamic> item) {
     String? rawTime = item['updated_at'] ?? item['tanggal_pesanan'] ?? item['created_at'] ?? item['tanggal'] ?? item['waktu'];
+    
     if (rawTime == null || rawTime.isEmpty) return 'Baru saja';
+    
     try {
       DateTime orderTime = DateTime.parse(rawTime);
       Duration diff = DateTime.now().difference(orderTime);
@@ -113,7 +122,7 @@ class _HomeAdminState extends State<HomeAdmin> {
     }
   }
 
-  // === FIX: Notif DITOLAK ===
+  // === FIX: Notif DIBATALKAN ===
   Future<void> _ubahStatusPesanan(String idPesanan, String statusBaru) async {
     setState(() {
       _isLoading = true;
@@ -121,10 +130,11 @@ class _HomeAdminState extends State<HomeAdmin> {
     });
     try {
       final response = await ApiService.updateStatusPesanan(idPesanan, statusBaru);
+      
       if (response['status'] == 'sukses') {
         // Teks notif dikustomisasi sesuai status
         String pesanNotif = (statusBaru == 'DIBATALKAN') 
-            ? 'Pesanan berhasil DITOLAK ✓' 
+            ? 'Pesanan berhasil DIBATALKAN ✓' 
             : 'Pesanan berhasil di-update ke $statusBaru ✓';
             
         ScaffoldMessenger.of(context).showSnackBar(
@@ -136,15 +146,24 @@ class _HomeAdminState extends State<HomeAdmin> {
         await _loadDataDashboard();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: CustomText('Gagal: ${response['pesan']}', color: Colors.white), backgroundColor: AppColors.error),
+          SnackBar(
+            content: CustomText('Gagal: ${response['pesan']}', color: Colors.white),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: CustomText('Sistem Error: $e', color: Colors.white), backgroundColor: AppColors.error),
+        SnackBar(
+          content: CustomText('Sistem Error: $e', color: Colors.white),
+          backgroundColor: AppColors.error,
+        ),
       );
     } finally {
-      if (mounted) setState(() { _isLoading = false; _isAdminAction = false; });
+      if (mounted) setState(() { 
+        _isLoading = false; 
+        _isAdminAction = false; 
+      });
     }
   }
 
@@ -160,14 +179,44 @@ class _HomeAdminState extends State<HomeAdmin> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    CustomText('PuddingKu', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 0.5),
-                    SizedBox(height: 2),
-                    CustomText('Panel Admin UMKM', color: AppColors.textBrown, fontSize: 12, fontWeight: FontWeight.w600),
-                  ]),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        'PuddingKu',
+                        color: AppColors.primary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                      ),
+                      SizedBox(height: 2),
+                      CustomText(
+                        'Panel Admin UMKM',
+                        color: AppColors.textBrown,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ],
+                  ),
                   GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HalamanProfilAdmin())),
-                    child: Container(width: 50, height: 50, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.textWhite, image: DecorationImage(image: AssetImage('assets/images/profil admin.png'), fit: BoxFit.cover))),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HalamanProfilAdmin()),
+                      );
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.textWhite,
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/profil admin.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -186,12 +235,26 @@ class _HomeAdminState extends State<HomeAdmin> {
                       const SizedBox(height: 25),
                       _buildTombolTambah(),
                       const SizedBox(height: 25),
-                      if (_isLoading) const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                      
+                      if (_isLoading)
+                        const Center(child: CircularProgressIndicator(color: AppColors.primary))
                       else if (_pesananMenunggu.isEmpty && _pesananProses.isEmpty)
-                        const Center(child: Padding(padding: EdgeInsets.all(20.0), child: CustomText("Yey! Belum ada antrean pesanan.", color: AppColors.textHint, fontWeight: FontWeight.bold)))
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: CustomText(
+                              "Belum ada antrean pesanan.",
+                              color: AppColors.textHint,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
                       else ...[
-                        if (_pesananMenunggu.isNotEmpty) _buildListPesanan(_pesananMenunggu, 'Butuh Konfirmasi Pesanan ⚠️', AppColors.error),
-                        if (_pesananProses.isNotEmpty) _buildListPesanan(_pesananProses, 'Sedang Menunggu', AppColors.info),
+                        if (_pesananMenunggu.isNotEmpty)
+                          _buildListPesanan(_pesananMenunggu, 'Konfirmasi Pesanan ⚠️', AppColors.error),
+                        
+                        if (_pesananProses.isNotEmpty)
+                          _buildListPesanan(_pesananProses, 'Sedang Di Proses', AppColors.info),
                       ],
                       const SizedBox(height: 30),
                     ],
@@ -218,7 +281,12 @@ class _HomeAdminState extends State<HomeAdmin> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomText(title, color: titleColor, fontSize: 24, fontWeight: FontWeight.bold),
+        CustomText(
+          title,
+          color: titleColor,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
         const SizedBox(height: 10),
         ListView.builder(
           shrinkWrap: true,
@@ -227,16 +295,22 @@ class _HomeAdminState extends State<HomeAdmin> {
           itemBuilder: (context, index) {
             final item = list[index];
             return GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => HalamanDetailPesanan(dataPesanan: item))),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HalamanDetailPesanan(dataPesanan: item)),
+                );
+              },
               child: OrderCard(
-                // FIX: Pakai kode_resi
                 id: item['kode_resi']?.toString() ?? 'PUD...',
                 nama: item['nama_pemesan'] ?? 'Unknown',
                 ringkasan: item['ringkasan_pesanan'] ?? 'Detail tidak tersedia',
                 harga: formatRupiah(item['total_harga']),
                 status: item['status_pesanan'] ?? 'MENUNGGU',
                 waktu: _formatWaktu(item),
-                onStatusChanged: (newStatus) => _ubahStatusPesanan(item['id_pesanan'].toString(), newStatus),
+                onStatusChanged: (newStatus) {
+                  _ubahStatusPesanan(item['id_pesanan'].toString(), newStatus);
+                },
               ),
             );
           },
@@ -247,55 +321,153 @@ class _HomeAdminState extends State<HomeAdmin> {
   }
 
   Widget _buildHeaderDashboard() {
-     return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(32)),
-        child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CustomText(
+                  'Selamat pagi, Admin',
+                  color: AppColors.textWhite,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+                const SizedBox(height: 4),
+                CustomText(
+                  _namaAdmin,
+                  color: AppColors.textWhite,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                ),
+                const SizedBox(height: 2),
+                CustomText(
+                  DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now()),
+                  color: AppColors.textWhite,
+                  fontSize: 11,
+                ),
+                const SizedBox(height: 15),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    const CustomText('Selamat pagi, Admin', color: AppColors.textWhite, fontSize: 12, fontWeight: FontWeight.w600),
-                    const SizedBox(height: 4),
-                    CustomText(_namaAdmin, color: AppColors.textWhite, fontSize: 22, fontWeight: FontWeight.w800),
-                    const SizedBox(height: 2),
-                    CustomText(DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now()), color: AppColors.textWhite, fontSize: 11),
-                    const SizedBox(height: 15),
-                    Wrap(spacing: 8, runSpacing: 8, children: [_buildGlassBadge('$_jumlahPesananHariIni Pesanan Aktif'), _buildGlassBadge('+12% Minggu Ini')]),
+                    _buildGlassBadge('$_jumlahPesananHariIni Pesanan Aktif'),
+                    _buildGlassBadge('+12% Minggu Ini'),
                   ],
                 ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                   Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.black.withOpacity(0.1), borderRadius: BorderRadius.circular(5)), child: CustomText(formatRupiah(_pendapatanBulanIni), color: AppColors.textWhite, fontSize: 11, fontWeight: FontWeight.bold)),
-                   const SizedBox(height: 15),
-                   Container(padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15), decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)), child: Column(children: [CustomText('$_jumlahPesananHariIni', color: AppColors.textWhite, fontSize: 26, fontWeight: FontWeight.w800), const CustomText('Pesanan\nHari Ini', textAlign: TextAlign.center, color: AppColors.textWhite, fontSize: 10)])),
-                ]),
-              ),
-            ]),
-      );
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: CustomText(
+                    formatRupiah(_pendapatanBulanIni),
+                    color: AppColors.textWhite,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      CustomText(
+                        '$_jumlahPesananHariIni',
+                        color: AppColors.textWhite,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      const CustomText(
+                        'Pesanan\nHari Ini',
+                        textAlign: TextAlign.center,
+                        color: AppColors.textWhite,
+                        fontSize: 10,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildTombolTambah() {
     return InkWell(
       onTap: () {
-        showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => const SheetTambahPesanan()).then((value) => _loadDataDashboard());
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const SheetTambahPesanan(),
+        ).then((value) => _loadDataDashboard());
       },
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-        decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(22)),
-        child: Row(children: const [CustomText('+', color: AppColors.textWhite, fontSize: 50, fontWeight: FontWeight.bold), SizedBox(width: 15), CustomText('Tambah pesanan', color: AppColors.textWhite, fontSize: 32, fontWeight: FontWeight.bold)]),
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Row(
+          children: const [
+            CustomText(
+              '+',
+              color: AppColors.textWhite,
+              fontSize: 50,
+              fontWeight: FontWeight.bold,
+            ),
+            SizedBox(width: 15),
+            CustomText(
+              'Tambah pesanan',
+              color: AppColors.textWhite,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildGlassBadge(String text) {
-    return Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.white.withOpacity(0.18), borderRadius: BorderRadius.circular(10)), child: CustomText(text, color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold));
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: CustomText(
+        text,
+        color: AppColors.textWhite,
+        fontSize: 10,
+        fontWeight: FontWeight.bold,
+      ),
+    );
   }
 }

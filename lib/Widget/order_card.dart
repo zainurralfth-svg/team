@@ -114,24 +114,12 @@ class OrderCard extends StatelessWidget {
                 // LOGIKA TOMBOL AKSI ADMIN (Sudah disesuaikan dengan displayStatus)
                 // ==============================================================
                 
-                // JIKA STATUS MASIH MENUNGGU: Muncul tombol Konfirmasi & Tolak
+                // JIKA STATUS MASIH MENUNGGU: Muncul tombol Konfirmasi & Dibatalkan
                 if (displayStatus == 'MENUNGGU') ...[
                   const SizedBox(height: 15),
                   Row(
                     children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.error,
-                            side: const BorderSide(color: AppColors.error),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          onPressed: () => onStatusChanged('DIBATALKAN'),
-                          child: const CustomText('Tolak', fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
+                      // 1. TOMBOL KONFIRMASI (SEKARANG DI KIRI)
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -142,6 +130,20 @@ class OrderCard extends StatelessWidget {
                           ),
                           onPressed: () => onStatusChanged('PROSES'),
                           child: const CustomText('Konfirmasi', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // 2. TOMBOL DIBATALKAN (SEKARANG DI KANAN, Teks udah diganti)
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.error,
+                            side: const BorderSide(color: AppColors.error),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: () => onStatusChanged('DIBATALKAN'),
+                          child: const CustomText('Dibatalkan', fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -155,7 +157,7 @@ class OrderCard extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: const Color.fromARGB(255, 81, 210, 48),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         elevation: 0,

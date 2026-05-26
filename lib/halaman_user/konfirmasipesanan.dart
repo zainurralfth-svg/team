@@ -119,10 +119,10 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
         child: Column(
           children: [
             // ============================================================
-            // HEADER COKELAT 
+            // HEADER COKELAT (UDAH DISAMAIN SAMA KERANJANG)
             // ============================================================
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               decoration: const BoxDecoration(
                 color: AppColors.primary, // Disamakan dengan oranye coklat Colour.dart
               ),
@@ -130,22 +130,10 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.textWhite, width: 1.5),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back,
-                            color: AppColors.textWhite,
-                            size: 20,
-                          ),
-                        ),
-                      ],
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: AppColors.textWhite,
+                      size: 26, // Dibuat polosan tanpa kotak
                     ),
                   ),
                   const Expanded(
@@ -153,15 +141,14 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                       child: Text(
                         'Konfirmasi Pesanan',
                         style: TextStyle(
-                          fontFamily: 'Signika Negative', // <-- FONT DIUBAH DARI SERIF
+                          fontFamily: 'Oleo Script', // <-- FONT DISAMAKAN DENGAN KERANJANG
                           color: AppColors.textWhite,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 40),
+                  const SizedBox(width: 26), // Biar text di tengah seimbang sama icon back
                 ],
               ),
             ),
@@ -190,6 +177,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                           BoxShadow(
                             color: AppColors.shadow, // Disamakan dengan bayangan Colour.dart
                             blurRadius: 10,
+                            offset: const Offset(0, 4), // Biar bayangannya ke bawah dikit
                           )
                         ],
                       ),
