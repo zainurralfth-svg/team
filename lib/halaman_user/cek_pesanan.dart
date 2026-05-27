@@ -139,6 +139,106 @@ class _CekPesananPageState extends State<CekPesananPage> {
     );
   }
 
+  Future<void> _hapusRiwayatPesanan(String idPesanan) async {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const CustomText('Hapus Riwayat?', fontWeight: FontWeight.bold),
+        content: const CustomText('Riwayat pesanan ini akan dihapus permanen. Lanjutkan?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx), 
+            child: const CustomText('Batal', color: Colors.grey)
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              setState(() => _isLoading = true);
+              
+              final response = await ApiService.deletePesanan(idPesanan);
+              
+              if (response['status'] == 'sukses') {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: CustomText('Riwayat pesanan berhasil dihapus.', color: Colors.white), backgroundColor: AppColors.success),
+                  );
+                }
+                _fetchPesananUser(); 
+              } else {
+                setState(() => _isLoading = false);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: CustomText('Gagal menghapus: ${response['pesan']}', color: Colors.white), backgroundColor: AppColors.error),
+                  );
+                }
+              }
+            },
+            child: const CustomText('Hapus', color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _tampilkanDialogEditCatatan(String idPesanan, String catatanLama) {
+    TextEditingController editController = TextEditingController(text: catatanLama);
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const CustomText('Edit Catatan Pesanan', fontWeight: FontWeight.bold, fontSize: 18),
+        content: TextField(
+          controller: editController,
+          maxLines: 3,
+          style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark),
+          decoration: InputDecoration(
+            hintText: "Contoh: Bang, gulanya dikit aja ya...",
+            hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 13),
+            filled: true,
+            fillColor: AppColors.bgInput,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx), 
+            child: const CustomText('Batal', color: Colors.grey)
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx); 
+              setState(() => _isLoading = true); 
+              
+              final response = await ApiService.updateCatatan(idPesanan, editController.text);
+              
+              if (response['status'] == 'sukses') {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: CustomText('Catatan berhasil diperbarui! 🎉', color: Colors.white), backgroundColor: AppColors.success),
+                  );
+                }
+                _fetchPesananUser(); 
+              } else {
+                setState(() => _isLoading = false);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: CustomText('Gagal update catatan: ${response['pesan']}', color: Colors.white), backgroundColor: AppColors.error),
+                  );
+                }
+              }
+            },
+            child: const CustomText('Simpan', color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -177,7 +277,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
           currentIndex: 0,
           onTap: (index) {
             if (index == 0) {
-              // Biarin kosong
+              
             } else if (index == 1) {
               Navigator.pushReplacementNamed(context, '/menu'); 
             } else if (index == 2) {
@@ -224,16 +324,17 @@ class _CekPesananPageState extends State<CekPesananPage> {
     String idTampil = dataPesanan['kode_resi']?.toString() ?? '-';
     String idDatabase = dataPesanan['id_pesanan']?.toString() ?? '';
     
+    String namaPemesan = dataPesanan['nama_pemesan']?.toString() ?? 'Pelanggan';
+    
     String statusRaw = dataPesanan['status_pesanan']?.toString().toUpperCase() ?? '';
     String status = statusRaw.isEmpty ? 'MENUNGGU' : statusRaw; 
     
     String totalHarga = formatRupiah(dataPesanan['total_harga']);
     String waktuTampil = _formatWaktu(dataPesanan); 
     
-    // TAMBAHAN: Tarik data catatan dari database
-    // Pastikan nama 'catatan' ini sama dengan nama kolom di database lu ya!
     String catatan = dataPesanan['catatan']?.toString() ?? ''; 
-    
+    bool hasCatatan = catatan.isNotEmpty && catatan != 'null';
+
     List<String> listProduk = [];
     if (dataPesanan['ringkasan_pesanan'] != null) {
       listProduk = dataPesanan['ringkasan_pesanan'].toString().split(RegExp(r',\s*'));
@@ -258,8 +359,22 @@ class _CekPesananPageState extends State<CekPesananPage> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomText(idTampil, color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(idTampil, color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.person_outline, size: 14, color: AppColors.textHint),
+                      const SizedBox(width: 4),
+                      CustomText(namaPemesan, color: AppColors.textDark, fontSize: 13, fontWeight: FontWeight.w600),
+                    ],
+                  ),
+                ],
+              ),
               CustomText(waktuTampil, color: AppColors.textHint, fontSize: 12, fontWeight: FontWeight.bold),
             ],
           ),
@@ -281,27 +396,45 @@ class _CekPesananPageState extends State<CekPesananPage> {
             );
           }),
           
-          // TAMBAHAN: Tampilan Catatan Pesanan
-          if (catatan.isNotEmpty && catatan != 'null') ...[
-            const SizedBox(height: 4),
-            Row(
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.bgInput.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(10)
+            ),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.edit_note, size: 16, color: AppColors.textHint), // Icon kecil buat catatan
+                const Icon(Icons.edit_note, size: 18, color: AppColors.textHint), 
                 const SizedBox(width: 8),
                 Expanded(
                   child: CustomText(
-                    'Catatan: $catatan', 
-                    color: AppColors.textHint, // Pakai warna agak redup biar beda sama menu utama
+                    hasCatatan ? catatan : 'Belum ada catatan pesanan', 
+                    color: hasCatatan ? AppColors.textDark : AppColors.textHint, 
                     fontSize: 13, 
-                    fontStyle: FontStyle.italic, // Dibikin miring biar kerasa kayak notes
+                    fontStyle: FontStyle.italic, 
                   ),
                 ),
+                if (!isRiwayat && status == 'MENUNGGU')
+                  GestureDetector(
+                    onTap: () => _tampilkanDialogEditCatatan(idDatabase, hasCatatan ? catatan : ''),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.edit_square, size: 20, color: AppColors.primary),
+                          const SizedBox(height: 2),
+                          const CustomText('Edit Catatan', color: AppColors.primary, fontSize: 9, fontWeight: FontWeight.bold),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
-          ],
+          ),
           
-          const Divider(color: AppColors.bgInput, height: 20),
+          const Divider(color: AppColors.bgInput, height: 25),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -358,6 +491,26 @@ class _CekPesananPageState extends State<CekPesananPage> {
                 color: AppColors.info, 
                 fontSize: 12, 
                 fontWeight: FontWeight.bold,
+              ),
+            ),
+          ] else if (isRiwayat) ...[
+            const SizedBox(height: 15),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.textHint), 
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: () => _hapusRiwayatPesanan(idDatabase),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.delete_outline, color: AppColors.textHint, size: 20),
+                    const SizedBox(width: 8),
+                    const CustomText('Hapus Riwayat', color: AppColors.textHint, fontWeight: FontWeight.bold),
+                  ],
+                ),
               ),
             ),
           ]

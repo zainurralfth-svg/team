@@ -426,4 +426,24 @@ class ApiService {
       return {"status": "error", "pesan": "Koneksi API gagal: $e"};
     }
   }
+  // ==========================================
+  // TAMBAHAN: UPDATE CATATAN PESANAN
+  // ==========================================
+  static Future<Map<String, dynamic>> updateCatatan(
+    String idPesanan, 
+    String catatanBaru
+  ) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$baseUrl/update_catatan.php"),
+        body: {
+          "id": idPesanan,
+          "catatan": catatanBaru,
+        },
+      );
+      return _safeDecodeMap(response.body);
+    } catch (e) {
+      return {"status": "error", "pesan": "Koneksi gagal: $e"};
+    }
+  }
 }
