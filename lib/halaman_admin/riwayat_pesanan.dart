@@ -62,11 +62,8 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
           return status == 'SELESAI' || status == 'DIBATALKAN';
         }).toList()
           ..sort((a, b) {
-            // FIX SORTING: Prioritaskan updated_at, kalau kosong baru pakai tanggal_pesan
             String waktuA = a['updated_at'] ?? a['tanggal_pesan'] ?? '';
             String waktuB = b['updated_at'] ?? b['tanggal_pesan'] ?? '';
-            
-            // Urutkan dari yang terbaru (Descending)
             return waktuB.compareTo(waktuA);
           });
         _isLoading = false;
@@ -113,6 +110,59 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     if (angka == null) return "Rp 0";
     int value = int.tryParse(angka.toString()) ?? 0;
     return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
+  }
+
+  // ==========================================
+  // FORMAT TANGGAL: "12 Januari 2025"
+  // ==========================================
+  String _formatTanggal(Map<String, dynamic> item) {
+    const namaBulan = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    ];
+
+    String status = (item['status_pesanan'] ?? '').toString().toUpperCase();
+    String? rawTime;
+
+    if (status == 'SELESAI' || status == 'DIBATALKAN') {
+      rawTime = item['updated_at'] ?? item['tanggal_pesanan'] ?? item['tanggal_pesan'] ?? item['created_at'];
+    } else {
+      rawTime = item['tanggal_pesanan'] ?? item['tanggal_pesan'] ?? item['created_at'];
+    }
+
+    if (rawTime == null || rawTime.isEmpty) return '';
+
+    try {
+      final tgl = DateTime.parse(rawTime.split(' ')[0]);
+      return '${tgl.day} ${namaBulan[tgl.month]} ${tgl.year}';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  // ==========================================
+  // FORMAT JAM: "14:30"
+  // ==========================================
+  String _formatJam(Map<String, dynamic> item) {
+    String status = (item['status_pesanan'] ?? '').toString().toUpperCase();
+    String? rawTime;
+
+    if (status == 'SELESAI' || status == 'DIBATALKAN') {
+      rawTime = item['updated_at'] ?? item['tanggal_pesanan'] ?? item['tanggal_pesan'] ?? item['created_at'];
+    } else {
+      rawTime = item['tanggal_pesanan'] ?? item['tanggal_pesan'] ?? item['created_at'];
+    }
+
+    if (rawTime == null || rawTime.isEmpty) return '';
+
+    try {
+      final tgl = DateTime.parse(rawTime);
+      return '${tgl.hour.toString().padLeft(2, '0')}:${tgl.minute.toString().padLeft(2, '0')}';
+    } catch (_) {
+      // Coba ambil dari string langsung jika parse gagal
+      if (rawTime.length > 16) return rawTime.substring(11, 16);
+      return '';
+    }
   }
 
   String _formatWaktu(Map<String, dynamic> item) {
@@ -269,7 +319,6 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
   }
 
   Widget _buildOrderCard(Map<String, dynamic> item, int index) {
-    // TANGGUNG JAWAB FIX: TAMPILIN KODE RESI ASLI DARI DATABASE
     String idTampil = item['kode_resi']?.toString() ?? '-';
 
     String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
@@ -277,12 +326,14 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
     String harga = formatRupiah(item['total_harga']);
     String status = item['status_pesanan'] ?? 'PROSES';
 
+    // Tanggal, bulan, tahun & jam
+    String tanggal = _formatTanggal(item);
+    String jam = _formatJam(item);
+
     List<String> daftarItem = ringkasanLengkap.split(', ').where((e) => e.isNotEmpty).toList();
 
     bool isExpanded = _expandedIndexes.contains(index);
     List<String> tampilItem = isExpanded ? daftarItem : daftarItem.take(2).toList();
-
-    String waktuTampil = _formatWaktu(item);
 
     Color statusColor = status == 'SELESAI'
         ? AppColors.success
@@ -304,14 +355,71 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
+                // ==========================================
+                // BARIS 1: Kode resi + tanggal & jam
+                // ==========================================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    CustomText(idTampil, color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold),
-                    CustomText(waktuTampil, fontSize: 11, color: AppColors.textHint, fontWeight: FontWeight.bold),
+                    // Kiri: kode resi + tanggal & jam di bawahnya
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          idTampil,
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        if (tanggal.isNotEmpty || jam.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Row(
+                              children: [
+                                if (tanggal.isNotEmpty)
+                                  CustomText(
+                                    tanggal,
+                                    fontSize: 10,
+                                    color: AppColors.textHint,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                if (tanggal.isNotEmpty && jam.isNotEmpty)
+                                  const CustomText(
+                                    '  •  ',
+                                    fontSize: 10,
+                                    color: AppColors.textHint,
+                                  ),
+                                if (jam.isNotEmpty)
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time,
+                                        size: 10,
+                                        color: AppColors.textHint,
+                                      ),
+                                      const SizedBox(width: 2),
+                                      CustomText(
+                                        jam,
+                                        fontSize: 10,
+                                        color: AppColors.textHint,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
+
                 const SizedBox(height: 8),
+
+                // ==========================================
+                // BARIS 2: Nama pemesan + status
+                // ==========================================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -322,18 +430,27 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         Icon(Icons.circle, color: statusColor, size: 10),
                         const SizedBox(width: 4),
-                        CustomText(status == 'SELESAI' ? 'Selesai' : 'Dibatalkan',
-                            fontSize: 10, fontWeight: FontWeight.bold),
+                        CustomText(
+                          status == 'SELESAI' ? 'Selesai' : 'Dibatalkan',
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ]),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
+
+                // ==========================================
+                // DAFTAR BARANG (EXPANDABLE)
+                // ==========================================
                 ...tampilItem.map((barang) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Padding(padding: EdgeInsets.only(top: 4),
-                        child: Icon(Icons.circle, size: 5, color: AppColors.textBrown)),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4),
+                      child: Icon(Icons.circle, size: 5, color: AppColors.textBrown),
+                    ),
                     const SizedBox(width: 6),
                     Expanded(child: CustomText(barang,
                         fontSize: 12, color: AppColors.textBrown, fontWeight: FontWeight.w600)),
@@ -358,13 +475,18 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                           fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600,
                         ),
                         const SizedBox(width: 2),
-                        Icon(isExpanded ? Icons.expand_less : Icons.expand_more, size: 14, color: AppColors.primary),
+                        Icon(isExpanded ? Icons.expand_less : Icons.expand_more,
+                            size: 14, color: AppColors.primary),
                       ]),
                     ),
                   ),
                 const SizedBox(height: 6),
                 _buildDashedLine(),
                 const SizedBox(height: 10),
+
+                // ==========================================
+                // BARIS BAWAH: Total harga
+                // ==========================================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
