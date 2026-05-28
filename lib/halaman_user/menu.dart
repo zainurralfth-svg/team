@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'product_detail.dart';
 import '../Backend/api_service.dart';
 import '../halaman_user/profil_pengguna.dart';
-import '../Core/Colour.dart'; // IMPORT GUDANG WARNA (Palet 14 Warna Baru)
+import '../Core/Colour.dart'; 
 import 'package:shared_preferences/shared_preferences.dart';
 
-// PASTIKAN IMPORT FILE NAVBAR CUSTOM LO DISINI YAH BRO!
 import '../Widget/custom_user_navbar.dart'; 
 
 // =============================================
-// ANIMASI TRANSISI HALAMAN — gaya Instagram
+// ANIMASI TRANSISI HALAMAN
 // =============================================
 PageRoute instagramSlideRoute(Widget page) {
   return PageRouteBuilder(
@@ -57,9 +56,9 @@ class _MenuPageState extends State<MenuPage> {
   List<dynamic> _menuDariDatabase = [];
   bool _isLoading = true;
 
-  // VARIABEL BARU: Menyimpan jumlah item di keranjang
   int _cartItemCount = 0; 
-  // Variabel untuk fitur pencarian
+  List<dynamic> _isiKeranjang = []; 
+  
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -78,10 +77,9 @@ class _MenuPageState extends State<MenuPage> {
   void initState() {
     super.initState();
     _ambilDataMenu();
-    _loadUserId(); // Ambil jumlah keranjang saat start
+    _loadUserId(); 
   }
 
-  // Fungsi ambil semua data menu dari API
   Future<void> _ambilDataMenu() async {
     try {
       final data = await ApiService.getMenu();
@@ -98,25 +96,22 @@ class _MenuPageState extends State<MenuPage> {
     }
   }
 
-  // FUNGSI BARU: Ambil ID dari memori HP
   Future<void> _loadUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
         currentUserId = prefs.getString('id_user') ?? "0";
       });
-
-      // Setelah dapat ID asli, baru kita hitung keranjangnya
       _ambilDataKeranjang(); 
     }
   }
 
-  // FUNGSI BARU: Mengambil jumlah item yang ada di keranjang dari database
   Future<void> _ambilDataKeranjang() async {
     try {
       final data = await ApiService.getKeranjang(currentUserId);
       if (mounted) {
         setState(() {
+          _isiKeranjang = data; 
           _cartItemCount = data.length;
         });
       }
@@ -139,7 +134,7 @@ class _MenuPageState extends State<MenuPage> {
         description: description,
         stok: stok,
       )),
-    ).then((_) => _ambilDataKeranjang()); // Update angka saat kembali dari detail
+    ).then((_) => _ambilDataKeranjang()); 
   }
 
   @override
@@ -150,9 +145,9 @@ class _MenuPageState extends State<MenuPage> {
     final double categoryBtnWidth = (screenWidth - 32 - 32) / 5;
 
     return Scaffold(
-      backgroundColor: AppColors.bgUtama, // Pakai krem dari palet
+      backgroundColor: AppColors.bgUtama, 
       appBar: AppBar(
-        backgroundColor: AppColors.primary, // Pakai oranye dari palet
+        backgroundColor: AppColors.primary, 
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Image.asset(
@@ -164,16 +159,13 @@ class _MenuPageState extends State<MenuPage> {
           ),
         ),
         actions: [
-          // =============================================
-          // IKON KERANJANG DENGAN BADGE NOTIFIKASI
-          // =============================================
           Padding(
             padding: const EdgeInsets.only(right: 16.0, top: 5),
             child: Stack(
               alignment: Alignment.topRight,
               children: [
                 CircleAvatar(
-                  backgroundColor: AppColors.bgCard, // Pakai background terang
+                  backgroundColor: AppColors.bgCard, 
                   child: IconButton(
                     icon: const Icon(Icons.shopping_cart, color: AppColors.primary),
                     onPressed: () => Navigator.pushNamed(context, '/keranjang').then((_) => _ambilDataKeranjang()),
@@ -186,7 +178,7 @@ class _MenuPageState extends State<MenuPage> {
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
-                        color: AppColors.error, // Warna merah error untuk notifikasi badge
+                        color: AppColors.error, 
                         shape: BoxShape.circle,
                       ),
                       constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
@@ -208,14 +200,12 @@ class _MenuPageState extends State<MenuPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Banner Kategori
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: Image.asset(
                   'assets/images/$activeBanner',
                   width: double.infinity, 
                   height: 180, 
-                  // INI PERBAIKANNYA BIAR GAK KEPOTONG ATASNYA BRO
                   fit: BoxFit.fitWidth, 
                   errorBuilder: (c, e, s) => Container(
                     width: double.infinity, height: 180,
@@ -226,7 +216,6 @@ class _MenuPageState extends State<MenuPage> {
               ),
               const SizedBox(height: 16),
 
-              // Search Bar
               TextField(
                 controller: _searchController, 
                 onChanged: (value) {
@@ -234,7 +223,7 @@ class _MenuPageState extends State<MenuPage> {
                     _searchQuery = value.toLowerCase(); 
                   });
                 },
-                style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark), // Tambah warna font ketikan
+                style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark), 
                 decoration: InputDecoration(
                   hintText: 'Search Produk',
                   hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint),
@@ -247,7 +236,6 @@ class _MenuPageState extends State<MenuPage> {
               ),
               const SizedBox(height: 16),
 
-              // Tab Kategori
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(_categories.length, (index) {
@@ -259,7 +247,7 @@ class _MenuPageState extends State<MenuPage> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
                         decoration: BoxDecoration(
-                          color: isActive ? AppColors.primary : AppColors.bgCard, // Pakai primary kalau aktif, bgCard kalau tidak
+                          color: isActive ? AppColors.primary : AppColors.bgCard, 
                           borderRadius: BorderRadius.circular(25),
                           border: Border.all(color: AppColors.primaryDark, width: isActive ? 2 : 1), 
                         ),
@@ -284,8 +272,7 @@ class _MenuPageState extends State<MenuPage> {
               ),
               const SizedBox(height: 16),
 
-              // Grid Produk
-             Builder(
+              Builder(
                 builder: (context) {
                   if (_isLoading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
 
@@ -339,16 +326,13 @@ class _MenuPageState extends State<MenuPage> {
         ),   
       ),    
             
-      // ==============================================================
-      // MANGGIL CUSTOM NAVBAR PELANGGAN (INDEKS 1 = Produk)
-      // ==============================================================
       bottomNavigationBar: CustomUserNavbar(
-        currentIndex: 1, // Posisi 1 = Halaman Produk
+        currentIndex: 1, 
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/cek_pesanan'); // Ganti kalau route-nya beda
+            Navigator.pushReplacementNamed(context, '/cek_pesanan'); 
           } else if (index == 1) {
-            // Biarin kosong, udah di sini
+            // Biarin kosong
           } else if (index == 2) {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProfil()));
           }
@@ -360,6 +344,21 @@ class _MenuPageState extends State<MenuPage> {
   Widget _buildProductCard(BuildContext context, String idMenu, String name, String price,
       String imgUrl, String description, String stok,
       Color cardColor, Color borderColor, Color textColor, Color btnColor) {
+    
+    // Cek jumlah barang di keranjang
+    int qtyDiKeranjang = 0;
+    for (var item in _isiKeranjang) {
+      if (item['id_produk'].toString() == idMenu) {
+        qtyDiKeranjang = int.tryParse(item['jumlah'].toString()) ?? 0;
+        break;
+      }
+    }
+    int sisaStok = int.tryParse(stok) ?? 0;
+    bool isStokHabis = sisaStok <= 0;
+    
+    // Ganti nama variabel biar logicnya lebih klop sama konsep "Habis Diambil"
+    bool isHabisDiambil = qtyDiKeranjang >= sisaStok;
+
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
@@ -371,47 +370,46 @@ class _MenuPageState extends State<MenuPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-  child: GestureDetector(
-    onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description, stok),
-    child: Hero(
-      tag: 'product-$name',
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-            child: Image.network(
-              imgUrl,
-              width: double.infinity, fit: BoxFit.cover,
-              errorBuilder: (c, e, s) => Container(color: btnColor.withOpacity(0.2), child: Center(child: Icon(Icons.fastfood, color: btnColor, size: 40))),
-            ),
-          ),
-          // Badge "Habis" di pojok kiri atas kalau stok 0
-          if ((int.tryParse(stok) ?? 0) <= 0)
-            Positioned(
-              top: 8,
-              left: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.error,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'Habis',
-                  style: TextStyle(
-                    fontFamily: 'Signika Negative',
-                    color: AppColors.textWhite,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
+            child: GestureDetector(
+              onTap: () => _goToDetail(context, idMenu, name, price, imgUrl, description, stok),
+              child: Hero(
+                tag: 'product-$name',
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                      child: Image.network(
+                        imgUrl,
+                        width: double.infinity, fit: BoxFit.cover,
+                        errorBuilder: (c, e, s) => Container(color: btnColor.withOpacity(0.2), child: Center(child: Icon(Icons.fastfood, color: btnColor, size: 40))),
+                      ),
+                    ),
+                    if (isStokHabis)
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.error,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'Habis',
+                            style: TextStyle(
+                              fontFamily: 'Signika Negative',
+                              color: AppColors.textWhite,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
-        ],
-      ),
-    ),
-  ),
-),
+          ),
 
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -430,61 +428,78 @@ class _MenuPageState extends State<MenuPage> {
                       child: const Text('Details', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 10, decoration: TextDecoration.underline, color: AppColors.primaryDark, fontWeight: FontWeight.w600)), 
                     ),
                     GestureDetector(
-                    onTap: (int.tryParse(stok) ?? 0) <= 0
-                    ? () {
-                    // Stok habis — tampilkan snackbar, gak bisa order
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                     SnackBar(
-                       content: Text('$name sedang kehabisan stok 😔', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                       backgroundColor: AppColors.error,
-                       behavior: SnackBarBehavior.floating,
-                       margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                       duration: const Duration(milliseconds: 1800),
-                      ),
-                     );
-                    }
-                    : () async {
-                    // Stok ada — lanjut order seperti biasa
-                    var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
-                    if (!mounted) return;
-                    if (response['status'] == 'sukses') {
-                    setState(() => _cartItemCount++);
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                     SnackBar(
-                      content: Text('$name ditambahkan pada keranjang! 🛒', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                      backgroundColor: AppColors.success,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      duration: const Duration(milliseconds: 1500),
-                      ),
-                     );
-                    } else {
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                     SnackBar(
-                      content: Text('Gagal: ${response['pesan']}', style: const TextStyle(fontFamily: 'Signika Negative')),
-                      backgroundColor: AppColors.error,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                      duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                },
-                       child: Container(
-                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                       decoration: BoxDecoration(
-                       // Kalau habis, tombol jadi abu-abu
-                       color: (int.tryParse(stok) ?? 0) <= 0 ? Colors.grey.shade400 : btnColor,
-                       borderRadius: BorderRadius.circular(10),
-                       ),
-                       child: Text(
-                       (int.tryParse(stok) ?? 0) <= 0 ? 'Habis' : '+ Order',
-                        style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold),
+                      onTap: isStokHabis
+                          ? () {
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('$name sedang kehabisan stok 😔', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+                                  backgroundColor: AppColors.error,
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                  duration: const Duration(milliseconds: 1800),
+                                ),
+                              );
+                            }
+                          : isHabisDiambil
+                              ? () {
+                                  // Munculin peringatan kalau stok habis karena udah masuk keranjang semua
+                                  ScaffoldMessenger.of(context).clearSnackBars();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Stok udah habis masuk keranjang anda sekarang', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+                                      backgroundColor: AppColors.error,
+                                      behavior: SnackBarBehavior.floating,
+                                      margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                      duration: const Duration(milliseconds: 1800),
+                                    ),
+                                  );
+                                }
+                              : () async {
+                                  // Masukin keranjang kalau aman
+                                  var response = await ApiService.tambahKeranjang(currentUserId, idMenu, 1);
+                                  if (!mounted) return;
+                                  if (response['status'] == 'sukses') {
+                                    // Refresh data biar UI langsung update
+                                    _ambilDataKeranjang(); 
+                                    
+                                    ScaffoldMessenger.of(context).clearSnackBars();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('$name ditambahkan pada keranjang! 🛒', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+                                        backgroundColor: AppColors.success,
+                                        behavior: SnackBarBehavior.floating,
+                                        margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                        duration: const Duration(milliseconds: 1500),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).clearSnackBars();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Gagal: ${response['pesan']}', style: const TextStyle(fontFamily: 'Signika Negative')),
+                                        backgroundColor: AppColors.error,
+                                        behavior: SnackBarBehavior.floating,
+                                        margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                                        duration: const Duration(seconds: 2),
+                                      ),
+                                    );
+                                  }
+                                },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          // Tombol abu-abu kalau stok habis atau udah diambil maksimal ke keranjang
+                          color: (isStokHabis || isHabisDiambil) ? Colors.grey.shade400 : btnColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          // PERUBAHAN TEKS: Kalau habis dari sananya ATAU udah habis diambil -> tulis "Habis"
+                          (isStokHabis || isHabisDiambil) ? 'Habis' : '+ Order',
+                          style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 10, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),

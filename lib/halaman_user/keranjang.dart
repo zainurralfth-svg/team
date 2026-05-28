@@ -50,13 +50,39 @@ class _KeranjangPageState extends State<KeranjangPage> {
     }
   }
 
+  // =========================================================
+  // LOGIKA BARU: DITAMBAHIN ANTI-SPAM BIAR GAK BABLAS
+  // =========================================================
   Future<void> _updateJumlah(String idProduk, int delta) async {
+    // 1. CEGAH SPAM KLIK (Kalau lagi loading lapor database, abaikan klik)
+    if (_isLoading) return;
+
     final item = _cartItems.firstWhere(
       (e) => e['id_produk'].toString() == idProduk,
     );
+    
     int jumlahSekarang = int.tryParse(item['jumlah'].toString()) ?? 1;
-    if (delta == -1 && jumlahSekarang <= 1) return;
+    
+    // Kalau di PHP lu gak ada stok, kita anggap 999 biar gak error (TAPI HARUSNYA ADA YA BRO!)
+    int maxStok = item['stok'] != null ? (int.tryParse(item['stok'].toString()) ?? 999) : 999;
 
+    // 2. VALIDASI BATAS BAWAH DAN ATAS
+    if (delta == -1 && jumlahSekarang <= 1) return;
+    if (delta == 1 && jumlahSekarang >= maxStok) {
+      // Kasih pop up peringatan kalau maksa neken +
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: CustomText("Mentok bro! Sisa stok cuma $maxStok 😅", color: Colors.white, fontWeight: FontWeight.bold),
+          backgroundColor: AppColors.error,
+          duration: const Duration(milliseconds: 1500),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return; // Berhenti di sini, gak usah lapor database
+    }
+
+    // 3. AMAN, LANJUT LAPOR DATABASE
     setState(() => _isLoading = true);
     final response = await ApiService.tambahKeranjang(
       currentUserId,
@@ -188,11 +214,11 @@ class _KeranjangPageState extends State<KeranjangPage> {
                           'Rp ${item['harga']}',
                           int.tryParse(item['jumlah'].toString()) ?? 1,
                           Uri.encodeFull("${ApiService.baseUrl}/uploads/${item['gambar']}"),
+                          int.tryParse(item['stok']?.toString() ?? '999') ?? 999, // Ambil stok
                         );
                       },
                     ),
                     const SizedBox(height: 25),
-                    // KOLOM CATATAN SUDAH DIHAPUS DARI SINI
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -280,7 +306,11 @@ class _KeranjangPageState extends State<KeranjangPage> {
     );
   }
 
-  Widget _buildCartCard(String idProduk, String nama, String harga, int jumlah, String imgUrl) {
+  Widget _buildCartCard(String idProduk, String nama, String harga, int jumlah, String imgUrl, int stok) {
+    bool isMinusDisabled = jumlah <= 1;
+    // Tombol plus langsung dikunci (isPlusDisabled = true) kalau udah nyentuh batas stok aslinya
+    bool isPlusDisabled = jumlah >= stok;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(12),
@@ -330,9 +360,10 @@ class _KeranjangPageState extends State<KeranjangPage> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
+                    // TOMBOL MINUS
                     GestureDetector(
-                      onTap: () => _updateJumlah(idProduk, -1),
-                      child: _buildQtyBtn('-'),
+                      onTap: isMinusDisabled ? null : () => _updateJumlah(idProduk, -1),
+                      child: _buildQtyBtn('-', isDisabled: (isMinusDisabled || _isLoading)),
                     ),
                     SizedBox(
                       width: 30, 
@@ -340,9 +371,12 @@ class _KeranjangPageState extends State<KeranjangPage> {
                         child: CustomText('$jumlah', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark) 
                       )
                     ),
+                    // TOMBOL PLUS
                     GestureDetector(
-                      onTap: () => _updateJumlah(idProduk, 1),
-                      child: _buildQtyBtn('+'),
+                      onTap: isPlusDisabled 
+                          ? () => _updateJumlah(idProduk, 1) // Sengaja dilempar ke fungsi biar munculin snackbar mentok
+                          : () => _updateJumlah(idProduk, 1),
+                      child: _buildQtyBtn('+', isDisabled: (isPlusDisabled || _isLoading)),
                     ),
                     const Spacer(),
                     GestureDetector(
@@ -363,16 +397,19 @@ class _KeranjangPageState extends State<KeranjangPage> {
     );
   }
 
-  Widget _buildQtyBtn(String title) {
-    return Container(
-      width: 25,
-      height: 25,
-      decoration: BoxDecoration(
-        color: AppColors.bgInput, 
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Center(
-        child: CustomText(title, fontWeight: FontWeight.bold, color: AppColors.textDark),
+  Widget _buildQtyBtn(String title, {bool isDisabled = false}) {
+    return Opacity(
+      opacity: isDisabled ? 0.4 : 1.0,
+      child: Container(
+        width: 25,
+        height: 25,
+        decoration: BoxDecoration(
+          color: AppColors.bgInput, 
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Center(
+          child: CustomText(title, fontWeight: FontWeight.bold, color: AppColors.textDark),
+        ),
       ),
     );
   }

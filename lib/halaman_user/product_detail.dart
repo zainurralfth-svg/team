@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; // IMPORT GUDANG WARNA (Palet 14 Warna Baru)
+import '../Backend/api_service.dart'; // Pastikan path ini benar
+import '../Core/Colour.dart'; 
 
 class ProductDetailPage extends StatefulWidget {
-  // Parameter yang diterima dari halaman menu
   final String idMenu;
   final String name;
   final String price;
   final String image;
   final String description;
-  final String stok;
+  final String stok; // Tetap dikirim, sebagai cadangan/awal
 
   const ProductDetailPage({
     super.key,
@@ -25,47 +25,56 @@ class ProductDetailPage extends StatefulWidget {
 }
 
 class _ProductDetailPageState extends State<ProductDetailPage> with SingleTickerProviderStateMixin {
-  // Controller untuk mengatur animasi
   late AnimationController _controller;
-
-  // Animasi fade: konten muncul dari transparan ke terlihat
   late Animation<double> _fadeAnim;
-
-  // Animasi slide: konten bergerak dari bawah ke posisi normal
   late Animation<Offset> _slideAnim;
+  
+  // Variabel untuk stok real-time
+  int _stokRealtime = 0;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    // Inisialisasi awal pakai stok dari widget, sambil nunggu API
+    _stokRealtime = int.tryParse(widget.stok) ?? 0;
+    
+    // Langsung cek ke database begitu halaman dibuka
+    _fetchStokTerbaru();
 
-    // Inisialisasi animasi dengan durasi 500ms
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-
-    // Fade: dari 0 (transparan) ke 1 (terlihat penuh)
-    _fadeAnim = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    );
-
-    // Slide: konten bergerak dari sedikit di bawah (0.15) ke posisi asli (0)
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.15),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
-
-    // Jalankan animasi saat halaman dibuka
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _controller.forward();
+  }
+
+  // FUNGSI INI YANG AKAN NGE-PING DATABASE
+  Future<void> _fetchStokTerbaru() async {
+    try {
+      final data = await ApiService.getMenu(); 
+      
+      // TAMBAHAN: Kita print buat ngintip datanya di terminal VS Code
+      print("DATA API YANG DITERIMA: $data");
+      
+      final produk = data.firstWhere((p) => p['id_produk'].toString() == widget.idMenu);
+      
+      // TAMBAHAN: Print stok spesifik produk ini
+      print("STOK PRODUK ${produk['nama_produk']} ADALAH: ${produk['stok']}");
+      
+      if (mounted) {
+        setState(() {
+          _stokRealtime = int.tryParse(produk['stok'].toString()) ?? 0;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("ERROR FETCH STOK: $e");
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
   void dispose() {
-    // Bersihkan controller saat halaman ditutup agar tidak memory leak
     _controller.dispose();
     super.dispose();
   }
@@ -73,15 +82,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgUtama, // Pakai background utama krem
+      backgroundColor: AppColors.bgUtama,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          // =============================================
-          // FOTO PRODUK — mengisi 40% tinggi layar
-          // Hero: animasi transisi gambar dari halaman menu ke sini
-          // =============================================
           Hero(
             tag: 'product-${widget.name}',
             child: SizedBox(
@@ -90,122 +94,36 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
               child: Image.network(
                 widget.image,
                 fit: BoxFit.cover,
-                // Tampilkan icon jika gambar gagal dimuat
                 errorBuilder: (c, e, s) => Container(
-                  color: AppColors.bgInput, // Placeholder gambar error pakai warna input abu-krem
-                  child: const Center(
-                    child: Icon(Icons.cake, size: 80, color: AppColors.primaryDark), // Icon pakai oranye gelap
-                  ),
+                  color: AppColors.bgInput,
+                  child: const Center(child: Icon(Icons.cake, size: 80, color: AppColors.primaryDark)),
                 ),
               ),
             ),
           ),
-
-          // =============================================
-          // KONTEN BAWAH — nama, deskripsi, harga, stok
-          // Dibungkus FadeTransition + SlideTransition
-          // supaya muncul dengan animasi saat halaman dibuka
-          // =============================================
           Expanded(
             child: FadeTransition(
-              opacity: _fadeAnim, // animasi fade in
+              opacity: _fadeAnim,
               child: SlideTransition(
-                position: _slideAnim, // animasi geser dari bawah
+                position: _slideAnim,
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
-                      // Nama produk — bold italic sesuai desain
-                      Text(
-                        widget.name,
-                        style: const TextStyle(
-                          fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.textDark, // Pakai teks gelap
-                          height: 1.2,
-                        ),
-                      ),
+                      Text(widget.name, style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 22, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, color: AppColors.textDark, height: 1.2)),
                       const SizedBox(height: 10),
-
-                      // Deskripsi produk — rata kanan kiri
-                      Text(
-                        widget.description,
-                        textAlign: TextAlign.justify,
-                        style: const TextStyle(
-                          fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
-                          fontSize: 13,
-                          color: AppColors.textBrown, // Pakai teks coklat
-                          height: 1.65,
-                        ),
-                      ),
+                      Text(widget.description, textAlign: TextAlign.justify, style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 13, color: AppColors.textBrown, height: 1.65)),
                       const SizedBox(height: 18),
-
-                      // Label Harga
-                      const Text(
-                        'Harga',
-                        style: TextStyle(
-                          fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.textDark, // Pakai teks gelap
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-
-                      // Nilai harga dari halaman menu
-                      Text(
-                        widget.price,
-                        style: const TextStyle(
-                          fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
-                          fontSize: 15, 
-                          color: AppColors.textBrown,
-                        ), // Pakai teks coklat
-                      ),
+                      const Text('Harga', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, color: AppColors.textDark)),
+                      Text(widget.price, style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, color: AppColors.textBrown)),
                       const SizedBox(height: 14),
-
-                      // Label Stock
-                      const Text(
-                        'Stock',
-                        style: TextStyle(
-                          fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.textDark, // Pakai teks gelap
-                        ),
-                      ),
+                      const Text('Stock', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, color: AppColors.textDark)),
                       const SizedBox(height: 4),
 
-                      // Nilai stok + keterangan tersedia/habis
-                      // Jika stok > 0 tampil hijau "(tersedia)", jika 0 tampil merah "(habis)"
-                     Builder(
-                      builder: (context) {
-                      // Clamp: stok gak boleh tampil negatif, minimal 0
-                      final int stokAngka = (int.tryParse(widget.stok) ?? 0).clamp(0, 999999);
-                      final bool tersedia = stokAngka > 0;
-                      return Text.rich(
-                       TextSpan(
-                       text: '$stokAngka ',
-                         style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, color: AppColors.textBrown),
-                          children: [
-                          TextSpan(
-                          text: tersedia ? '(tersedia)' : '(habis)',
-                            style: TextStyle(
-                            fontFamily: 'Signika Negative',
-                            fontStyle: FontStyle.italic,
-                            color: tersedia ? AppColors.success : AppColors.error,
-                            ),
-                           ),
-                          ],
-                         ),
-                        );
-                       },
-                      ),
+                      // DISPLAY STOK LIVE
+                      _buildStokDisplay(),
+                      
                       const SizedBox(height: 30),
                     ],
                   ),
@@ -213,11 +131,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
               ),
             ),
           ),
-
-          // =============================================
-          // TOMBOL BACK — pojok kanan bawah
-          // Kembali ke halaman menu sebelumnya
-          // =============================================
           Padding(
             padding: const EdgeInsets.only(right: 22, bottom: 18),
             child: Align(
@@ -225,22 +138,38 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
               child: OutlinedButton(
                 onPressed: () => Navigator.pop(context),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.textDark, // Pakai teks gelap
-                  side: const BorderSide(color: AppColors.textDark, width: 1.5), // Pakai border gelap
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  ),
+                  foregroundColor: AppColors.textDark,
+                  side: const BorderSide(color: AppColors.textDark, width: 1.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
                   padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
                 ),
-                child: const Text(
-                  'Back',
-                  style: TextStyle(
-                    fontFamily: 'Signika Negative', // <-- FONT DITAMBAHKAN
-                    fontWeight: FontWeight.bold, 
-                    fontSize: 14,
-                  ),
-                ),
+                child: const Text('Back', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 14)),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget terpisah biar kodenya rapi
+  Widget _buildStokDisplay() {
+    if (_isLoading) {
+      return const Text("Memuat stok...", style: TextStyle(fontFamily: 'Signika Negative', fontSize: 14, color: Colors.grey));
+    }
+    
+    final bool tersedia = _stokRealtime > 0;
+    return Text.rich(
+      TextSpan(
+        text: '$_stokRealtime ',
+        style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, color: AppColors.textBrown),
+        children: [
+          TextSpan(
+            text: tersedia ? '(tersedia)' : '(habis)',
+            style: TextStyle(
+              fontFamily: 'Signika Negative',
+              fontStyle: FontStyle.italic,
+              color: tersedia ? AppColors.success : AppColors.error,
             ),
           ),
         ],
