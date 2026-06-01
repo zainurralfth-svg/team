@@ -9,7 +9,6 @@ class ApiService {
   // Gunakan IP Address laptop (misal: 192.168.1.5) untuk HP Fisik
   // =========================================================
   static const String baseUrl = "http://localhost/api_puddingku";
-
   // =========================================================
   // HELPER: Decode JSON aman agar aplikasi tidak crash
   // =========================================================
@@ -294,8 +293,8 @@ class ApiService {
       var response = await http.post(
         url,
         body: {
-          'id_user': idUser, 
-          'nama_pemesan': nama, 
+          'id_user': idUser,
+          'nama_pemesan': nama,
           'no_telp': noTelp,
           'catatan': catatan, // <-- TAMBAHAN 2: Ngirim catatan ke checkout.php
         },
@@ -346,10 +345,7 @@ class ApiService {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/update_status_pesanan.php"),
-        body: {
-          "id": idPesanan,
-          "status": statusBaru,
-        },
+        body: {"id": idPesanan, "status": statusBaru},
       );
       return _safeDecodeMap(response.body);
     } catch (e) {
@@ -426,20 +422,18 @@ class ApiService {
       return {"status": "error", "pesan": "Koneksi API gagal: $e"};
     }
   }
+
   // ==========================================
   // TAMBAHAN: UPDATE CATATAN PESANAN
   // ==========================================
   static Future<Map<String, dynamic>> updateCatatan(
-    String idPesanan, 
-    String catatanBaru
+    String idPesanan,
+    String catatanBaru,
   ) async {
     try {
       var response = await http.post(
         Uri.parse("$baseUrl/update_catatan.php"),
-        body: {
-          "id": idPesanan,
-          "catatan": catatanBaru,
-        },
+        body: {"id": idPesanan, "catatan": catatanBaru},
       );
       return _safeDecodeMap(response.body);
     } catch (e) {

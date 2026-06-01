@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // <-- WAJIB IMPORT INI UNTUK FILTER INPUT ANGKA!
 import '../Core/Colour.dart'; // Palet 14 Warna Baru
-import '../Backend/API_Service.dart'; 
+import '../Backend/API_Service.dart';
 import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
 
-class RegisterPage extends StatefulWidget { 
-  const RegisterPage({super.key}); 
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> { 
+class _RegisterPageState extends State<RegisterPage> {
   // Controller untuk membaca data yang diketik oleh user
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  
-  // State untuk visibilitas password
-  bool _passwordVisible = false; 
 
-  @override 
+  // State untuk visibilitas password
+  bool _passwordVisible = false;
+
+  @override
   void dispose() {
     // Membersihkan memori saat halaman ditutup
     _namaController.dispose();
@@ -44,20 +45,35 @@ class _RegisterPageState extends State<RegisterPage> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 150, left: 20, right: 20),
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height - 150,
+            left: 20,
+            right: 20,
+          ),
           content: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: AppColors.error, // Menggunakan merah error baru
               borderRadius: BorderRadius.circular(15),
-              boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: const Offset(0, 4))],
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: const Row(
               children: [
                 Icon(Icons.error_outline, color: AppColors.textWhite, size: 24),
                 SizedBox(width: 12),
                 Expanded(
-                  child: CustomText('Semua data register harus diisi!', color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600),
+                  child: CustomText(
+                    'Semua data register harus diisi!',
+                    color: AppColors.textWhite,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -69,18 +85,23 @@ class _RegisterPageState extends State<RegisterPage> {
 
     // 2. Eksekusi Pengiriman ke API dengan Try-Catch
     try {
-      var hasil = await ApiService.registerUser(nama, username, phone, password); 
+      var hasil = await ApiService.registerUser(
+        nama,
+        username,
+        phone,
+        password,
+      );
 
       // 3. Menangani Respon dari Server
       if (hasil['status'] == 'sukses') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: CustomText(hasil['pesan']), 
+            content: CustomText(hasil['pesan']),
             backgroundColor: AppColors.success, // Menggunakan hijau sukses baru
             behavior: SnackBarBehavior.floating,
           ),
         );
-        
+
         // Bersihkan form
         _namaController.clear();
         _usernameController.clear();
@@ -95,7 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
         // Tampilkan error dari server (misal: Username sudah dipakai)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: CustomText(hasil['pesan']), 
+            content: CustomText(hasil['pesan']),
             backgroundColor: AppColors.error, // Menggunakan merah error baru
             behavior: SnackBarBehavior.floating,
           ),
@@ -105,7 +126,9 @@ class _RegisterPageState extends State<RegisterPage> {
       // Penanganan error jika server mati atau IP salah
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: CustomText('Gagal terhubung ke server! Cek koneksi / XAMPP.'), 
+          content: CustomText(
+            'Gagal terhubung ke server! Cek koneksi / XAMPP.',
+          ),
           backgroundColor: AppColors.error, // Menggunakan merah error baru
           behavior: SnackBarBehavior.floating,
         ),
@@ -120,14 +143,16 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Tetap true biar form nggak ketutup keyboard
-      resizeToAvoidBottomInset: true, 
-      backgroundColor: AppColors.bgUtama, 
-      
+      resizeToAvoidBottomInset: true,
+      backgroundColor: AppColors.bgUtama,
+
       // SafeArea KITA HAPUS di sini, biar gambar kue full sampai atas jam HP
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
-          double contentWidth = isDesktop ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9;
+          double contentWidth = isDesktop
+              ? constraints.maxWidth * 0.8
+              : constraints.maxWidth * 0.9;
 
           return Stack(
             children: [
@@ -136,11 +161,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 physics: const ClampingScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop),             // <-- Aman, nggak dirubah
+                    _buildHeader(isDesktop), // <-- Aman, nggak dirubah
                     const SizedBox(height: 20),
-                    _buildForm(contentWidth, isDesktop), // <-- Aman, nggak dirubah
-                    const SizedBox(height: 80),          
-                    _buildFooter(),                      // <-- Aman, nggak dirubah
+                    _buildForm(
+                      contentWidth,
+                      isDesktop,
+                    ), // <-- Aman, nggak dirubah
+                    const SizedBox(height: 80),
+                    _buildFooter(), // <-- Aman, nggak dirubah
                   ],
                 ),
               ),
@@ -161,16 +189,32 @@ class _RegisterPageState extends State<RegisterPage> {
         ClipPath(
           clipper: HeaderClipper(),
           child: Container(
-            width: double.infinity, height: isDesktop ? 230 : 280,
+            width: double.infinity,
+            height: isDesktop ? 230 : 280,
             decoration: const BoxDecoration(
-              image: DecorationImage(image: AssetImage('assets/images/Dessert Box Banafe.png'), fit: BoxFit.cover, alignment: Alignment.center),
+              image: DecorationImage(
+                image: AssetImage('assets/images/Dessert Box Banafe.png'),
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+              ),
             ),
           ),
         ),
-        CustomPaint(size: Size(double.infinity, isDesktop ? 230 : 280), painter: HeaderPainter()),
+        CustomPaint(
+          size: Size(double.infinity, isDesktop ? 230 : 280),
+          painter: HeaderPainter(),
+        ),
         Positioned(
-          left: 10, top: 30,
-          child: IconButton(icon: const Icon(Icons.arrow_back, color: AppColors.textWhite, size: 30), onPressed: () => Navigator.pop(context)),
+          left: 10,
+          top: 30,
+          child: IconButton(
+            icon: const Icon(
+              Icons.arrow_back,
+              color: AppColors.textWhite,
+              size: 30,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
       ],
     );
@@ -188,13 +232,17 @@ class _RegisterPageState extends State<RegisterPage> {
             // INI PERUBAHAN FONT OLEO SCRIPT NYA
             // =====================================
             const CustomText(
-              'Register', 
+              'Register',
               isOleo: true, // <-- PANGGIL SAKLARNYA!
-              color: AppColors.textDark, 
-              fontSize: 38, 
-              fontWeight: FontWeight.w900, 
+              color: AppColors.textDark,
+              fontSize: 38,
+              fontWeight: FontWeight.w900,
             ),
-            const CustomText('Register Untuk Membuat Akun', color: AppColors.textDark, fontSize: 18),
+            const CustomText(
+              'Register Untuk Membuat Akun',
+              color: AppColors.textDark,
+              fontSize: 18,
+            ),
             const SizedBox(height: 30),
 
             // Container Background Form
@@ -204,15 +252,44 @@ class _RegisterPageState extends State<RegisterPage> {
               decoration: BoxDecoration(
                 color: AppColors.primary, // Menggunakan oranye utama
                 borderRadius: BorderRadius.circular(30),
-                boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 5))],
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadow,
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildInputField('Nama Lengkap', 'Ketik Disini', Icons.badge_outlined, _namaController),
-                  _buildInputField('Username', 'Arif12309', Icons.person_outline, _usernameController),
-                  _buildInputField('Phone', '0812345678', Icons.phone_outlined, _phoneController),
-                  _buildInputField('Password', 'Minimal 6 Karakter', Icons.lock_outline, _passwordController, isPassword: true),
+                  _buildInputField(
+                    'Nama Lengkap',
+                    'Ketik Disini',
+                    Icons.badge_outlined,
+                    _namaController,
+                  ),
+                  _buildInputField(
+                    'Username',
+                    'Arif12309',
+                    Icons.person_outline,
+                    _usernameController,
+                  ),
+                  // DI SINI KITA SET UNTUK INPUT NOMOR HP (isPhone: true)
+                  _buildInputField(
+                    'Phone',
+                    '0812345678',
+                    Icons.phone_outlined,
+                    _phoneController,
+                    isPhone: true,
+                  ),
+                  _buildInputField(
+                    'Password',
+                    'Minimal 6 Karakter',
+                    Icons.lock_outline,
+                    _passwordController,
+                    isPassword: true,
+                  ),
                 ],
               ),
             ),
@@ -220,11 +297,23 @@ class _RegisterPageState extends State<RegisterPage> {
 
             // Tombol Eksekusi
             SizedBox(
-              width: isDesktop ? 350 : double.infinity, height: 55,
+              width: isDesktop ? 350 : double.infinity,
+              height: 55,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 5,
+                ),
                 onPressed: _prosesRegister,
-                child: const CustomText('REGISTER', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20),
+                child: const CustomText(
+                  'REGISTER',
+                  color: AppColors.textWhite,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
               ),
             ),
           ],
@@ -235,54 +324,116 @@ class _RegisterPageState extends State<RegisterPage> {
 
   // KOMPONEN 3: Footer Statis
   Widget _buildFooter() {
-    return Container( 
-      height: 65, width: double.infinity,
+    return Container(
+      height: 65,
+      width: double.infinity,
       decoration: const BoxDecoration(
         color: AppColors.primary, // Menggunakan oranye utama
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(5),
-            decoration: const BoxDecoration(color: AppColors.textWhite, shape: BoxShape.circle),
-            child: const Icon(Icons.cake, color: AppColors.primary, size: 28), 
+            decoration: const BoxDecoration(
+              color: AppColors.textWhite,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.cake, color: AppColors.primary, size: 28),
           ),
           const SizedBox(width: 10),
-          const CustomText('Puddingku', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold),
+          const CustomText(
+            'Puddingku',
+            color: AppColors.textWhite,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ],
       ),
     );
   }
 
-  // WIDGET REUSABLE: Input Field 
-  Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, {bool isPassword = false}) {
+  // WIDGET REUSABLE: Input Field (Sudah ditambahkan parameter isPhone)
+  Widget _buildInputField(
+    String label,
+    String hint,
+    IconData icon,
+    TextEditingController controller, {
+    bool isPassword = false,
+    bool isPhone = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomText(label, color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600),
+          CustomText(
+            label,
+            color: AppColors.textWhite,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
           const SizedBox(height: 10),
           Container(
-            decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(12)), // Background kolom input
+            decoration: BoxDecoration(
+              color: AppColors.bgInput,
+              borderRadius: BorderRadius.circular(12),
+            ), // Background kolom input
             child: TextField(
               controller: controller,
               obscureText: isPassword ? !_passwordVisible : false,
-              style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16, color: AppColors.textDark), // Teks warna gelap biar terbaca
+              // Ganti tipe keyboard jadi nomor jika isPhone bernilai true
+              keyboardType: isPhone ? TextInputType.number : TextInputType.text,
+              // Menambahkan filter agar hanya menerima angka dan membatasi maksimal 15 karakter
+              inputFormatters: isPhone
+                  ? [
+                      FilteringTextInputFormatter
+                          .digitsOnly, // Hanya boleh angka
+                      LengthLimitingTextInputFormatter(15), // Maksimal 15 digit
+                    ]
+                  : null,
+              style: const TextStyle(
+                fontFamily: 'Signika Negative',
+                fontSize: 16,
+                color: AppColors.textDark,
+              ), // Teks warna gelap biar terbaca
               decoration: InputDecoration(
-                prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24), // Ikon oranye gelap
+                prefixIcon: Icon(
+                  icon,
+                  color: AppColors.primaryDark,
+                  size: 24,
+                ), // Ikon oranye gelap
                 suffixIcon: isPassword
                     ? GestureDetector(
-                        onTap: () => setState(() => _passwordVisible = !_passwordVisible),
-                        child: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off, color: AppColors.textHint, size: 24),
+                        onTap: () => setState(
+                          () => _passwordVisible = !_passwordVisible,
+                        ),
+                        child: Icon(
+                          _passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.textHint,
+                          size: 24,
+                        ),
                       )
                     : null,
                 hintText: hint,
-                hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint, fontSize: 16),
+                hintStyle: const TextStyle(
+                  fontFamily: 'Signika Negative',
+                  color: AppColors.textHint,
+                  fontSize: 16,
+                ),
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 18,
+                  horizontal: 20,
+                ),
+                counterText:
+                    '', // Menghilangkan counter teks bawaan Flutter di pojok kanan bawah TextField
               ),
             ),
           ),
@@ -297,11 +448,33 @@ class _RegisterPageState extends State<RegisterPage> {
 // ==============================================================
 
 class HeaderClipper extends CustomClipper<Path> {
-  @override Path getClip(Size size) { Path path = Path(); path.lineTo(0, size.height); path.lineTo(size.width, size.height); path.lineTo(size.width, 0); path.close(); return path; }
-  @override bool shouldReclip(oldClipper) => false;
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    path.lineTo(0, size.height);
+    path.lineTo(size.width, size.height);
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(oldClipper) => false;
 }
 
 class HeaderPainter extends CustomPainter {
-  @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.textBrown..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); }
-  @override bool shouldRepaint(oldDelegate) => false;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.textBrown
+      ..strokeWidth = 7.0
+      ..style = PaintingStyle.stroke;
+    final path = Path();
+    path.moveTo(0, size.height);
+    path.lineTo(size.width, size.height);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(oldDelegate) => false;
 }
