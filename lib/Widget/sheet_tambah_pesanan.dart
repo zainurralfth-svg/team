@@ -178,7 +178,7 @@ class _SheetTambahPesananState extends State<SheetTambahPesanan> {
                 child: listPencarian.isEmpty 
                   ? Padding(
                       padding: const EdgeInsets.all(15.0),
-                      child: CustomText('Menu "$keyword" tidak ditemukan bro!', color: Colors.grey[600], fontSize: 14),
+                      child: CustomText('Menu "$keyword" tidak ditemukan', color: Colors.grey[600], fontSize: 14),
                     )
                   : ListView.builder(
                       shrinkWrap: true,
@@ -286,7 +286,7 @@ class _SheetTambahPesananState extends State<SheetTambahPesanan> {
                                   setState(() => _jumlahPesanan[idProduk] = qtySekarang + 1);
                                 } else {
                                   ScaffoldMessenger.of(context).clearSnackBars();
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('⚠️ Maksimal stok sisa $maxStok bro!'), backgroundColor: AppColors.error));
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('⚠️ Maksimal stok sisa $maxStok'), backgroundColor: AppColors.error));
                                 }
                               },
                               child: const Icon(Icons.add_circle_outline, color: Colors.green, size: 28),
@@ -313,7 +313,7 @@ class _SheetTambahPesananState extends State<SheetTambahPesanan> {
                 ElevatedButton.icon(
                   onPressed: () async {
                     if (_namaController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nama pemesan wajib diisi ya bro!'), backgroundColor: Colors.red));
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nama pemesan wajib diisi ya'), backgroundColor: Colors.red));
                       return;
                     }
 
@@ -332,7 +332,7 @@ class _SheetTambahPesananState extends State<SheetTambahPesanan> {
                     }
 
                     if (listKeranjangFix.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih minimal 1 menu dulu bro!'), backgroundColor: Colors.red));
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih minimal 1 menu dulu'), backgroundColor: Colors.red));
                       return;
                     }
 
