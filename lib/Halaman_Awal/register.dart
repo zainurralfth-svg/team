@@ -83,6 +83,51 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
+    // 1b. Validasi Minimal Karakter Password
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height - 150,
+            left: 20,
+            right: 20,
+          ),
+          content: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.error,
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.error_outline, color: AppColors.textWhite, size: 24),
+                SizedBox(width: 12),
+                Expanded(
+                  child: CustomText(
+                    'Password minimal harus 6 karakter!',
+                    color: AppColors.textWhite,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
     // 2. Eksekusi Pengiriman ke API dengan Try-Catch
     try {
       var hasil = await ApiService.registerUser(
@@ -142,11 +187,8 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Tetap true biar form nggak ketutup keyboard
       resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.bgUtama,
-
-      // SafeArea KITA HAPUS di sini, biar gambar kue full sampai atas jam HP
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
@@ -157,18 +199,14 @@ class _RegisterPageState extends State<RegisterPage> {
           return Stack(
             children: [
               SingleChildScrollView(
-                // GANTI INI AJA: Biar pas di-scroll mentok nggak ketarik/mantul
                 physics: const ClampingScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop), // <-- Aman, nggak dirubah
+                    _buildHeader(isDesktop),
                     const SizedBox(height: 20),
-                    _buildForm(
-                      contentWidth,
-                      isDesktop,
-                    ), // <-- Aman, nggak dirubah
+                    _buildForm(contentWidth, isDesktop),
                     const SizedBox(height: 80),
-                    _buildFooter(), // <-- Aman, nggak dirubah
+                    _buildFooter(),
                   ],
                 ),
               ),
@@ -182,7 +220,6 @@ class _RegisterPageState extends State<RegisterPage> {
   // ==============================================================
   // --- KUMPULAN WIDGET KOMPONEN ---
   // ==============================================================
-  // KOMPONEN 1: Header Gambar Lurus
   Widget _buildHeader(bool isDesktop) {
     return Stack(
       children: [
@@ -220,7 +257,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // KOMPONEN 2: Struktur Form dan Judul
   Widget _buildForm(double contentWidth, bool isDesktop) {
     return Center(
       child: Container(
@@ -228,12 +264,9 @@ class _RegisterPageState extends State<RegisterPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            // =====================================
-            // INI PERUBAHAN FONT OLEO SCRIPT NYA
-            // =====================================
             const CustomText(
               'Register',
-              isOleo: true, // <-- PANGGIL SAKLARNYA!
+              isOleo: true,
               color: AppColors.textDark,
               fontSize: 38,
               fontWeight: FontWeight.w900,
@@ -244,13 +277,11 @@ class _RegisterPageState extends State<RegisterPage> {
               fontSize: 18,
             ),
             const SizedBox(height: 30),
-
-            // Container Background Form
             Container(
               width: isDesktop ? 700 : double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
               decoration: BoxDecoration(
-                color: AppColors.primary, // Menggunakan oranye utama
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
@@ -275,7 +306,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     Icons.person_outline,
                     _usernameController,
                   ),
-                  // DI SINI KITA SET UNTUK INPUT NOMOR HP (isPhone: true)
                   _buildInputField(
                     'Phone',
                     '0812345678',
@@ -294,8 +324,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             const SizedBox(height: 40),
-
-            // Tombol Eksekusi
             SizedBox(
               width: isDesktop ? 350 : double.infinity,
               height: 55,
@@ -322,13 +350,12 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // KOMPONEN 3: Footer Statis
   Widget _buildFooter() {
     return Container(
       height: 65,
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: AppColors.primary, // Menggunakan oranye utama
+        color: AppColors.primary,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
@@ -357,7 +384,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // WIDGET REUSABLE: Input Field (Sudah ditambahkan parameter isPhone)
   Widget _buildInputField(
     String label,
     String hint,
@@ -382,31 +408,28 @@ class _RegisterPageState extends State<RegisterPage> {
             decoration: BoxDecoration(
               color: AppColors.bgInput,
               borderRadius: BorderRadius.circular(12),
-            ), // Background kolom input
+            ),
             child: TextField(
               controller: controller,
               obscureText: isPassword ? !_passwordVisible : false,
-              // Ganti tipe keyboard jadi nomor jika isPhone bernilai true
               keyboardType: isPhone ? TextInputType.number : TextInputType.text,
-              // Menambahkan filter agar hanya menerima angka dan membatasi maksimal 15 karakter
               inputFormatters: isPhone
                   ? [
-                      FilteringTextInputFormatter
-                          .digitsOnly, // Hanya boleh angka
-                      LengthLimitingTextInputFormatter(15), // Maksimal 15 digit
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(15),
                     ]
                   : null,
               style: const TextStyle(
                 fontFamily: 'Signika Negative',
                 fontSize: 16,
                 color: AppColors.textDark,
-              ), // Teks warna gelap biar terbaca
+              ),
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   icon,
                   color: AppColors.primaryDark,
                   size: 24,
-                ), // Ikon oranye gelap
+                ),
                 suffixIcon: isPassword
                     ? GestureDetector(
                         onTap: () => setState(
@@ -432,8 +455,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   vertical: 18,
                   horizontal: 20,
                 ),
-                counterText:
-                    '', // Menghilangkan counter teks bawaan Flutter di pojok kanan bawah TextField
+                counterText: '',
               ),
             ),
           ),
@@ -442,10 +464,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-
-// ==============================================================
-// --- CLASS DEKORASI BENTUK ---
-// ==============================================================
 
 class HeaderClipper extends CustomClipper<Path> {
   @override
