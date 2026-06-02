@@ -24,31 +24,32 @@ class ProductDetailPage extends StatefulWidget {
   State<ProductDetailPage> createState() => _ProductDetailPageState();
 }
 
+// State utama dengan animasi fade + slide saat halaman pertama dibuka
 class _ProductDetailPageState extends State<ProductDetailPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
   
-  // Variabel untuk stok real-time
-  int _stokRealtime = 0;
-  bool _isLoading = true;
+  int _stokRealtime = 0; // Stok terkini dari API (awalnya diisi dari widget.stok)
+  bool _isLoading = true; // Tampilkan "Memuat stok..." selama fetch berlangsung
 
   @override
   void initState() {
     super.initState();
-    // Inisialisasi awal pakai stok dari widget, sambil nunggu API
+    // Pakai stok dari parameter widget sebagai nilai awal sebelum API merespons
     _stokRealtime = int.tryParse(widget.stok) ?? 0;
     
     // Langsung cek ke database begitu halaman dibuka
     _fetchStokTerbaru();
 
+    // Animasi fade + slide dari bawah selama 500ms saat konten muncul
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
     _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _controller.forward();
   }
 
-  // FUNGSI INI YANG AKAN NGE-PING DATABASE
+  // Fetch stok terbaru dari API berdasarkan idMenu, lalu update tampilan
   Future<void> _fetchStokTerbaru() async {
     try {
       final data = await ApiService.getMenu(); 
@@ -86,6 +87,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Gambar produk dengan Hero animation (transisi dari halaman sebelumnya)
           Hero(
             tag: 'product-${widget.name}',
             child: SizedBox(
@@ -94,6 +96,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
               child: Image.network(
                 widget.image,
                 fit: BoxFit.cover,
+                // Tampilkan ikon kue jika gambar gagal dimuat
                 errorBuilder: (c, e, s) => Container(
                   color: AppColors.bgInput,
                   child: const Center(child: Icon(Icons.cake, size: 80, color: AppColors.primaryDark)),
@@ -101,6 +104,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
               ),
             ),
           ),
+          // Konten bawah: nama, deskripsi, harga, stok — muncul dengan animasi fade+slide
           Expanded(
             child: FadeTransition(
               opacity: _fadeAnim,
@@ -121,7 +125,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
                       const Text('Stock', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, color: AppColors.textDark)),
                       const SizedBox(height: 4),
 
-                      // DISPLAY STOK LIVE
+                      // Tampilan stok real-time dari API
                       _buildStokDisplay(),
                       
                       const SizedBox(height: 30),
@@ -131,6 +135,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
               ),
             ),
           ),
+          // Tombol Back di pojok kanan bawah
           Padding(
             padding: const EdgeInsets.only(right: 22, bottom: 18),
             child: Align(
@@ -152,7 +157,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
     );
   }
 
-  // Widget terpisah biar kodenya rapi
+  // Tampilkan angka stok + label "(tersedia)" hijau atau "(habis)" merah
   Widget _buildStokDisplay() {
     if (_isLoading) {
       return const Text("Memuat stok...", style: TextStyle(fontFamily: 'Signika Negative', fontSize: 14, color: Colors.grey));

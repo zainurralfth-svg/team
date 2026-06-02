@@ -8,8 +8,11 @@ import '../Backend/api_service.dart';
 import 'halaman_laporan.dart';
 
 // ─── SHARED PREFS ─────────────────────────────────────────────────────────────
+
+// Key untuk menyimpan daftar bulan yang sudah diunduh di penyimpanan lokal perangkat
 const String kDownloadedBulanKey = 'downloaded_bulan';
 
+// Simpan catatan bahwa laporan bulan ini sudah diunduh beserta waktu downloadnya
 Future<void> simpanBulanDownloaded(String bulan) async {
   final prefs = await SharedPreferences.getInstance();
   final existing = prefs.getStringList(kDownloadedBulanKey) ?? [];
@@ -21,7 +24,7 @@ Future<void> simpanBulanDownloaded(String bulan) async {
   await prefs.setStringList(kDownloadedBulanKey, existing);
 }
 
-/// Kembalikan Map: { "Mei 2026": DateTime(waktu_download) }
+// Baca daftar bulan yang pernah diunduh; kembalikan Map { "Mei 2026": DateTime }
 Future<Map<String, DateTime>> getBulanDownloaded() async {
   final prefs = await SharedPreferences.getInstance();
   final list = prefs.getStringList(kDownloadedBulanKey) ?? [];
@@ -38,6 +41,8 @@ Future<Map<String, DateTime>> getBulanDownloaded() async {
 }
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
+
+// Versi formatRupiah khusus PDF; contoh: 150000 → "Rp 150.000"
 String formatRupiahCetak(int value) {
   final str = value.toString();
   final result = StringBuffer();
@@ -51,6 +56,8 @@ String formatRupiahCetak(int value) {
 }
 
 // ─── PRINT BUTTON ─────────────────────────────────────────────────────────────
+
+// Tombol ikon download; saat ditekan: generate PDF → share → catat → hapus pesanan → refresh halaman
 class CetakLaporanButton extends StatelessWidget {
   final String bulan;
   final int totalTransaksi;
@@ -67,7 +74,7 @@ class CetakLaporanButton extends StatelessWidget {
     required this.details,
   });
 
-  // ─── Fetch lalu hapus semua pesanan SELESAI bulan ini ────────────────────────
+  // Hapus semua pesanan berstatus "selesai" milik bulan ini dari server setelah laporan dicetak
   Future<void> _hapusPesananBulan() async {
     const namaBulan = [
       '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -103,12 +110,12 @@ class CetakLaporanButton extends StatelessWidget {
       try {
         await ApiService.deletePesanan(id.toString());
       } catch (_) {
-        // lanjut ke pesanan berikutnya meski satu gagal
+        // Lanjut ke pesanan berikutnya meski satu gagal dihapus
       }
     }
   }
 
-  // ─── Build PDF ───────────────────────────────────────────────────────────────
+  // Generate dokumen PDF A4 berisi header, ringkasan statistik, tabel detail harian, dan footer
   Future<pw.Document> _buildPdf() async {
     final doc = pw.Document();
 
@@ -120,7 +127,7 @@ class CetakLaporanButton extends StatelessWidget {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // ── Header ────────────────────────────────────────────
+              // Header: nama app di kiri, label "LAPORAN BULANAN" di kanan
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
@@ -160,7 +167,7 @@ class CetakLaporanButton extends StatelessWidget {
               pw.Divider(color: PdfColor.fromHex('#E8701A'), thickness: 1.5),
               pw.SizedBox(height: 12),
 
-              // ── Judul bulan ───────────────────────────────────────
+              // Judul laporan bulan
               pw.Text(
                 'Laporan $bulan',
                 style: pw.TextStyle(
@@ -171,7 +178,7 @@ class CetakLaporanButton extends StatelessWidget {
               ),
               pw.SizedBox(height: 16),
 
-              // ── Ringkasan statistik ───────────────────────────────
+              // Kotak ringkasan 3 statistik: total transaksi, rata/hari, total pendapatan
               pw.Container(
                 padding: const pw.EdgeInsets.symmetric(
                     horizontal: 16, vertical: 12),
@@ -195,7 +202,6 @@ class CetakLaporanButton extends StatelessWidget {
 
               pw.SizedBox(height: 20),
 
-              // ── Tabel detail harian ───────────────────────────────
               pw.Text(
                 'Detail Harian',
                 style: pw.TextStyle(
@@ -206,6 +212,7 @@ class CetakLaporanButton extends StatelessWidget {
               ),
               pw.SizedBox(height: 8),
 
+              // Tabel harian: header oranye, baris selang-seling, baris TOTAL di bawah
               pw.Table(
                 border: pw.TableBorder.all(
                   color: PdfColor.fromHex('#E0D0C0'),
@@ -217,7 +224,6 @@ class CetakLaporanButton extends StatelessWidget {
                   2: pw.FlexColumnWidth(2.5),
                 },
                 children: [
-                  // Header tabel
                   pw.TableRow(
                     decoration: pw.BoxDecoration(
                         color: PdfColor.fromHex('#E8701A')),
@@ -230,7 +236,6 @@ class CetakLaporanButton extends StatelessWidget {
                           isHeader: true, align: pw.Alignment.centerRight),
                     ],
                   ),
-                  // Baris data harian
                   ...details.asMap().entries.map((entry) {
                     final i = entry.key;
                     final d = entry.value;
@@ -251,7 +256,6 @@ class CetakLaporanButton extends StatelessWidget {
                       ],
                     );
                   }),
-                  // Baris total
                   pw.TableRow(
                     decoration: pw.BoxDecoration(
                         color: PdfColor.fromHex('#C45C10')),
@@ -269,7 +273,7 @@ class CetakLaporanButton extends StatelessWidget {
 
               pw.Spacer(),
 
-              // ── Footer ────────────────────────────────────────────
+              // Footer: nama pencetak di kiri, nomor halaman di kanan
               pw.Divider(color: PdfColor.fromHex('#E0D0C0'), thickness: 0.5),
               pw.SizedBox(height: 4),
               pw.Row(
@@ -296,6 +300,7 @@ class CetakLaporanButton extends StatelessWidget {
     return doc;
   }
 
+  // Widget statistik PDF: label kecil di atas, nilai bold di bawah
   static pw.Widget _pdfStat(String label, String value) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.center,
@@ -314,11 +319,13 @@ class CetakLaporanButton extends StatelessWidget {
     );
   }
 
+  // Garis vertikal tipis sebagai pemisah antar statistik di kotak ringkasan
   static pw.Widget _pdfVerticalDivider() {
     return pw.Container(
         width: 1, height: 36, color: PdfColor.fromHex('#E8701A'));
   }
 
+  // Sel tabel PDF dengan padding; isHeader → teks putih bold, align → posisi teks dalam sel
   static pw.Widget _pdfTableCell(
     String text, {
     bool isHeader = false,
@@ -345,6 +352,7 @@ class CetakLaporanButton extends StatelessWidget {
         try {
           final doc = await _buildPdf();
           final bytes = await doc.save();
+          // Buka dialog share/simpan PDF ke perangkat
           await Printing.sharePdf(
             bytes: bytes,
             filename: 'Laporan_${bulan.replaceAll(" ", "_")}.pdf',
@@ -358,6 +366,7 @@ class CetakLaporanButton extends StatelessWidget {
             );
           }
         } catch (e) {
+          // Tampilkan snackbar merah jika proses unduh gagal
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

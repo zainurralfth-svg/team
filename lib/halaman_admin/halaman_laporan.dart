@@ -11,6 +11,7 @@ import 'cetak_laporan.dart';
 
 // ─── MODEL ────────────────────────────────────────────────────────────────────
 
+// Model data transaksi per hari (tanggal, jumlah transaksi, pendapatan)
 class TransaksiDetail {
   final String tanggal;
   final int jumlah;
@@ -23,6 +24,7 @@ class TransaksiDetail {
   });
 }
 
+// Model laporan satu bulan berisi ringkasan total dan daftar detail harian
 class LaporanBulan {
   final String bulan;
   final int totalTransaksi;
@@ -36,12 +38,14 @@ class LaporanBulan {
     this.details = const [],
   });
 
+  // Rata-rata pendapatan per hari aktif (hindari pembagian nol jika details kosong)
   int get rataPerHari =>
       details.isEmpty ? 0 : totalPendapatan ~/ details.length;
 }
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
 
+// Mengubah integer menjadi format Rupiah, contoh: 150000 → "Rp 150.000"
 String formatRupiah(int value) {
   final str = value.toString();
   final result = StringBuffer();
@@ -56,6 +60,7 @@ String formatRupiah(int value) {
 
 // ─── PARSER ───────────────────────────────────────────────────────────────────
 
+// Mengolah data mentah API menjadi daftar LaporanBulan yang sudah dikelompokkan dan diurutkan terbaru
 List<LaporanBulan> _parseLaporan(List<dynamic> rawPesanan) {
   const namaBulan = [
     '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -66,6 +71,7 @@ List<LaporanBulan> _parseLaporan(List<dynamic> rawPesanan) {
   final Map<String, DateTime> urutan = {};
 
   for (final item in rawPesanan) {
+    // Lewati pesanan yang belum berstatus selesai
     final String status = (
       item['status_pesanan'] ?? item['status'] ?? ''
     ).toString().toLowerCase().trim();
@@ -89,6 +95,7 @@ List<LaporanBulan> _parseLaporan(List<dynamic> rawPesanan) {
     final String kunciBulan = '${namaBulan[tgl.month]} ${tgl.year}';
     final String kunciHari = '${tgl.day} ${namaBulan[tgl.month]}';
 
+    // Simpan DateTime bulan untuk keperluan sorting nanti
     urutan.putIfAbsent(kunciBulan, () => DateTime(tgl.year, tgl.month));
     grupBulan.putIfAbsent(kunciBulan, () => {});
     grupBulan[kunciBulan]!.putIfAbsent(kunciHari, () => {'jumlah': 0, 'pendapatan': 0});
@@ -98,6 +105,7 @@ List<LaporanBulan> _parseLaporan(List<dynamic> rawPesanan) {
         (grupBulan[kunciBulan]![kunciHari]!['pendapatan'] ?? 0) + harga;
   }
 
+  // Urutkan bulan dari terbaru ke terlama
   final sortedKeys = urutan.keys.toList()
     ..sort((a, b) => urutan[b]!.compareTo(urutan[a]!));
 
@@ -125,6 +133,7 @@ List<LaporanBulan> _parseLaporan(List<dynamic> rawPesanan) {
 
 // ─── HALAMAN LAPORAN ──────────────────────────────────────────────────────────
 
+// Halaman utama laporan bulanan; mengambil data dari API saat pertama dibuka
 class HalamanLaporan extends StatefulWidget {
   const HalamanLaporan({super.key});
 
@@ -143,6 +152,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     _loadData();
   }
 
+  // Fetch pesanan dari API lalu proses menjadi laporan; tangani loading, error, dan kosong
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
@@ -176,6 +186,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
           ],
         ),
       ),
+      // Navbar bawah untuk navigasi antar halaman admin
       bottomNavigationBar: CustomBottomNavbar(
         currentIndex: 0,
         onTap: (index) {
@@ -188,6 +199,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     );
   }
 
+  // Tampilkan spinner, pesan error, layar kosong, atau daftar kartu laporan sesuai kondisi
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(
@@ -232,6 +244,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
         ),
       );
     }
+    // Tarik ke bawah untuk refresh; kartu bulan terbaru (index 0) otomatis terbuka
     return RefreshIndicator(
       color: AppColors.primary,
       onRefresh: _loadData,
@@ -252,6 +265,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
 
 // ─── APP HEADER ───────────────────────────────────────────────────────────────
 
+// Header atas: logo "PuddingKu" di kiri, foto profil admin (klik → HalamanProfilAdmin) di kanan
 class _AppHeader extends StatelessWidget {
   const _AppHeader();
 
@@ -307,6 +321,7 @@ class _AppHeader extends StatelessWidget {
 
 // ─── PAGE LABEL ───────────────────────────────────────────────────────────────
 
+// Badge bertulisan "LAPORAN" sebagai penanda halaman aktif
 class _PageLabel extends StatelessWidget {
   const _PageLabel();
 
@@ -334,6 +349,7 @@ class _PageLabel extends StatelessWidget {
 
 // ─── LAPORAN CARD ─────────────────────────────────────────────────────────────
 
+// Kartu laporan per bulan; bisa di-tap untuk expand/collapse detail harian dengan animasi
 class _LaporanCard extends StatefulWidget {
   final LaporanBulan laporan;
   final bool initiallyExpanded;
@@ -368,6 +384,7 @@ class _LaporanCardState extends State<_LaporanCard>
     super.dispose();
   }
 
+  // Toggle buka/tutup kartu dan jalankan animasi sesuai arah
   void _toggle() {
     setState(() => _expanded = !_expanded);
     _expanded ? _ctrl.forward() : _ctrl.reverse();
@@ -383,7 +400,7 @@ class _LaporanCardState extends State<_LaporanCard>
       shadowColor: AppColors.shadow,
       child: Column(
         children: [
-          // Header kartu
+          // Header kartu: ikon, judul bulan, ringkasan, dan tombol unduh PDF
           InkWell(
             onTap: _toggle,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -415,7 +432,7 @@ class _LaporanCardState extends State<_LaporanCard>
                       ],
                     ),
                   ),
-                  // ─── Tombol cetak dari cetak_laporan.dart ───────────
+                  // Tombol unduh PDF dari cetak_laporan.dart
                   CetakLaporanButton(
                     bulan: l.bulan,
                     totalTransaksi: l.totalTransaksi,
@@ -432,7 +449,7 @@ class _LaporanCardState extends State<_LaporanCard>
             ),
           ),
 
-          // Detail expand/collapse
+          // Detail harian muncul/hilang dengan animasi SizeTransition
           SizeTransition(
             sizeFactor: _anim,
             child: Column(
@@ -462,6 +479,7 @@ class _LaporanCardState extends State<_LaporanCard>
 
 // ─── CARD ICON ────────────────────────────────────────────────────────────────
 
+// Ikon clipboard (📋) di sisi kiri header kartu laporan
 class _CardIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -486,6 +504,7 @@ class _CardIcon extends StatelessWidget {
 
 // ─── STAT PILL ────────────────────────────────────────────────────────────────
 
+// Pilstatistik kecil yang menampilkan satu pasang label dan nilai
 class _StatPill extends StatelessWidget {
   final String label;
   final String value;
@@ -526,6 +545,7 @@ class _StatPill extends StatelessWidget {
 
 // ─── LAPORAN TABLE ────────────────────────────────────────────────────────────
 
+// Tabel detail harian dengan warna baris selang-seling dan baris TOTAL di bagian bawah
 class _LaporanTable extends StatelessWidget {
   final LaporanBulan laporan;
   const _LaporanTable({required this.laporan});
