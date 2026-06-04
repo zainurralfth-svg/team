@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Backend/api_service.dart'; // Pastikan path ini benar
+import '../Backend/api_service.dart';
 import '../Core/Colour.dart'; 
 
 class ProductDetailPage extends StatefulWidget {
@@ -8,7 +8,7 @@ class ProductDetailPage extends StatefulWidget {
   final String price;
   final String image;
   final String description;
-  final String stok; // Tetap dikirim, sebagai cadangan/awal
+  final String stok; 
 
   const ProductDetailPage({
     super.key,
@@ -24,43 +24,30 @@ class ProductDetailPage extends StatefulWidget {
   State<ProductDetailPage> createState() => _ProductDetailPageState();
 }
 
-// State utama dengan animasi fade + slide saat halaman pertama dibuka
 class _ProductDetailPageState extends State<ProductDetailPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
   
-  int _stokRealtime = 0; // Stok terkini dari API (awalnya diisi dari widget.stok)
-  bool _isLoading = true; // Tampilkan "Memuat stok..." selama fetch berlangsung
+  int _stokRealtime = 0; 
+  bool _isLoading = true; 
 
   @override
   void initState() {
     super.initState();
-    // Pakai stok dari parameter widget sebagai nilai awal sebelum API merespons
     _stokRealtime = int.tryParse(widget.stok) ?? 0;
-    
-    // Langsung cek ke database begitu halaman dibuka
     _fetchStokTerbaru();
 
-    // Animasi fade + slide dari bawah selama 500ms saat konten muncul
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _controller.forward();
   }
 
-  // Fetch stok terbaru dari API berdasarkan idMenu, lalu update tampilan
   Future<void> _fetchStokTerbaru() async {
     try {
       final data = await ApiService.getMenu(); 
-      
-      // TAMBAHAN: Kita print buat ngintip datanya di terminal VS Code
-      print("DATA API YANG DITERIMA: $data");
-      
       final produk = data.firstWhere((p) => p['id_produk'].toString() == widget.idMenu);
-      
-      // TAMBAHAN: Print stok spesifik produk ini
-      print("STOK PRODUK ${produk['nama_produk']} ADALAH: ${produk['stok']}");
       
       if (mounted) {
         setState(() {
@@ -69,7 +56,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
         });
       }
     } catch (e) {
-      print("ERROR FETCH STOK: $e");
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -84,19 +70,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgUtama,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Stack(
         children: [
-          // Gambar produk dengan Hero animation (transisi dari halaman sebelumnya)
-          Hero(
-            tag: 'product-${widget.name}',
-            child: SizedBox(
-              width: double.infinity,
-              height: MediaQuery.of(context).size.height * 0.40,
+          // 1. GAMBAR PRODUK (FULL HEADER)
+          Positioned(
+            top: 0, left: 0, right: 0,
+            height: MediaQuery.of(context).size.height * 0.45,
+            child: Hero(
+              tag: 'product-${widget.name}',
               child: Image.network(
                 widget.image,
                 fit: BoxFit.cover,
-                // Tampilkan ikon kue jika gambar gagal dimuat
                 errorBuilder: (c, e, s) => Container(
                   color: AppColors.bgInput,
                   child: const Center(child: Icon(Icons.cake, size: 80, color: AppColors.primaryDark)),
@@ -104,52 +88,83 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
               ),
             ),
           ),
-          // Konten bawah: nama, deskripsi, harga, stok — muncul dengan animasi fade+slide
-          Expanded(
-            child: FadeTransition(
-              opacity: _fadeAnim,
-              child: SlideTransition(
-                position: _slideAnim,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(widget.name, style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 22, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, color: AppColors.textDark, height: 1.2)),
-                      const SizedBox(height: 10),
-                      Text(widget.description, textAlign: TextAlign.justify, style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 13, color: AppColors.textBrown, height: 1.65)),
-                      const SizedBox(height: 18),
-                      const Text('Harga', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, color: AppColors.textDark)),
-                      Text(widget.price, style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, color: AppColors.textBrown)),
-                      const SizedBox(height: 14),
-                      const Text('Stock', style: TextStyle(fontFamily: 'Signika Negative', fontSize: 16, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, color: AppColors.textDark)),
-                      const SizedBox(height: 4),
 
-                      // Tampilan stok real-time dari API
-                      _buildStokDisplay(),
-                      
-                      const SizedBox(height: 30),
-                    ],
+          // 2. KONTEN INFO (OVERLAP DI ATAS GAMBAR)
+          Positioned.fill(
+            top: MediaQuery.of(context).size.height * 0.40, 
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.bgUtama,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 15, offset: const Offset(0, -5))
+                ],
+              ),
+              child: FadeTransition(
+                opacity: _fadeAnim,
+                child: SlideTransition(
+                  position: _slideAnim,
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    // Tambah padding bawah extra biar konten nggak ketutup tombol back
+                    padding: const EdgeInsets.only(top: 30, left: 25, right: 25, bottom: 90),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // NAMA PRODUK & HARGA
+                        Text(
+                          widget.name, 
+                          style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.textDark, height: 1.2),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.price, // 👈 UDAH LANGSUNG PAKE DATA DARI MENU.DART, GAK AKAN NOL LAGI
+                          style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primary),
+                        ),
+                        
+                        const SizedBox(height: 20),
+                        
+                        // INFO STOK (BADGE KEKINIAN)
+                        _buildStokDisplay(),
+
+                        const SizedBox(height: 25),
+                        const Divider(color: Colors.black12, thickness: 1.5),
+                        const SizedBox(height: 15),
+
+                        // DESKRIPSI
+                        const Text(
+                          'Deskripsi Produk', 
+                          style: TextStyle(fontFamily: 'Signika Negative', fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textDark)
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          widget.description, 
+                          textAlign: TextAlign.justify, 
+                          style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, color: AppColors.textBrown, height: 1.6),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          // Tombol Back di pojok kanan bawah
-          Padding(
-            padding: const EdgeInsets.only(right: 22, bottom: 18),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton(
-                onPressed: () => Navigator.pop(context),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.textDark,
-                  side: const BorderSide(color: AppColors.textDark, width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                  padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
-                ),
-                child: const Text('Back', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 14)),
+
+          // 3. TOMBOL BACK (MELAYANG DI KANAN BAWAH)
+          Positioned(
+            bottom: 25,
+            right: 25,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.bgUtama, // Biar ada background dan gak transparan
+                foregroundColor: AppColors.textDark,
+                side: const BorderSide(color: AppColors.textDark, width: 1.5),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+                elevation: 4, // Kasih bayangan dikit biar mantap
               ),
+              child: const Text('Back', style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 15)),
             ),
           ),
         ],
@@ -157,23 +172,36 @@ class _ProductDetailPageState extends State<ProductDetailPage> with SingleTicker
     );
   }
 
-  // Tampilkan angka stok + label "(tersedia)" hijau atau "(habis)" merah
+  // WIDGET KHUSUS BUAT NAMPILIN STOK
   Widget _buildStokDisplay() {
     if (_isLoading) {
       return const Text("Memuat stok...", style: TextStyle(fontFamily: 'Signika Negative', fontSize: 14, color: Colors.grey));
     }
     
     final bool tersedia = _stokRealtime > 0;
-    return Text.rich(
-      TextSpan(
-        text: '$_stokRealtime ',
-        style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 15, color: AppColors.textBrown),
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: tersedia ? AppColors.success.withOpacity(0.15) : AppColors.error.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: tersedia ? AppColors.success : AppColors.error, width: 1.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          TextSpan(
-            text: tersedia ? '(tersedia)' : '(habis)',
+          Icon(
+            tersedia ? Icons.check_circle_rounded : Icons.cancel_rounded, 
+            size: 18, 
+            color: tersedia ? AppColors.success : AppColors.error
+          ),
+          const SizedBox(width: 8),
+          Text(
+            tersedia ? 'Sisa Stok: $_stokRealtime' : 'Stok Habis',
             style: TextStyle(
               fontFamily: 'Signika Negative',
-              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
               color: tersedia ? AppColors.success : AppColors.error,
             ),
           ),

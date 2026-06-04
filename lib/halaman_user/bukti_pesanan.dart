@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import '../halaman_user/profil_pengguna.dart'; 
 import '../Core/Colour.dart'; 
+import 'package:intl/intl.dart';
 
 class BuktiPemesanan extends StatelessWidget {
   const BuktiPemesanan({super.key});
+
+// TAMBAHAN: Fungsi format Rupiah
+  String formatRupiah(dynamic angka) {
+    int value = int.tryParse(angka.toString()) ?? 0;
+    return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +60,13 @@ class BuktiPemesanan extends StatelessWidget {
 
                         Text(
                           kodeResi,
-                          style: const TextStyle(color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 10),
 
                         const Text(
-                          'CEK OUT BERHASIL',
-                          style: TextStyle(color: AppColors.primary, fontSize: 24, fontFamily: 'Tai Heritage Pro', fontWeight: FontWeight.w700),
+                          'CHEK OUT KAMU BERHASIL',
+                          style: TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 24, fontWeight: FontWeight.w900),
                         ),
                         const SizedBox(height: 20),
 
@@ -84,7 +91,7 @@ class BuktiPemesanan extends StatelessWidget {
                             child: _buildProductRow(
                               item['nama_produk'] ?? 'Produk', 
                               '${item['jumlah']}x', 
-                              '${item['harga']}'
+                              formatRupiah(item['harga']) // 👈 UDAH PAKAI RUPIAH
                             ),
                           );
                         }),
@@ -98,18 +105,20 @@ class BuktiPemesanan extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
-                              'Total',
+                              'Total Harga',
                               style: TextStyle(
+                                fontFamily: 'Signika Negative', // 👈 FONT BARU
                                 color: AppColors.textBrown,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
-                              totalHarga.toString(), 
+                              formatRupiah(totalHarga), // 👈 UDAH PAKAI RUPIAH
                               style: const TextStyle(
+                                fontFamily: 'Signika Negative', // 👈 FONT BARU
                                 color: AppColors.primary,
-                                fontSize: 16,
+                                fontSize: 18, // Gedein dikit biar mantap
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -155,10 +164,10 @@ class BuktiPemesanan extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start, 
       children: [
-        SizedBox(width: 80, child: Text(label, style: const TextStyle(color: AppColors.textBrown, fontSize: 16, fontWeight: FontWeight.bold))),
-        Text(separator, style: const TextStyle(color: AppColors.textBrown, fontSize: 16, fontWeight: FontWeight.bold)),
+        SizedBox(width: 80, child: Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 16, fontWeight: FontWeight.bold))),
+        Text(separator, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(width: 15),
-        Expanded(child: Text(value, style: const TextStyle(color: AppColors.textBrown, fontSize: 16, fontWeight: FontWeight.bold))),
+        Expanded(child: Text(value, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 16, fontWeight: FontWeight.bold))),
       ],
     );
   }
@@ -167,9 +176,9 @@ class BuktiPemesanan extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(flex: 5, child: Text(nama, style: const TextStyle(color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.bold))),
-        Expanded(flex: 1, child: Text(qty, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.bold))),
-        Expanded(flex: 2, child: Text(harga, textAlign: TextAlign.right, style: const TextStyle(color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.bold))),
+        Expanded(flex: 5, child: Text(nama, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.bold))),
+        Expanded(flex: 1, child: Text(qty, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.bold))),
+        Expanded(flex: 2, child: Text(harga, textAlign: TextAlign.right, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.bold))),
       ],
     );
   }
@@ -190,7 +199,7 @@ class BuktiPemesanan extends StatelessWidget {
             child: Icon(icon, color: isSelected ? activeColor : AppColors.textWhite, size: 24),
           ),
           const SizedBox(height: 2),
-          Text(label, style: const TextStyle(color: AppColors.textWhite, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textWhite, fontSize: 12, fontWeight: FontWeight.bold)),
         ],
       ),
     );

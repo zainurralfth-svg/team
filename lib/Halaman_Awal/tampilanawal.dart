@@ -142,7 +142,7 @@ class TampilanAwal extends StatelessWidget {
                               // TEKS TOMBOL SEKARANG PAKAI CUSTOM TEXT!
                               // ==========================================
                               child: CustomText(
-                                'Get Started',
+                                'Masuk Sekarang', // Teks tombol
                                 color: AppColors.textWhite, // Teks putih
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,

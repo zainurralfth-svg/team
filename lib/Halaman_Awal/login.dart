@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; // Palet 14 Warna Baru
-import 'package:shared_preferences/shared_preferences.dart';
-
-// ==============================================================
-// IMPORT CLASS MODELS OOP & CUSTOM TEXT
-// ==============================================================
-import '../Models/user.dart';
-import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
+import '../Core/Colour.dart'; // Memanggil file warna aplikasi kita
+import 'package:shared_preferences/shared_preferences.dart'; // Library buat simpan data ke memori HP
+import '../Models/user.dart'; // Mengambil logika login dari class User (OOP)
+import '../Widget/custom_text.dart'; // Mengambil komponen teks kustom
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,28 +12,32 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Controller untuk membaca data yang diketik oleh user
+  // Box/Remot kontrol untuk membaca apa yang diketik user di kolom input
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
-  // State untuk visibilitas password
+  // Saklar buat buka/tutup mata password (false = disensor)
   bool _passwordVisible = false;
 
   @override
   void dispose() {
-    // Membersihkan memori saat halaman ditutup
+    // Menghapus kontroler dari memori kalau halaman ditutup biar HP nggak lemot
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  // FUNGSI UTAMA: Logika Autentikasi Login (MURNI OOP)
+  // ==============================================================
+  // TAHAP UTAMA: LOGIKA PROSES LOGIN Saat Tombol Diklik
+  // ==============================================================
   Future<void> _handleLogin() async {
+    // Ambil teks yang diketik, lalu hapus spasi di ujungnya (trim)
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    // 1. Validasi Input Kosong
+    // 1. Cek Apakah Kolomnya Kosong
     if (username.isEmpty || password.isEmpty) {
+      // Munculin notifikasi melayang di atas kalau kosong
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.transparent, 
@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
           content: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.error, // Menggunakan warna merah error baru
+              color: AppColors.error, // Warna merah error
               borderRadius: BorderRadius.circular(15),
               boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: const Offset(0, 4))],
             ),
@@ -64,25 +64,26 @@ class _LoginPageState extends State<LoginPage> {
           duration: const Duration(seconds: 3),
         ),
       );
-      return;
+      return; // Stop proses di sini, jangan lanjut ke bawah
     }
 
-    // 2. Eksekusi API melalui Class Model OOP
+    // 2. Kirim Data Ke Server Lewat Model OOP User
     try {
       var hasil = await User.autentikasiOOP(username, password);
 
-      // 3. Evaluasi Respon dari Model OOP
+      // 3. Cek Hasil Respon dari Server
       if (hasil['status'] == 'sukses') {
+        // Tampilkan notifikasi warna hijau kalau berhasil login
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: CustomText(hasil['pesan']), 
-            backgroundColor: AppColors.success, // Menggunakan warna hijau sukses baru
+            backgroundColor: AppColors.success, 
             behavior: SnackBarBehavior.floating,
           ),
         );
 
         // ==============================================================
-        // SIMPAN DATA KE MEMORI HP (Untuk Autofill di Checkout)
+        // SIMPAN DATA LOGIN KE MEMORI HP (Biar Halaman Checkout Otomatis Diisi)
         // ==============================================================
         SharedPreferences prefs = await SharedPreferences.getInstance();
         
@@ -91,33 +92,36 @@ class _LoginPageState extends State<LoginPage> {
         String phoneUser = hasil['phone']?.toString() ?? ""; 
         
         if (idUserLoginStr.isNotEmpty && idUserLoginStr != "0") {
-          await prefs.setString('id_user', idUserLoginStr);
-          await prefs.setString('nama_user', namaUser);   
-          await prefs.setString('phone_user', phoneUser); 
+          await prefs.setString('id_user', idUserLoginStr); // Simpan ID
+          await prefs.setString('nama_user', namaUser);     // Simpan Nama
+          await prefs.setString('phone_user', phoneUser);   // Simpan No Telp
           print("Mantap! Data ID, Nama, dan Telp berhasil disimpan ke memori!");
         }
 
         // ==============================================================
-        // --- LOGIKA ROUTING BERDASARKAN HASIL OOP ---
+        // NAVIGASI HALAMAN (DIARAHKAN SESUAI STATUS/ROLE-NYA)
         // ==============================================================
         String roleUser = hasil['role'] ?? 'user'; 
 
+        // Kasih jeda 1 detik biar user sempat baca notifikasi suksesnya
         Future.delayed(const Duration(milliseconds: 1000), () {
           if (mounted) {
             if (roleUser == 'admin') {
-              print("Login sebagai Admin");
+              print("Membuka Halaman Utama Admin...");
               Navigator.pushReplacementNamed(context, '/admin_home');
             } else {
-              print("Login sebagai User");
+              print("Membuka Halaman Utama Pembeli (Menu)...");
               Navigator.pushReplacementNamed(context, '/menu');
             }
           }
         });
 
+        // Bersihkan kolom inputan setelah sukses login
         _usernameController.clear();
         _passwordController.clear();
         
       } else {
+        // Tampilkan notifikasi error warna merah kalau password/username salah
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: CustomText(hasil['pesan'] ?? 'Login Gagal'), 
@@ -127,6 +131,7 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } catch (e) {
+      // Menangkap error jika XAMPP mati atau laptop putus koneksi internet
       print("Error Server: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -139,33 +144,31 @@ class _LoginPageState extends State<LoginPage> {
   }
   
   // ==============================================================
-  // --- BUILDER UTAMA UI ---
+  // DESAIN TAMPILAN LAYAR (UI BUILDER)
   // ==============================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Tetap true biar form nggak ketutup keyboard
-      resizeToAvoidBottomInset: true, 
+      resizeToAvoidBottomInset: true, // Biar kotak form naik ke atas saat keyboard HP muncul
       backgroundColor: AppColors.bgUtama, 
       
-      // SafeArea KITA HAPUS di sini, biar gambar kue full sampai atas jam HP
       body: LayoutBuilder(
         builder: (context, constraints) {
+          // Cek ukuran layar (Buat jaga-jaga kalau dibuka di laptop/tablet)
           bool isDesktop = constraints.maxWidth > 800;
           double contentWidth = isDesktop ? constraints.maxWidth * 0.8 : constraints.maxWidth * 0.9;
 
           return Stack(
             children: [
               SingleChildScrollView(
-                // GANTI INI AJA: Biar pas di-scroll mentok nggak ketarik/mantul
                 physics: const ClampingScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop),             // <-- Aman, nggak dirubah
+                    _buildHeader(isDesktop),     // Tampilkan gambar kue di bagian atas layar
                     const SizedBox(height: 20),
-                    _buildForm(contentWidth, isDesktop), // <-- Aman, nggak dirubah
+                    _buildForm(contentWidth, isDesktop), // Tampilkan form login (kotak oranye)
                     const SizedBox(height: 80),          
-                    _buildFooter(),                      // <-- Aman, nggak dirubah
+                    _buildFooter(),              // Tampilkan bawah halaman berlogo 'Puddingku'
                   ],
                 ),
               ),
@@ -177,14 +180,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // ==============================================================
-  // --- KUMPULAN WIDGET KOMPONEN ---
+  // WIDGET BAGIAN 1: GAMBAR HEADER ATAS
   // ==============================================================
-
   Widget _buildHeader(bool isDesktop) {
     return Stack(
       children: [
         ClipPath(
-          clipper: HeaderClipper(),
+          clipper: HeaderClipper(), // Memotong gambar sesuai bentuk kustom kita
           child: Container(
             width: double.infinity, height: isDesktop ? 230 : 280,
             decoration: const BoxDecoration(
@@ -192,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
-        CustomPaint(size: Size(double.infinity, isDesktop ? 230 : 280), painter: HeaderPainter()),
+        CustomPaint(size: Size(double.infinity, isDesktop ? 230 : 280), painter: HeaderPainter()), // Menggambar garis pembatas di bawah gambar
         Positioned(
           left: 10, top: 30,
           child: IconButton(icon: const Icon(Icons.arrow_back, color: AppColors.textWhite, size: 30), onPressed: () => Navigator.pop(context)),
@@ -201,6 +203,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // ==============================================================
+  // WIDGET BAGIAN 2: KOTAK FORM LOGIN & TOMBOL-TOMBOL
+  // ==============================================================
   Widget _buildForm(double contentWidth, bool isDesktop) {
     return Center(
       child: Container(
@@ -208,59 +213,60 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            // =====================================
-            // INI DIA PERUBAHAN FONT OLEO SCRIPT NYA
-            // =====================================
             const CustomText(
               'Selamat Datang', 
-              isOleo: true, // <-- PANGGIL SAKLARNYA!
+              isOleo: true, // Mengaktifkan font estetik 'Oleo Script' buat judul utama
               color: AppColors.textDark, 
               fontSize: 38, 
               fontWeight: FontWeight.w900, 
             ),
-            const CustomText('Login Untuk Mulai Memesan', color: AppColors.textDark, fontSize: 18),
+            const CustomText('Masuk untuk mulai memesan', color: AppColors.textDark, fontSize: 18),
             const SizedBox(height: 30),
 
+            // Kotak besar berwarna oranye-coklat
             Container(
               width: isDesktop ? 700 : double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
               decoration: BoxDecoration(
-                color: AppColors.primary, // Menggunakan warna utama oranye coklat
+                color: AppColors.primary, 
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 5))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildInputField('Username/No Telp', 'Ketik Disini', Icons.person, _usernameController),
-                  _buildInputField('Password', '******', Icons.lock, _passwordController, isPassword: true),
+                  _buildInputField('Nama Pengguna/No. Telp', 'Ketik Disini', Icons.person, _usernameController),
+                  _buildInputField('Kata sandi', '******', Icons.lock, _passwordController, isPassword: true),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/lupa-password'),
-                    child: const CustomText('Lupa password?', color: AppColors.textWhite, fontSize: 14, decoration: TextDecoration.underline),
+                    child: const CustomText('Lupa kata sandi?', color: AppColors.textWhite, fontSize: 14, decoration: TextDecoration.underline),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 40),
 
+            // Baris Tombol Utama (LOGIN dan REGISTER)
             Wrap(
               spacing: 20, runSpacing: 15, alignment: WrapAlignment.center,
               children: [
+                // Tombol LOGIN
                 SizedBox(
                   width: isDesktop ? 300 : double.infinity, height: 55,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
-                    onPressed: _handleLogin,
-                    child: const CustomText('LOGIN', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20), 
+                    onPressed: _handleLogin, // Menjalankan fungsi cek login saat ditekan
+                    child: const CustomText('MASUK', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20), 
                   ),
                 ),
+                // Tombol REGISTER
                 SizedBox(
                   width: isDesktop ? 300 : double.infinity, height: 55,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
                     onPressed: () {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      Navigator.pushNamed(context, '/register'); 
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Tutup snackbar dulu biar bersih
+                      Navigator.pushNamed(context, '/register'); // Pindah ke halaman daftar akun baru
                     },
                     child: const CustomText('REGISTER', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20), 
                   ),
@@ -273,11 +279,14 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // ==============================================================
+  // WIDGET BAGIAN 3: FOOTER BAWAH (NAMA APLIKASI)
+  // ==============================================================
   Widget _buildFooter() {
     return Container(
       height: 65, width: double.infinity,
       decoration: const BoxDecoration(
-        color: AppColors.primary, // Menggunakan warna utama oranye coklat
+        color: AppColors.primary, 
         borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
       ),
       child: Row(
@@ -295,6 +304,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // ==============================================================
+  // WIDGET KUSTOM: RUMUS UNTUK MEMBUAT KOLOM INPUT TEXTFIELD
+  // ==============================================================
   Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, {bool isPassword = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -307,13 +319,14 @@ class _LoginPageState extends State<LoginPage> {
             decoration: BoxDecoration(color: AppColors.bgInput, borderRadius: BorderRadius.circular(12)), 
             child: TextField(
               controller: controller,
-              obscureText: isPassword ? !_passwordVisible : false,
+              obscureText: isPassword ? !_passwordVisible : false, // Cek sensor password otomatis
               style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16, color: AppColors.textDark), 
               decoration: InputDecoration(
                 prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24), 
+                // Jika tipenya password, tambahkan ikon tombol mata di sebelah kanan
                 suffixIcon: isPassword
                     ? GestureDetector(
-                        onTap: () => setState(() => _passwordVisible = !_passwordVisible),
+                        onTap: () => setState(() => _passwordVisible = !_passwordVisible), // Klik buat saklar sensor mata
                         child: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off, color: AppColors.textHint, size: 24),
                       )
                     : null,
@@ -330,6 +343,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+// ==============================================================
+// KELAS PEMBANTU: UNTUK MENGGUNTING & MENGGAMBAR GARIS HEADER
+// ==============================================================
 class HeaderClipper extends CustomClipper<Path> {
   @override Path getClip(Size size) { Path path = Path(); path.lineTo(0, size.height); path.lineTo(size.width, size.height); path.lineTo(size.width, 0); path.close(); return path; }
   @override bool shouldReclip(oldClipper) => false;
