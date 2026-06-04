@@ -41,8 +41,21 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   void _showSuccess() {
     AwesomeDialog(
       context: context,
-      dialogType: DialogType.success, // Ikon centang hijau sukses
-      animType: AnimType.bottomSlide, // Animasi muncul meluncur dari bawah
+      dialogType: DialogType.success,
+      
+      // 👇 TAMBAHAN KODE INI BUAT MUNCULIN ICON CENTANG MANUAL
+      customHeader: Container(
+        decoration: const BoxDecoration(
+          color: Colors.green, // Warna background bulatannya
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.check,
+          size: 50,
+          color: Colors.white, // Warna centangnya
+        ),
+      ),
+      // 👆 BATAS TAMBAHAN KODE // Animasi muncul meluncur dari bawah
       title: 'Berhasil!',
       desc: 'Password kamu sudah diperbarui. Silakan Masuk kembali!',
       titleTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 20),
