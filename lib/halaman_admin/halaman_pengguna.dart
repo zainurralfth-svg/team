@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../Core/Colour.dart';
 import '../Backend/API_Service.dart'; 
 import 'halaman_laporan.dart';
@@ -157,7 +156,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
 
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
-              child: CustomText('Daftar Pengguna', fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textDark),
+              child: CustomText('Daftar Akun Pengguna', fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.primary),
             ),
 
             // ============================================================
@@ -171,7 +170,7 @@ class _HalamanPenggunaState extends State<HalamanPengguna> {
                   controller: _searchController,
                   onChanged: _filterSearch, // Otomatis menjalankan fungsi pencarian setiap kali admin mengetik huruf baru.
                   decoration: const InputDecoration(
-                    hintText: 'Search...',
+                    hintText: 'Cari Akun...',
                     prefixIcon: Icon(Icons.search, color: AppColors.primary),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: 12),

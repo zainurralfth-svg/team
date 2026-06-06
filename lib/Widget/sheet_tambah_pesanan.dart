@@ -188,16 +188,27 @@ class _SheetTambahPesananState extends State<SheetTambahPesanan> {
                         var item = listPencarian[index];
                         int idProduk = int.parse(item['id_produk'].toString());
                         int harga = int.tryParse(item['harga'].toString()) ?? 0;
+                        int stokTersedia = int.tryParse(item['stok'].toString()) ?? 0; // 👈 1. Ambil data stok dari API
 
                         return ListTile(
                           title: CustomText(item['nama_produk'].toString(), fontWeight: FontWeight.bold, color: Colors.black, fontSize: 14),
-                          subtitle: CustomText(formatRupiah(harga), color: AppColors.textBrown, fontSize: 12),
-                          trailing: const Icon(Icons.add_circle, color: Colors.orange),
+                          // 👈 2. Tampilin info sisa stok di layar pencarian
+                          subtitle: CustomText('${formatRupiah(harga)}  •  Sisa Stok: $stokTersedia', color: stokTersedia > 0 ? AppColors.textBrown : Colors.red, fontSize: 12),
+                          // 👈 3. Kalau stok habis, tombol + berubah jadi abu-abu
+                          trailing: Icon(Icons.add_circle, color: stokTersedia > 0 ? Colors.orange : Colors.grey),
                           onTap: () {
+                            // 👈 4. SATPAM FRONTEND: Cegah masuk keranjang kalau stok habis
+                            if (stokTersedia <= 0) {
+                              FocusScope.of(context).unfocus(); // Tutup keyboard
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('⚠️ Stok habis! Tidak bisa ditambahkan ke pesanan.'), backgroundColor: Colors.red));
+                              return; // Stop proses di sini!
+                            }
+
                             // KLIK DISINI BUAT MASUKIN KE KERANJANG TERPILIH
                             setState(() {
                               if ((_jumlahPesanan[idProduk] ?? 0) == 0) {
-                                _jumlahPesanan[idProduk] = 1; // Otomatis set 1
+                                _jumlahPesanan[idProduk] = 1; // Otomatis set 1 karena stok udah dijamin > 0
                               }
                               // Bersihin kolom pencarian biar list pencarian ketutup
                               _searchController.clear();

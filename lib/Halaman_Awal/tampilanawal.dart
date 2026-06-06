@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; 
-import '../Widget/custom_text.dart'; 
+import '../Core/Colour.dart';
+import '../Widget/custom_text.dart';
 
 // Halaman pertama yang muncul saat aplikasi baru dibuka (Splash/Welcome Screen)
 class TampilanAwal extends StatelessWidget {
@@ -16,13 +16,13 @@ class TampilanAwal extends StatelessWidget {
       // Memakai Stack karena kita mau menumpuk gambar: dari warna background paling belakang sampai tombol di paling depan
       body: Stack(
         children: [
-          
           // =========================================================================
           // LAPISAN 1: WARNA BACKGROUND PALING BELAKANG
           // =========================================================================
           Container(
-            width: double.infinity,  // Memaksa lebar agar memenuhi seluruh layar
-            height: double.infinity, // Memaksa tinggi agar memenuhi seluruh layar
+            width: double.infinity, // Memaksa lebar agar memenuhi seluruh layar
+            height:
+                double.infinity, // Memaksa tinggi agar memenuhi seluruh layar
             decoration: const BoxDecoration(
               // Membuat warna gradasi yang menyatu dari atas ke bawah
               gradient: LinearGradient(
@@ -30,7 +30,8 @@ class TampilanAwal extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   AppColors.bgUtama, // Warna krem di bagian atas
-                  AppColors.primary, // Menyatu jadi warna oranye cokelat di bagian bawah
+                  AppColors
+                      .primary, // Menyatu jadi warna oranye cokelat di bagian bawah
                 ],
               ),
             ),
@@ -41,7 +42,7 @@ class TampilanAwal extends StatelessWidget {
           // =========================================================================
           // Positioned: Untuk menaruh gambar di posisi X dan Y yang pas (seperti nempel stiker)
           // Opacity (0.15): Agar gambarnya transparan/samar dan tidak menutupi tulisan di depannya
-          
+
           // Hiasan 1: Di pojok kiri atas
           Positioned(
             left: -20,
@@ -51,7 +52,7 @@ class TampilanAwal extends StatelessWidget {
               child: Image.asset('assets/images/satu.png', width: 120),
             ),
           ),
-          
+
           // Hiasan 2: Di pojok kanan atas
           Positioned(
             right: -20,
@@ -61,7 +62,7 @@ class TampilanAwal extends StatelessWidget {
               child: Image.asset('assets/images/dua.png', width: 100),
             ),
           ),
-          
+
           // Hiasan 3: Di kiri tengah (posisi tingginya menyesuaikan 40% dari tinggi layar HP)
           Positioned(
             left: 20,
@@ -71,7 +72,7 @@ class TampilanAwal extends StatelessWidget {
               child: Image.asset('assets/images/tiga.png', width: 90),
             ),
           ),
-          
+
           // Hiasan 4: Di pojok kanan bawah
           Positioned(
             right: 10,
@@ -81,7 +82,7 @@ class TampilanAwal extends StatelessWidget {
               child: Image.asset('assets/images/empat.png', width: 140),
             ),
           ),
-          
+
           // Hiasan 5: Di pojok kiri bawah
           Positioned(
             left: 30,
@@ -101,7 +102,9 @@ class TampilanAwal extends StatelessWidget {
             child: SingleChildScrollView(
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 20), // Memberi jarak pinggir agar konten tidak nempel ke bingkai HP
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ), // Memberi jarak pinggir agar konten tidak nempel ke bingkai HP
                 // Memastikan tinggi area ini sama persis dengan tinggi layar yang tersedia
                 constraints: BoxConstraints(
                   minHeight: screenHeight - MediaQuery.of(context).padding.top,
@@ -111,7 +114,6 @@ class TampilanAwal extends StatelessWidget {
                   // SpaceBetween: Mendorong elemen ke atas dan ke bawah agar letaknya proporsional
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    
                     // Ruang kosong pembantu agar letak logo bisa agak turun dan pas di tengah
                     const SizedBox(),
 
@@ -129,8 +131,9 @@ class TampilanAwal extends StatelessWidget {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.accent.withOpacity(0.4), 
-                                blurRadius: 80, // Seberapa luas cahayanya menyebar
+                                color: AppColors.accent.withOpacity(0.4),
+                                blurRadius:
+                                    80, // Seberapa luas cahayanya menyebar
                                 spreadRadius: 10, // Seberapa terang cahayanya
                               ),
                             ],
@@ -139,8 +142,11 @@ class TampilanAwal extends StatelessWidget {
                         // Gambar tulisan logo aplikasi
                         Image.asset(
                           'assets/images/tulisan tampilan awal.png',
-                          width: screenWidth * 0.85, // Lebar logo diatur 85% dari lebar HP agar pas
-                          fit: BoxFit.contain, // Menjaga gambar agar tidak gepeng atau berubah bentuk
+                          width:
+                              screenWidth *
+                              0.85, // Lebar logo diatur 85% dari lebar HP agar pas
+                          fit: BoxFit
+                              .contain, // Menjaga gambar agar tidak gepeng atau berubah bentuk
                         ),
                       ],
                     ),
@@ -155,17 +161,25 @@ class TampilanAwal extends StatelessWidget {
                             Navigator.pushNamed(context, '/login');
                           },
                           child: Container(
-                            width: screenWidth * 0.85, // Lebar tombol disamakan dengan lebar logo biar rapi
-                            height: 60, // Tinggi tombol yang pas untuk ditekan jari
+                            width:
+                                screenWidth *
+                                0.85, // Lebar tombol disamakan dengan lebar logo biar rapi
+                            height:
+                                60, // Tinggi tombol yang pas untuk ditekan jari
                             decoration: BoxDecoration(
                               color: AppColors.primary, // Warna dasar tombol
-                              borderRadius: BorderRadius.circular(20), // Membuat ujung tombol jadi melengkung/tumpul
+                              borderRadius: BorderRadius.circular(
+                                20,
+                              ), // Membuat ujung tombol jadi melengkung/tumpul
                               boxShadow: [
                                 // Memberi efek bayangan kecil agar tombol terlihat timbul (3D)
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.3),
                                   blurRadius: 8,
-                                  offset: const Offset(0, 4), // Bayangan jatuh ke bawah sedikit
+                                  offset: const Offset(
+                                    0,
+                                    4,
+                                  ), // Bayangan jatuh ke bawah sedikit
                                 ),
                               ],
                             ),
@@ -173,9 +187,10 @@ class TampilanAwal extends StatelessWidget {
                               // Memakai CustomText buatan sendiri agar desain dan ukuran tulisan selalu seragam
                               child: CustomText(
                                 'Get Started',
-                                color: AppColors.textWhite, 
+                                color: AppColors.textWhite,
                                 fontSize: 18,
-                                fontWeight: FontWeight.bold, // Ditebalkan karena ini tombol aksi penting
+                                fontWeight: FontWeight
+                                    .bold, // Ditebalkan karena ini tombol aksi penting
                               ),
                             ),
                           ),

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
-import '../Core/Colour.dart'; 
-import '../Backend/api_service.dart'; 
-import 'profil_pengguna.dart';
-import '../Widget/custom_user_navbar.dart'; 
-import '../Widget/custom_text.dart'; 
+import 'package:shared_preferences/shared_preferences.dart'; // Buat mengambil ID user yang lagi login
+import 'package:intl/intl.dart'; // Buat format mata uang Rupiah
+import '../Core/Colour.dart'; // Palet warna resmi Puddingku
+import '../Backend/api_service.dart'; // Koneksi ke database PHP/XAMPP
+import 'profil_pengguna.dart'; //untuk navigasi ke halaman profil pengguna
+import '../Widget/custom_user_navbar.dart'; // Navigasi bawah kustom
+import '../Widget/custom_text.dart'; // Komponen teks kustom buatan kita
 import '../Widget/notification_helper.dart';
 
-class CekPesananPage extends StatefulWidget {
+class CekPesananPage extends StatefulWidget { // Halaman utama buat cek status pesanan pudding yang udah dibuat sama user
   const CekPesananPage({super.key});
 
   @override
@@ -16,28 +16,33 @@ class CekPesananPage extends StatefulWidget {
 }
 
 class _CekPesananPageState extends State<CekPesananPage> {
-  bool _isLoading = true;
-  String _currentUserId = "";
+  // Saklar loading & penampung ID user
+  bool _isLoading = true; // loading untuk kontrol tampilan indikator muter-muter saat data pesanan sedang diambil dari database
+  String _currentUserId = ""; // Penampung ID user yang lagi login, nanti dipakai buat filter data pesanan sesuai usernya di database
 
-  List<dynamic> _pesananAktif = [];
-  List<dynamic> _pesananRiwayat = [];
+  // penampung data pesanan yang dipisah berdasarkan status
+  List<dynamic> _pesananAktif = [];   // Tampung pesanan yang lagi MENUNGGU / PROSES
+  List<dynamic> _pesananRiwayat = []; // Tampung pesanan yang sudah SELESAI / DIBATALKAN
 
   @override
   void initState() {
     super.initState();
-    _fetchPesananUser();
+    _fetchPesananUser(); // Gerak cepat ambil data begitu halaman pertama kali dibuka
   }
 
+  // FUNGSI: Mengubah angka mentah jadi format Rupiah (Contoh: 15000 -> Rp 15.000)
   String formatRupiah(dynamic angka) {
     if (angka == null) return "Rp 0";
     int value = int.tryParse(angka.toString()) ?? 0;
     return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
   }
 
+  // FUNGSI: Menghitung selisih waktu biar tampil (Contoh: '3 jam lalu')
   String _formatWaktu(Map<String, dynamic> item) {
     String status = (item['status_pesanan'] ?? '').toString().toUpperCase();
     String? rawTime;
 
+    // Kalau pesanan udah selesai/batal, patokannya waktu update status terakhir. Kalau belum, waktu pas baru pesan.
     if (status == 'SELESAI' || status == 'DIBATALKAN') {
       rawTime = item['updated_at'] ?? item['tanggal_pesanan'] ?? item['created_at'];
     } else {
@@ -55,13 +60,18 @@ class _CekPesananPageState extends State<CekPesananPage> {
       if (diff.inHours < 24) return '${diff.inHours} jam lalu';
       return '${diff.inDays} hari lalu';
     } catch (e) {
+      // Jalur darurat kalau format tanggal dari MySQL agak aneh, potong stringnya aja
       return rawTime.length > 15 ? rawTime.substring(0, 15) : rawTime;
     }
   }
 
+  // ==============================================================
+  // LOGIKA UTAMA: AMBIL DATA PESANAN DARI DATABASE & PILIHKAN TAB
+  // ==============================================================
   Future<void> _fetchPesananUser() async {
     setState(() => _isLoading = true);
     try {
+      // 1. Intip SharedPreferences dulu, cari tahu siapa user yang lagi buka
       SharedPreferences prefs = await SharedPreferences.getInstance();
       _currentUserId = prefs.getString('id_user') ?? ""; 
 
@@ -70,21 +80,26 @@ class _CekPesananPageState extends State<CekPesananPage> {
         return;
       }
 
+      // 2. Tarik semua data pesanan dari API PHP
       final semuaPesanan = await ApiService.getPesanan();
+      
+      // 3. Filter/Saring: Ambil pesanan yang "id_user"-nya cocok dengan user yang lagi login saat ini
       final pesananSaya = semuaPesanan.where((p) => p['id_user'].toString() == _currentUserId).toList();
 
       List<dynamic> aktif = [];
       List<dynamic> riwayat = [];
 
+      // 4. Sortir masuk keranjang mana: Masih diproses atau udah selesai?
       for (var p in pesananSaya) {
         String status = p['status_pesanan']?.toString().toUpperCase() ?? 'MENUNGGU';
         if (status == 'SELESAI' || status == 'DIBATALKAN') {
-          riwayat.add(p);
+          riwayat.add(p); // Masuk tab Riwayat pesanan
         } else {
-          aktif.add(p);
+          aktif.add(p);   // Masuk tab pesanan aktif
         }
       }
 
+      // 5. Masukkan ke dalam State utama biar UI ke-refresh otomatis
       setState(() {
         _pesananAktif = aktif;
         _pesananRiwayat = riwayat;
@@ -103,6 +118,9 @@ class _CekPesananPageState extends State<CekPesananPage> {
     }
   }
 
+  // ==============================================================
+  // PROSES: TOMBOL AKSI BATALKAN PESANAN (KHUSUS STATUS 'MENUNGGU')
+  // ==============================================================
   Future<void> _batalkanPesanan(String idPesanan) async {
     showDialog(
       context: context,
@@ -114,11 +132,13 @@ class _CekPesananPageState extends State<CekPesananPage> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () async {
-              Navigator.pop(ctx);
+              Navigator.pop(ctx); // Tutup dialog
               setState(() => _isLoading = true);
               
+              // Tembak API ubah status pesanan jadi 'DIBATALKAN'
               final response = await ApiService.updateStatusPesanan(idPesanan, 'DIBATALKAN');
               
+              //notifikasi hasil batalin pesanan ke user berdasarkan response dari API
               if (response['status'] == 'sukses') {
                 if (mounted) {
                   NotificationHelper.show(
@@ -127,7 +147,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
                     type: NotificationType.success,
                   );
                 }
-                _fetchPesananUser();
+                _fetchPesananUser(); // Ambil ulang data terbaru biar kartu pesanannya pindah tab
               } else {
                 setState(() => _isLoading = false);
                 if (mounted) {
@@ -146,6 +166,9 @@ class _CekPesananPageState extends State<CekPesananPage> {
     );
   }
 
+  // ==============================================================
+  // PROSES: HAPUS RIWAYAT KARTU PESANAN DARI LAYAR SECARA PERMANEN
+  // ==============================================================
   Future<void> _hapusRiwayatPesanan(String idPesanan) async {
     showDialog(
       context: context,
@@ -153,16 +176,14 @@ class _CekPesananPageState extends State<CekPesananPage> {
         title: const CustomText('Hapus Riwayat?', fontWeight: FontWeight.bold),
         content: const CustomText('Riwayat pesanan ini akan dihapus permanen. Lanjutkan?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx), 
-            child: const CustomText('Batal', color: Colors.grey)
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const CustomText('Batal', color: Colors.grey)),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () async {
               Navigator.pop(ctx);
               setState(() => _isLoading = true);
               
+              // Tembak API delete data berdasarkan ID di database MySQL
               final response = await ApiService.deletePesanan(idPesanan);
               
               if (response['status'] == 'sukses') {
@@ -173,7 +194,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
                     type: NotificationType.success,
                   );
                 }
-                _fetchPesananUser(); 
+                _fetchPesananUser(); // Refresh UI
               } else {
                 setState(() => _isLoading = false);
                 if (mounted) {
@@ -192,6 +213,9 @@ class _CekPesananPageState extends State<CekPesananPage> {
     );
   }
 
+  // ==============================================================
+  // PROSES: EDIT CATATAN PESANAN 
+  // ==============================================================
   void _tampilkanDialogEditCatatan(String idPesanan, String catatanLama) {
     TextEditingController editController = TextEditingController(text: catatanLama);
     
@@ -212,19 +236,14 @@ class _CekPesananPageState extends State<CekPesananPage> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx), 
-            child: const CustomText('Batal', color: Colors.grey)
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const CustomText('Batal', color: Colors.grey)),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
             onPressed: () async {
               Navigator.pop(ctx); 
               setState(() => _isLoading = true); 
               
+              // Tembak API update text catatan/request user ke MySQL
               final response = await ApiService.updateCatatan(idPesanan, editController.text);
               
               if (response['status'] == 'sukses') {
@@ -235,7 +254,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
                     type: NotificationType.success,
                   );
                 }
-                _fetchPesananUser(); 
+                _fetchPesananUser(); // Ambil ulang data biar text catatan langsung berubah di layar
               } else {
                 setState(() => _isLoading = false);
                 if (mounted) {
@@ -254,14 +273,17 @@ class _CekPesananPageState extends State<CekPesananPage> {
     );
   }
 
+  // ==============================================================
+  // DESAIN STRUKTUR HALAMAN UTAMA (TAB BAR & NAVBAR BAWAH)
+  // ==============================================================
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2, 
+      length: 2, // 2 Tab: 'Saat Ini' dan 'Pesanan Selesai'
       child: Scaffold(
         backgroundColor: AppColors.bgUtama,
         appBar: AppBar(
-          automaticallyImplyLeading: false,
+          automaticallyImplyLeading: false, // Matikan tombol back bawaan flutter
           backgroundColor: AppColors.primary,
           elevation: 0,
           toolbarHeight: 70,
@@ -269,10 +291,10 @@ class _CekPesananPageState extends State<CekPesananPage> {
           title: const CustomText('Pesanan Saya', color: AppColors.textWhite, fontSize: 24, fontWeight: FontWeight.bold),
           centerTitle: true,
           bottom: const TabBar(
-            indicatorColor: AppColors.accent,
+            indicatorColor: AppColors.accent, // Garis bawah penanda tab aktif (warna kuning/aksen)
             indicatorWeight: 4,
             labelColor: AppColors.textWhite,
-            unselectedLabelColor: Colors.white54,
+            unselectedLabelColor: Colors.white54, // Warna tab kalau lagi ga dipilih/redup
             labelStyle: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 16),
             tabs: [
               Tab(text: 'Saat Ini'),
@@ -281,22 +303,22 @@ class _CekPesananPageState extends State<CekPesananPage> {
           ),
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+            ? const Center(child: CircularProgressIndicator(color: AppColors.primary)) // Efek muter-muter pas loading data
             : TabBarView(
                 children: [
-                  _buildListPesanan(_pesananAktif, isRiwayat: false),
-                  _buildListPesanan(_pesananRiwayat, isRiwayat: true),
+                  _buildListPesanan(_pesananAktif, isRiwayat: false),  // Isi konten Tab saat ini (pesanan yang masih menunggu/proses)
+                  _buildListPesanan(_pesananRiwayat, isRiwayat: true), // Isi konten Tab riwayat (pesanan yang sudah selesai/dibatalkan)
                 ],
               ),
         bottomNavigationBar: CustomUserNavbar(
-          currentIndex: 0,
+          currentIndex: 0, // Penanda kalau menu 'Pesanan' lagi aktif di navbar bawah
           onTap: (index) {
             if (index == 0) {
-              
+              // Sudah di halaman cek pesanan, diam di tempat
             } else if (index == 1) {
-              Navigator.pushReplacementNamed(context, '/menu'); 
+              Navigator.pushReplacementNamed(context, '/menu'); // Pindah ke Katalog menu pudding
             } else if (index == 2) {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProfil()));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HalamanProfil())); // Pindah ke Profile
             }
           },
         ),
@@ -304,7 +326,11 @@ class _CekPesananPageState extends State<CekPesananPage> {
     );
   }
 
+  // ==============================================================
+  // WIDGET BUILDER: MEMBENTUK DAFTAR PESANAN / NOTIFIKASI KOSONG
+  // ==============================================================
   Widget _buildListPesanan(List<dynamic> listData, {required bool isRiwayat}) {
+    // KONDISI: Jika datanya kosong melompong, tampilin ikon sedih/box kosong
     if (listData.isEmpty) {
       return Center(
         child: Column(
@@ -321,24 +347,27 @@ class _CekPesananPageState extends State<CekPesananPage> {
       );
     }
 
+    // KONDISI: Jika ada datanya, bungkus pakai RefreshIndicator biar bisa ditarik ke bawah (Swipe to Refresh)
     return RefreshIndicator(
       color: AppColors.primary,
-      onRefresh: _fetchPesananUser,
+      onRefresh: _fetchPesananUser, // Kalau ditarik ke bawah, otomatis ambil data ulang ke database
       child: ListView.builder(
         padding: const EdgeInsets.all(20),
-        physics: const AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(), // Memaksa halaman bisa discroll walau isinya sedikit (syarat wajib RefreshIndicator)
         itemCount: listData.length,
         itemBuilder: (context, index) {
-          return _buildOrderCard(listData[index], isRiwayat);
+          return _buildOrderCard(listData[index], isRiwayat); // Gambar kartu orderan satu per satu
         },
       ),
     );
   }
 
+  // ==============================================================
+  // WIDGET BUILDER: KARTU DESAIN PER-PESANAN (KOTAK PUTIH DETAIL)
+  // ==============================================================
   Widget _buildOrderCard(Map<String, dynamic> dataPesanan, bool isRiwayat) {
-    String idTampil = dataPesanan['kode_resi']?.toString() ?? '-';
+    String idTampil = dataPesanan['kode_resi']?.toString() ?? '-'; // Nomor resi unik transaksi Puddingku
     String idDatabase = dataPesanan['id_pesanan']?.toString() ?? '';
-    
     String namaPemesan = dataPesanan['nama_pemesan']?.toString() ?? 'Pelanggan';
     
     String statusRaw = dataPesanan['status_pesanan']?.toString().toUpperCase() ?? '';
@@ -350,15 +379,17 @@ class _CekPesananPageState extends State<CekPesananPage> {
     String catatan = dataPesanan['catatan']?.toString() ?? ''; 
     bool hasCatatan = catatan.isNotEmpty && catatan != 'null';
 
+    // Memecah tulisan ringkasan menu yang dipisah tanda koma dari MySQL jadi bentuk List (Contoh: "Pudding Coklat x2, Pudding Susu x1")
     List<String> listProduk = [];
     if (dataPesanan['ringkasan_pesanan'] != null) {
       listProduk = dataPesanan['ringkasan_pesanan'].toString().split(RegExp(r',\s*'));
     }
 
-    Color warnaStatus = AppColors.primary;
-    if (status == 'PROSES') warnaStatus = AppColors.info;
-    if (status == 'SELESAI') warnaStatus = AppColors.success;
-    if (status == 'DIBATALKAN') warnaStatus = AppColors.error;
+    // LOGIKA WARNA STATUS: Menentukan warna dot & teks status pesanan pudding
+    Color warnaStatus = AppColors.primary; // Default Oranye (MENUNGGU)
+    if (status == 'PROSES') warnaStatus = AppColors.info; // Biru
+    if (status == 'SELESAI') warnaStatus = AppColors.success; // Hijau
+    if (status == 'DIBATALKAN') warnaStatus = AppColors.error; // Merah
 
     return Container(
       width: double.infinity,
@@ -372,6 +403,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // BAGIAN 1: BARIS ATAS (Kode Resi, Nama, & Status Waktu)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -395,13 +427,14 @@ class _CekPesananPageState extends State<CekPesananPage> {
           ),
           const Divider(color: AppColors.bgInput, thickness: 1, height: 25),
           
+          // BAGIAN 2: BARIS DAFTAR MENU PUDDING (Looping pakai widget Map)
           ...listProduk.map((produk) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.fastfood_rounded, size: 16, color: AppColors.primaryDark),
+                  const Icon(Icons.fastfood_rounded, size: 16, color: AppColors.primaryDark), // Ikon makanan imut
                   const SizedBox(width: 8),
                   Expanded(
                     child: CustomText(produk, color: AppColors.textBrown, fontSize: 14, fontWeight: FontWeight.w600),
@@ -412,12 +445,11 @@ class _CekPesananPageState extends State<CekPesananPage> {
           }),
           
           const SizedBox(height: 8),
+          
+          // BAGIAN 3: BOX CATATAN / REQUEST KHUSUS PELANGGAN JIKA ADA (Contoh: "Bang, gulanya dikit aja ya...")
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.bgInput.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(10)
-            ),
+            decoration: BoxDecoration(color: AppColors.bgInput.withOpacity(0.5), borderRadius: BorderRadius.circular(10)),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -431,6 +463,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
                     fontStyle: FontStyle.italic, 
                   ),
                 ),
+                // Tombol Edit Catatan hanya akan muncul jika pesanan belum diproses penjual/ dengan status proses(Status masih 'MENUNGGU')
                 if (!isRiwayat && status == 'MENUNGGU')
                   GestureDetector(
                     onTap: () => _tampilkanDialogEditCatatan(idDatabase, hasCatatan ? catatan : ''),
@@ -451,6 +484,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
           
           const Divider(color: AppColors.bgInput, height: 25),
 
+          // BAGIAN 4: BARIS BAWAH (Total Harga Belanjaan & Indikator Status)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -467,7 +501,7 @@ class _CekPesananPageState extends State<CekPesananPage> {
                   const CustomText('Status', color: AppColors.textHint, fontSize: 12),
                   Row(
                     children: [
-                      Container(width: 8, height: 8, decoration: BoxDecoration(color: warnaStatus, shape: BoxShape.circle)),
+                      Container(width: 8, height: 8, decoration: BoxDecoration(color: warnaStatus, shape: BoxShape.circle)), // Dot warna dinamis
                       const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -481,49 +515,43 @@ class _CekPesananPageState extends State<CekPesananPage> {
             ],
           ),
 
+          // BAGIAN 5: TOMBOL AKSI DINAMIS DI BAGIAN BAWAH KARTU
+          // Kondisi A: Masih menunggu konfirmasi, kasih tombol "Batalkan Pesanan Jika Ingin Mmebatalkan Pesanan"
           if (!isRiwayat && status == 'MENUNGGU') ...[
             const SizedBox(height: 15),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.error),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
+                style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.error), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                 onPressed: () => _batalkanPesanan(idDatabase),
                 child: const CustomText('Batalkan Pesanan', color: AppColors.error, fontWeight: FontWeight.bold),
               ),
             ),
+            // Kondisi B: kunci tombol pembatalan dan beri pemberitahuan info bahwa pesanan sedang diproses dan tidak bisa dibatalkan
           ] else if (!isRiwayat && status == 'PROSES') ...[
             const SizedBox(height: 15),
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(10),
+              width: double.infinity, padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(color: AppColors.info.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
               child: const CustomText(
                 'Pesanan sedang disiapkan, tidak bisa dibatalkan.',
-                textAlign: TextAlign.center,
-                color: AppColors.info, 
-                fontSize: 12, 
-                fontWeight: FontWeight.bold,
+                textAlign: TextAlign.center, color: AppColors.info, fontSize: 12, fontWeight: FontWeight.bold,
               ),
             ),
           ] else if (isRiwayat) ...[
+            // Kondisi C: Pesanan udah selesai/batal di sebelum nya, kasih tombol "Hapus Riwayat" biar layar bersih di riwayat pesanan
             const SizedBox(height: 15),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.textHint), 
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
+                style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.textHint), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                 onPressed: () => _hapusRiwayatPesanan(idDatabase),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(Icons.delete_outline, color: AppColors.textHint, size: 20),
                     const SizedBox(width: 8),
-                    const CustomText('Hapus Riwayat', color: AppColors.textHint, fontWeight: FontWeight.bold),
+                    const CustomText('Hapus Riwayat Pesanan', color: AppColors.textHint, fontWeight: FontWeight.bold),
                   ],
                 ),
               ),

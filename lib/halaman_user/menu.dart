@@ -4,7 +4,7 @@ import '../Backend/api_service.dart';
 import '../halaman_user/profil_pengguna.dart';
 import '../Core/Colour.dart'; 
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:intl/intl.dart';
 import '../Widget/custom_user_navbar.dart'; 
 import '../Widget/notification_helper.dart';
 
@@ -73,6 +73,11 @@ class _MenuPageState extends State<MenuPage> {
   ];
 
   String currentUserId = "0";
+  // Fungsi format Rupiah
+  String formatRupiah(dynamic angka) {
+    int value = int.tryParse(angka.toString()) ?? 0;
+    return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
+  }
 
   @override
   void initState() {
@@ -226,7 +231,7 @@ class _MenuPageState extends State<MenuPage> {
                 },
                 style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textDark), 
                 decoration: InputDecoration(
-                  hintText: 'Search Produk',
+                  hintText: 'Cari produk kami di sini...',
                   hintStyle: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.textHint),
                   prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   filled: true, fillColor: AppColors.textWhite,
@@ -306,7 +311,7 @@ class _MenuPageState extends State<MenuPage> {
                       final product = produkFilter[index];
                       String idMenu = product['id_produk']?.toString() ?? '';
                       String namaDB = product['nama_produk'] ?? 'Tanpa Nama';
-                      String hargaDB = 'Rp ${product['harga']}';
+                      String hargaDB = formatRupiah(product['harga']);
                       String namaFileGambar = product['gambar'] ?? '';
                       String urlGambarLengkap = Uri.encodeFull("${ApiService.baseUrl}/uploads/$namaFileGambar");
                       String deskripsiDB = product['deskripsi'] ?? 'Deskripsi tidak tersedia.';

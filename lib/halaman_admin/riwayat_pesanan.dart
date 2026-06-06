@@ -7,6 +7,8 @@ import 'admin.dart';
 import 'halaman_profil_admin.dart';
 import 'halaman_produk.dart';
 import 'halaman_laporan.dart';
+// TAMBAHAN: Import halaman detail_pesanan kamu
+import 'halaman_detail_pesanan.dart'; 
 import '../Widget/custom_admin_navbar.dart';
 import 'cetak_laporan.dart' show getBulanDownloaded;
 import '../Widget/custom_text.dart'; 
@@ -159,34 +161,8 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
       final tgl = DateTime.parse(rawTime);
       return '${tgl.hour.toString().padLeft(2, '0')}:${tgl.minute.toString().padLeft(2, '0')}';
     } catch (_) {
-      // Coba ambil dari string langsung jika parse gagal
       if (rawTime.length > 16) return rawTime.substring(11, 16);
       return '';
-    }
-  }
-
-  String _formatWaktu(Map<String, dynamic> item) {
-    String status = (item['status_pesanan'] ?? '').toString().toUpperCase();
-    String? rawTime;
-
-    if (status == 'SELESAI' || status == 'DIBATALKAN') {
-      rawTime = item['updated_at'] ?? item['tanggal_pesanan'] ?? item['tanggal_pesan'] ?? item['created_at'];
-    } else {
-      rawTime = item['tanggal_pesanan'] ?? item['tanggal_pesan'] ?? item['created_at'] ?? item['waktu'];
-    }
-
-    if (rawTime == null || rawTime.isEmpty) return 'Baru saja';
-
-    try {
-      DateTime orderTime = DateTime.parse(rawTime);
-      Duration diff = DateTime.now().difference(orderTime);
-
-      if (diff.inMinutes < 1) return 'Baru saja';
-      if (diff.inMinutes < 60) return '${diff.inMinutes} mnt lalu';
-      if (diff.inHours < 24) return '${diff.inHours} jam lalu';
-      return '${diff.inDays} hari lalu';
-    } catch (e) {
-      return rawTime.length > 15 ? rawTime.substring(0, 15) : rawTime;
     }
   }
 
@@ -252,7 +228,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
                           });
                         },
                         decoration: const InputDecoration(
-                          hintText: 'Search...',
+                          hintText: 'Cari Riwayat Pesanan...',
                           border: InputBorder.none,
                         ),
                         style: const TextStyle(fontFamily: 'Signika Negative', color: AppColors.primary, fontSize: 16),
@@ -277,7 +253,7 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: const CustomText('Riwayat Pesanan', color: AppColors.primaryDark, fontSize: 20, fontWeight: FontWeight.bold),
+              child: const CustomText('Daftar Riwayat Pesanan', color: AppColors.primary, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Expanded(
               child: _isLoading
@@ -320,13 +296,11 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
 
   Widget _buildOrderCard(Map<String, dynamic> item, int index) {
     String idTampil = item['kode_resi']?.toString() ?? '-';
-
     String namaPemesan = item['nama_pemesan'] ?? 'Tanpa Nama';
     String ringkasanLengkap = item['ringkasan_pesanan'] ?? 'Detail Kosong';
     String harga = formatRupiah(item['total_harga']);
     String status = item['status_pesanan'] ?? 'PROSES';
 
-    // Tanggal, bulan, tahun & jam
     String tanggal = _formatTanggal(item);
     String jam = _formatJam(item);
 
@@ -339,164 +313,164 @@ class _HalamanRiwayatState extends State<HalamanRiwayat> {
         ? AppColors.success
         : (status == 'DIBATALKAN' ? AppColors.error : AppColors.info);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: AppColors.textWhite,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 5, offset: const Offset(0, 3))],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-
-                // ==========================================
-                // BARIS 1: Kode resi + tanggal & jam
-                // ==========================================
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Kiri: kode resi + tanggal & jam di bawahnya
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomText(
-                          idTampil,
-                          color: AppColors.primary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        if (tanggal.isNotEmpty || jam.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Row(
-                              children: [
-                                if (tanggal.isNotEmpty)
-                                  CustomText(
-                                    tanggal,
-                                    fontSize: 10,
-                                    color: AppColors.textHint,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                if (tanggal.isNotEmpty && jam.isNotEmpty)
-                                  const CustomText(
-                                    '  •  ',
-                                    fontSize: 10,
-                                    color: AppColors.textHint,
-                                  ),
-                                if (jam.isNotEmpty)
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.access_time,
-                                        size: 10,
-                                        color: AppColors.textHint,
-                                      ),
-                                      const SizedBox(width: 2),
-                                      CustomText(
-                                        jam,
-                                        fontSize: 10,
-                                        color: AppColors.textHint,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ],
-                                  ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
-                // ==========================================
-                // BARIS 2: Nama pemesan + status
-                // ==========================================
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CustomText(namaPemesan, fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(10)),
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(Icons.circle, color: statusColor, size: 10),
-                        const SizedBox(width: 4),
-                        CustomText(
-                          status == 'SELESAI' ? 'Selesai' : 'Dibatalkan',
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ]),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // ==========================================
-                // DAFTAR BARANG (EXPANDABLE)
-                // ==========================================
-                ...tampilItem.map((barang) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 4),
-                      child: Icon(Icons.circle, size: 5, color: AppColors.textBrown),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(child: CustomText(barang,
-                        fontSize: 12, color: AppColors.textBrown, fontWeight: FontWeight.w600)),
-                  ]),
-                )),
-                if (daftarItem.length > 2)
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (isExpanded) {
-                          _expandedIndexes.remove(index);
-                        } else {
-                          _expandedIndexes.add(index);
-                        }
-                      });
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 2, bottom: 4),
-                      child: Row(children: [
-                        CustomText(
-                          isExpanded ? 'Sembunyikan' : '+${daftarItem.length - 2} barang lainnya',
-                          fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600,
-                        ),
-                        const SizedBox(width: 2),
-                        Icon(isExpanded ? Icons.expand_less : Icons.expand_more,
-                            size: 14, color: AppColors.primary),
-                      ]),
-                    ),
-                  ),
-                const SizedBox(height: 6),
-                _buildDashedLine(),
-                const SizedBox(height: 10),
-
-                // ==========================================
-                // BARIS BAWAH: Total harga
-                // ==========================================
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    CustomText(harga, fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
-                  ],
-                ),
-              ],
-            ),
+    // ========================================================
+    // TAMBAHAN: Bungkus Card dengan GestureDetector
+    // ========================================================
+    return GestureDetector(
+      onTap: () {
+        // Pindah ke halaman detail_pesanan sambil bawa data pesanan ini
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HalamanDetailPesanan(dataPesanan: item),
           ),
-        ],
+        ).then((_) => _fetchDataPesanan()); // Refresh pas balik dari detail (opsional)
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 15),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: AppColors.textWhite,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 5, offset: const Offset(0, 3))],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomText(
+                            idTampil,
+                            color: AppColors.primary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          if (tanggal.isNotEmpty || jam.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Row(
+                                children: [
+                                  if (tanggal.isNotEmpty)
+                                    CustomText(
+                                      tanggal,
+                                      fontSize: 10,
+                                      color: AppColors.textHint,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  if (tanggal.isNotEmpty && jam.isNotEmpty)
+                                    const CustomText(
+                                      '  •  ',
+                                      fontSize: 10,
+                                      color: AppColors.textHint,
+                                    ),
+                                  if (jam.isNotEmpty)
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.access_time,
+                                          size: 10,
+                                          color: AppColors.textHint,
+                                        ),
+                                        const SizedBox(width: 2),
+                                        CustomText(
+                                          jam,
+                                          fontSize: 10,
+                                          color: AppColors.textHint,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CustomText(namaPemesan, fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: AppColors.bgCard, borderRadius: BorderRadius.circular(10)),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          Icon(Icons.circle, color: statusColor, size: 10),
+                          const SizedBox(width: 4),
+                          CustomText(
+                            status == 'SELESAI' ? 'Selesai' : 'Dibatalkan',
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ]),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  ...tampilItem.map((barang) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Icon(Icons.circle, size: 5, color: AppColors.textBrown),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(child: CustomText(barang,
+                          fontSize: 12, color: AppColors.textBrown, fontWeight: FontWeight.w600)),
+                    ]),
+                  )),
+                  if (daftarItem.length > 2)
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (isExpanded) {
+                            _expandedIndexes.remove(index);
+                          } else {
+                            _expandedIndexes.add(index);
+                          }
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 2, bottom: 4),
+                        child: Row(children: [
+                          CustomText(
+                            isExpanded ? 'Sembunyikan' : '+${daftarItem.length - 2} barang lainnya',
+                            fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600,
+                          ),
+                          const SizedBox(width: 2),
+                          Icon(isExpanded ? Icons.expand_less : Icons.expand_more,
+                              size: 14, color: AppColors.primary),
+                        ]),
+                      ),
+                    ),
+                  const SizedBox(height: 6),
+                  _buildDashedLine(),
+                  const SizedBox(height: 10),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      CustomText(harga, fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

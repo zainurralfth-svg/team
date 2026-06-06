@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
-import '../Core/Colour.dart'; // Palet 14 Warna Baru
-import '../Backend/API_Service.dart'; 
-import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
+import 'package:awesome_dialog/awesome_dialog.dart'; // Library untuk memunculkan pop-up 
+import '../Core/Colour.dart'; // Mengambil palet warna aplikasi Puddingku
+import '../Backend/API_Service.dart'; // Menghubungkan ke fungsi reset password di PHP
+import '../Widget/custom_text.dart'; // Komponen teks kustom buatan kita
 
 class LupaPasswordPage extends StatefulWidget {
   const LupaPasswordPage({super.key});
@@ -12,97 +12,109 @@ class LupaPasswordPage extends StatefulWidget {
 }
 
 class _LupaPasswordPageState extends State<LupaPasswordPage> {
-  // Controller untuk membaca teks yang diinput oleh user
+  // Box/Remot kontrol untuk mencatat apa yang diketik user di kolom HP & Password Baru
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   
-  // Variabel State untuk mengelola kondisi UI
-  bool _isPhoneVerified = false; // Status apakah nomor telepon valid
-  bool _obscureText = true;      // Status visibilitas teks password (hidden/visible)
-  String? _errorMessage;         // Menyimpan teks pesan error untuk ditampilkan
+  // untuk kondisi UI aplikasi
+  bool _isPhoneVerified = false; // false = baru ketik nomor HP, true = nomor valid & siap buat password baru
+  bool _obscureText = true;      // true = password disensor bintik-bintik, false = kelihatan teksnya
+  String? _errorMessage;         // Tempat menyimpan pesan error kalau ada yang salah input
 
   @override
   void dispose() {
-    // Membersihkan controller dari memori saat halaman dihancurkan
+    // Hapus semua kontroler dari memori pas halaman ditutup biar HP gak berat
     _phoneController.dispose();
     _newPasswordController.dispose();
     super.dispose();
   }
 
-  // FUNGSI: Menampilkan pesan error pada UI
+  // FUNGSI: Buat nampilin banner/notifikasi error merah di atas form (hilang otomatis setelah 3 detik)
   void _setAlert(String pesan) {
     setState(() => _errorMessage = pesan);
-    // Menghapus pesan error secara otomatis setelah 3 detik
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) setState(() => _errorMessage = null);
     });
   }
 
-  // FUNGSI: Menampilkan dialog pop-up ketika proses berhasil
+  // FUNGSI: Memunculkan pop-up dialog sukses pakai AwesomeDialog
   void _showSuccess() {
     AwesomeDialog(
       context: context,
       dialogType: DialogType.success,
-      animType: AnimType.bottomSlide,
+      
+      // 👇 TAMBAHAN KODE INI BUAT MUNCULIN ICON CENTANG MANUAL
+      customHeader: Container(
+        decoration: const BoxDecoration(
+          color: Colors.green, // Warna background bulatannya
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.check,
+          size: 50,
+          color: Colors.white, // Warna centangnya
+        ),
+      ),
+      // 👆 BATAS TAMBAHAN KODE // Animasi muncul meluncur dari bawah
       title: 'Berhasil!',
-      desc: 'Password kamu sudah diperbarui. Silakan login kembali!',
-      // Awesome Dialog butuh objek TextStyle, jadi tetap pakai TextStyle
+      desc: 'Password kamu sudah diperbarui. Silakan Masuk kembali!',
       titleTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 20),
       descTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16),
-      btnOkText: "Siap, Login!",
+      btnOkText: "Siap, Masuk!",
       buttonsTextStyle: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: Colors.white),
-      btnOkColor: AppColors.primary, // Pakai primary (Oranye Coklat)
-      btnOkOnPress: () => Navigator.pop(context), // Kembali ke halaman sebelumnya (Login)
+      btnOkColor: AppColors.primary, // Tombol warna oranye utama
+      btnOkOnPress: () => Navigator.pop(context), // Pas diklik OK, otomatis balik ke halaman Login
     ).show();
   }
 
-  // FUNGSI UTAMA: Logika untuk memproses reset password
+  // ==============================================================
+  // TAHAP UTAMA: LOGIKA PROSES RESET PASSWORD (Langkah Kontrol)
+  // ==============================================================
   Future<void> _prosesReset() async {
     final phone = _phoneController.text.trim();
     final newPass = _newPasswordController.text.trim();
 
     try {
-      // TAHAP 1: Validasi dan pengecekan nomor telepon ke API
+      // --- LANGKAH 1: Cek dulu apakah nomor HP-nya ada di database ---
       if (!_isPhoneVerified) {
         if (phone.isEmpty) return _setAlert('Nomor telepon tidak boleh kosong!');
         
+        // Kirim nomor HP ke API PHP untuk dicek kelayakannya
         var hasil = await ApiService.resetPassword(phone);
         if (hasil['status'] == 'sukses') {
-          // Jika nomor valid, ubah state untuk menampilkan form password baru
+          // Jika nomor terdaftar, ubah status jadi true (buka form password baru)
           setState(() { _errorMessage = null; _isPhoneVerified = true; });
         } else {
-          _setAlert(hasil['pesan']); // Tampilkan pesan error dari API
+          _setAlert(hasil['pesan']); // Nomor gak ketemu atau salah
         }
-        return;
+        return; // Stop di sini dulu, nunggu user input password baru
       }
 
-      // TAHAP 2: Validasi dan penyimpanan password baru ke API
-      if (newPass.isEmpty) return _setAlert('Password baru tidak boleh kosong!');
-      if (newPass.length < 6) return _setAlert('Password baru minimal 6 karakter!');
+      // --- LANGKAH 2: Validasi dan simpan password baru ke database ---
+      if (newPass.isEmpty) return _setAlert('Kata sandi baru tidak boleh kosong!');
+      if (newPass.length < 6) return _setAlert('Kata sandi baru minimal 6 karakter!');
 
+      // Kirim data lengkap (Nomor HP + Kata Sandi Baru) ke API PHP untuk disimpan
       var hasilUpdate = await ApiService.resetPassword(phone, newPassword: newPass);
       if (hasilUpdate['status'] == 'sukses') {
-        _showSuccess(); // Jika update berhasil, tampilkan dialog sukses
+        _showSuccess(); //Munculkan dialog sukses ganti password
       } else {
-        _setAlert(hasilUpdate['pesan']); // Tampilkan pesan error dari API
+        _setAlert(hasilUpdate['pesan']); // Jika ada error gagal update dari database
       }
     } catch (e) {
-      // Penanganan error jika tidak dapat terhubung ke server/XAMPP
+      // Penanganan darurat kalau XAMPP mati atau IP laptop berubah mendadak
       _setAlert('Gagal terhubung ke server! Cek koneksi / XAMPP.');
     }
   }
 
   // ==============================================================
-  // --- BUILDER UTAMA UI ---
+  // DESAIN TAMPILAN LAYAR (UI BUILDER)
   // ==============================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Tetap true biar form nggak ketutup keyboard
-      resizeToAvoidBottomInset: true, 
+      resizeToAvoidBottomInset: true, // Biar form otomatis naik pas keyboard HP lu muncul
       backgroundColor: AppColors.bgUtama, 
-      
-      // SafeArea KITA HAPUS di sini, biar gambar kue full sampai atas jam HP
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 800;
@@ -111,16 +123,15 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
           return Stack(
             children: [
               SingleChildScrollView(
-                // GANTI INI AJA: Biar pas di-scroll mentok nggak ketarik/mantul
-                physics: const ClampingScrollPhysics(),
+                physics: const ClampingScrollPhysics(), // Scroll anti-mantul lebay pas mentok atas/bawah
                 child: Column(
                   children: [
-                    _buildHeader(isDesktop),             // <-- Aman, nggak dirubah
+                   _buildHeader(isDesktop),             // Gambar dessert banner atas + tombol back
                     const SizedBox(height: 20),
-                    _buildErrorBanner(),
-                    _buildForm(contentWidth, isDesktop), // <-- Aman, nggak dirubah
-                    const SizedBox(height: 80),          
-                    _buildFooter(),                      // <-- Aman, nggak dirubah
+                    _buildErrorBanner(),                 // Banner merah pemberitahuan error (jika ada)
+                    _buildForm(contentWidth, isDesktop), // Kotak form oranye utama
+                    const SizedBox(height: 80),
+                    _buildFooter(),                     // di bawah halaman berlogo 'Puddingku'
                   ],
                 ),
               ),
@@ -132,38 +143,41 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
   }
 
   // ==============================================================
-  // --- KUMPULAN WIDGET KOMPONEN ---
+  // WIDGET BAGIAN 1: GAMBAR HEADER ATAS
   // ==============================================================
-
-  // KOMPONEN 1: Menampilkan gambar header beserta tombol kembali
   Widget _buildHeader(bool isDesktop) {
     return Stack(
       children: [
         ClipPath(
-          clipper: HeaderClipper(),
+          clipper: HeaderClipper(), // Potong gambar biar rapi
           child: Container(
             width: double.infinity, height: isDesktop ? 230 : 280,
             decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/Dessert Box Banafe.png'), fit: BoxFit.cover)),
           ),
         ),
-        CustomPaint(size: Size(double.infinity, isDesktop ? 230 : 280), painter: HeaderPainter()),
+        CustomPaint(size: Size(double.infinity, isDesktop ? 230 : 280), painter: HeaderPainter()), // Garis dekorasi coklat di bawah gambar
         Positioned(
           left: 10, top: 30,
-          child: IconButton(icon: const Icon(Icons.arrow_back, color: AppColors.textWhite, size: 30), onPressed: () => Navigator.pop(context)),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.textWhite, size: 30), 
+            onPressed: () => Navigator.pop(context) // Klik untuk kembali ke halaman login
+          ),
         ),
       ],
     );
   }
 
-  // KOMPONEN 2: Menampilkan banner notifikasi error jika _errorMessage tidak null
+  // ==============================================================
+  // WIDGET BAGIAN 2: BANNER NOTIFIKASI ERROR (MELAYANG SEMENTARA)
+  // ==============================================================
   Widget _buildErrorBanner() {
-    if (_errorMessage == null) return const SizedBox(height: 10);
+    if (_errorMessage == null) return const SizedBox(height: 10); // Kalau gak ada error, kasih jarak kecil aja
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.error, // Menggunakan merah error baru
+          color: AppColors.error, // Merah galak penanda error
           borderRadius: BorderRadius.circular(15),
           boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 5)], 
         ),
@@ -178,7 +192,9 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     );
   }
 
-  // KOMPONEN 3: Menampilkan struktur form (Teks, Input Field, dan Tombol)
+  // ==============================================================
+  // WIDGET BAGIAN 3: KOTAK FORM DINAMIS (BISA BERUBAH ISI)
+  // ==============================================================
   Widget _buildForm(double contentWidth, bool isDesktop) {
     return Center(
       child: Container(
@@ -186,12 +202,10 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            // =====================================
-            // INI PERUBAHAN FONT OLEO SCRIPT NYA
-            // =====================================
+            // Judul halaman otomatis berubah teksnya sesuai status saklar _isPhoneVerified
             CustomText(
-              _isPhoneVerified ? 'Buat Password Baru' : 'Reset Password', 
-              isOleo: true, // <-- PANGGIL SAKLARNYA DARI CUSTOMTEXT
+              _isPhoneVerified ? 'Buat Kata Sandi Baru' : 'Ganti Kata Sandi', 
+              isOleo: true, // Pakai font Oleo Script estetik
               textAlign: TextAlign.center, 
               color: AppColors.textDark, 
               fontSize: 38, 
@@ -199,41 +213,45 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
             ),
             const SizedBox(height: 10),
             CustomText(
-              _isPhoneVerified ? 'Nomor terverifikasi! Masukkan Password Baru Anda.' : 'Masukkan Nomor Telepon Yang Terdaftar Di Akun Anda.', 
+              _isPhoneVerified ? 'Nomor terverifikasi! Masukkan Kata Sandi Baru Anda.' : 'Masukkan Nomor Telepon Yang Terdaftar Di Akun Anda.', 
               textAlign: TextAlign.center, 
               color: AppColors.textDark, 
               fontSize: 16,
             ),
             const SizedBox(height: 30),
 
-            // Container Background Form (Warna Oranye)
+            // Kotak besar oranye pembungkus inputan
             Container(
               width: isDesktop ? 700 : double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 40),
               decoration: BoxDecoration(
-                color: AppColors.primary, // Menggunakan oranye utama
+                color: AppColors.primary, 
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10, offset: const Offset(0, 5))], 
               ),
               child: Column(
                 children: [
+                  // Kolom Nomor HP: Otomatis terkunci/mati (enabled: false) kalau nomornya sudah terverifikasi sukses
                   _buildInputField('Nomor Telepon', '08123456xxx', Icons.phone_android, _phoneController, enabled: !_isPhoneVerified),
+                  
+                  // LOGIKA IF SLEEPING: Kolom Password Baru di bawah ini HANYA AKAN MUNCUL kalau nomor HP sukses dicek
                   if (_isPhoneVerified) ...[
                     const SizedBox(height: 20),
-                    _buildInputField('Password Baru', 'Minimal 6 karakter', Icons.lock_outline, _newPasswordController, isPassword: true),
+                    _buildInputField('Kata Sandi Baru', 'Minimal 6 karakter', Icons.lock_outline, _newPasswordController, isPassword: true),
                   ],
                 ],
               ),
             ),
             const SizedBox(height: 40),
 
-            // Tombol Eksekusi
+            // Tombol Utama Eksekutor
             SizedBox(
               width: isDesktop ? 350 : double.infinity, height: 55,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 5),
-                onPressed: _prosesReset, 
-                child: CustomText(_isPhoneVerified ? 'SIMPAN PASSWORD' : 'CEK NOMOR TELEPON', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 18),
+                onPressed: _prosesReset, // Menjalankan logika pemicu reset
+                // Teks di dalam tombol ikut berubah dinamis mengikuti progress user
+                child: CustomText(_isPhoneVerified ? 'SIMPAN KATA SANDI' : 'CEK NOMOR TELEPON', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 18),
               ),
             ),
           ],
@@ -242,12 +260,14 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     );
   }
 
-  // KOMPONEN 4: Menampilkan Footer Statis di bagian bawah layar
+  // ==============================================================
+  // WIDGET BAGIAN 4: FOOTER BAWAH (NAMA APLIKASI)
+  // ==============================================================
   Widget _buildFooter() {
     return Container( 
       height: 65, width: double.infinity,
       decoration: const BoxDecoration(
-        color: AppColors.primary, // Menggunakan oranye utama
+        color: AppColors.primary, 
         borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
       ),
       child: Row(
@@ -265,7 +285,9 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
     );
   }
 
-  // WIDGET REUSABLE: Cetakan untuk membuat form input text agar kode tidak berulang
+  // ==============================================================
+  // WIDGET REUSABLE: CETAKAN KOLOM INPUT FIELD
+  // ==============================================================
   Widget _buildInputField(String label, String hint, IconData icon, TextEditingController controller, {bool isPassword = false, bool enabled = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,16 +295,17 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
         CustomText(label, color: AppColors.textWhite, fontSize: 16, fontWeight: FontWeight.w600),
         const SizedBox(height: 10),
         Container(
-          // Mengubah warna background menjadi abu-abu jika parameter enabled = false
+          //Warna bg otomatis berubah jadi abu-abu gelap (shade400) kalau kolomnya dikunci (enabled: false) di kondisi nomor HP sudah terverifikasi
           decoration: BoxDecoration(color: enabled ? AppColors.bgInput : Colors.grey.shade400, borderRadius: BorderRadius.circular(12)),
           child: TextField(
             controller: controller, 
-            enabled: enabled, 
-            obscureText: isPassword ? _obscureText : false, // Menyembunyikan teks jika ini form password
-            keyboardType: isPassword ? TextInputType.text : TextInputType.phone,
+            enabled: enabled, // Mengatur aktif atau matinya kolom ketik
+            obscureText: isPassword ? _obscureText : false, // Sembunyikan tulisan kalau ini tipe password
+            keyboardType: isPassword ? TextInputType.text : TextInputType.phone, // HP otomatis buka panel angka jika input telepon
             style: const TextStyle(fontFamily: 'Signika Negative', fontSize: 16, color: AppColors.textDark),
             decoration: InputDecoration(
               prefixIcon: Icon(icon, color: AppColors.primaryDark, size: 24),
+              // Pasang tombol mata intip khusus untuk inputan bertipe password saja
               suffixIcon: isPassword 
                 ? IconButton(icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: AppColors.primaryDark), onPressed: () => setState(() => _obscureText = !_obscureText))
                 : null,
@@ -299,16 +322,13 @@ class _LupaPasswordPageState extends State<LupaPasswordPage> {
 }
 
 // ==============================================================
-// --- CLASS DEKORASI BENTUK GARIS LURUS HITAM ---
+// KELAS PEMBANTU: UNTUK MENGGUNTING & MENGGAMBAR GARIS HEADER
 // ==============================================================
-
-// Class untuk memotong kontainer gambar secara lurus
 class HeaderClipper extends CustomClipper<Path> {
   @override Path getClip(Size size) { Path path = Path(); path.lineTo(0, size.height); path.lineTo(size.width, size.height); path.lineTo(size.width, 0); path.close(); return path; }
   @override bool shouldReclip(oldClipper) => false;
 }
 
-// Class untuk menggambar garis batas dekoratif pada potongan gambar
 class HeaderPainter extends CustomPainter {
   @override void paint(Canvas canvas, Size size) { final paint = Paint()..color = AppColors.textBrown..strokeWidth = 7.0..style = PaintingStyle.stroke; final path = Path(); path.moveTo(0, size.height); path.lineTo(size.width, size.height); canvas.drawPath(path, paint); }
   @override bool shouldRepaint(oldDelegate) => false;

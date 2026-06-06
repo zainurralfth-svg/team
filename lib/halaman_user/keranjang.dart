@@ -5,6 +5,7 @@ import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import 'konfirmasipesanan.dart'; // Pastikan file ini sudah ada
 import '../Widget/custom_text.dart'; 
 import '../Widget/notification_helper.dart';
+import 'package:intl/intl.dart';
 
 class KeranjangPage extends StatefulWidget {
   const KeranjangPage({super.key});
@@ -102,8 +103,8 @@ class _KeranjangPageState extends State<KeranjangPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const CustomText("Hapus Item", fontWeight: FontWeight.bold),
-        content: const CustomText("Apakah Anda yakin ingin menghapus item ini dari keranjang?"),
+        title: const CustomText("Hapus Produk", fontWeight: FontWeight.bold),
+        content: const CustomText("Apakah Anda yakin ingin menghapus Produk ini dari keranjang?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -155,6 +156,12 @@ class _KeranjangPageState extends State<KeranjangPage> {
       total += int.tryParse(item['jumlah'].toString()) ?? 0;
     }
     return total;
+  }
+
+  // Fungsi buat nambahin titik di angka (format Rupiah)
+  String formatRupiah(dynamic angka) {
+    int value = int.tryParse(angka.toString()) ?? 0;
+    return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
   }
 
   @override
@@ -214,10 +221,10 @@ class _KeranjangPageState extends State<KeranjangPage> {
                         return _buildCartCard(
                           item['id_produk'].toString(),
                           item['nama_produk'] ?? 'Tanpa Nama',
-                          'Rp ${item['harga']}',
+                          formatRupiah(item['harga']), // 👈 INI YANG BARU
                           int.tryParse(item['jumlah'].toString()) ?? 1,
                           Uri.encodeFull("${ApiService.baseUrl}/uploads/${item['gambar']}"),
-                          int.tryParse(item['stok']?.toString() ?? '999') ?? 999, // Ambil stok
+                          int.tryParse(item['stok']?.toString() ?? '999') ?? 999, 
                         );
                       },
                     ),
@@ -242,7 +249,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               CustomText(
-                                '$_totalItem Item',
+                                '$_totalItem produk',
                                 fontSize: 14, 
                                 color: AppColors.textDark,
                               ),
@@ -255,7 +262,7 @@ class _KeranjangPageState extends State<KeranjangPage> {
                           ),
                           const SizedBox(height: 10),
                           CustomText(
-                            'Rp $_totalHarga',
+                            formatRupiah(_totalHarga),
                             color: AppColors.primary,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,

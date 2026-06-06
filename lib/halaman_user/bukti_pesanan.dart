@@ -6,6 +6,16 @@ import '../Core/Colour.dart';
 class BuktiPemesanan extends StatelessWidget {
   const BuktiPemesanan({super.key});
 
+  // TAMBAHAN: Fungsi format Rupiah
+  String formatRupiah(dynamic angka) {
+    int value = int.tryParse(angka.toString()) ?? 0;
+    return NumberFormat.currency(
+      locale: 'id',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    ).format(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     // Menangkap kiriman data (seperti nama, no HP, keranjang belanja) dari halaman konfirmasi sebelumnya.
@@ -181,8 +191,9 @@ class BuktiPemesanan extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
-                              'Total',
+                              'Total Harga',
                               style: TextStyle(
+                                fontFamily: 'Signika Negative', // 👈 FONT BARU
                                 color: AppColors.textBrown,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -191,8 +202,9 @@ class BuktiPemesanan extends StatelessWidget {
                             Text(
                               totalHarga.toString(),
                               style: const TextStyle(
+                                fontFamily: 'Signika Negative', // 👈 FONT BARU
                                 color: AppColors.primary,
-                                fontSize: 16,
+                                fontSize: 18, // Gedein dikit biar mantap
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

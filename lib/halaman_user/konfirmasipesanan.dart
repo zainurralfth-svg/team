@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Backend/api_service.dart';
 import '../Core/Colour.dart'; 
 import '../Widget/notification_helper.dart';
+import 'package:intl/intl.dart';
 
 // Halaman untuk menampilkan ulang rincian pesanan pembeli sebelum data dikirim ke database.
 class KonfirmasiPage extends StatefulWidget {
@@ -60,11 +61,17 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
     super.dispose();
   }
 
-  // =========================================================================
-  // FUNGSI UTAMA: PROSES PENGIRIMAN DATA PESANAN KE SERVER (DATABASE)
-  // =========================================================================
+  // Fungsi format Rupiah
+  String formatRupiah(dynamic angka) {
+    int value = int.tryParse(angka.toString()) ?? 0;
+    return NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(value);
+  }
+
+  // ============================================================
+  // FUNGSI PROSES PESANAN KE DATABASE & PINDAH HALAMAN
+  // ============================================================
   Future<void> _prosesPesanan(List<dynamic> cartItems, int totalHarga) async {
-    // 1. Cek Kelengkapan Data
+    // 1. Validasi Input
     if (_namaController.text.isEmpty || _telpController.text.isEmpty) {
       NotificationHelper.show(
         context,
@@ -183,9 +190,10 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                       child: Text(
                         'Konfirmasi Pesanan',
                         style: TextStyle(
-                          fontFamily: 'Oleo Script', 
+                          fontFamily: 'Signika Negative', // 👈 Diganti biar normal
+                          fontWeight: FontWeight.bold,    // 👈 Ditambahin biar tebal & tegas
                           color: AppColors.textWhite,
-                          fontSize: 22,
+                          fontSize: 24, // 👈 Disesuaikan ukurannya biar sama persis kayak di keranjang
                         ),
                       ),
                     ),
@@ -242,7 +250,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                                 child: _buildOrderItem(
                                   item['nama_produk'] ?? '',
                                   "${item['jumlah']}x",
-                                  "Rp ${item['harga']}",
+                                  formatRupiah(item['harga']),
                                 ),
                               );
                             },
@@ -258,7 +266,7 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                                 style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textDark),
                               ),
                               Text(
-                                "Rp $totalHarga",
+                                formatRupiah(totalHarga),
                                 style: const TextStyle(
                                   fontFamily: 'Signika Negative',
                                   fontWeight: FontWeight.bold,
@@ -273,20 +281,40 @@ class _KonfirmasiPageState extends State<KonfirmasiPage> {
                     ),
 
                     const SizedBox(height: 25),
+                    // Ubah teksnya jadi "Informasi Pemesan:" sesuai screenshot terbarumu
                     const Text(
-                      "Informasi Pengiriman",
+                      "Informasi Pemesan:", 
                       style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 15),
 
-                    // KOTAK INPUT UNTUK PENGIRIMAN
-                    _buildTextField("Nama Lengkap", Icons.person, AppColors.primary, _namaController),
-                    const SizedBox(height: 12),
-                    _buildTextField("Nomor Telepon", Icons.phone, AppColors.primary, _telpController),
-                    const SizedBox(height: 12), 
+                    // 1. LABEL & TEXTFIELD NAMA LENGKAP
+                    const Text(
+                      "Nama Lengkap", 
+                      style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark),
+                    ),
+                    const SizedBox(height: 6), // Jarak tipis antara label dan kotak input
+                    _buildTextField("Contoh: Muhammad Arief", Icons.person, AppColors.primary, _namaController),
                     
-                    // Kotak input yang ukurannya lebih lebar khusus untuk menulis catatan tambahan.
-                    _buildNotesField("Tambahkan Jika Ada Catatan Untuk Pesanan Anda", Icons.edit_note, AppColors.primary, _catatanController),
+                    const SizedBox(height: 15), // Jarak agak lebar antar form
+
+                    // 2. LABEL & TEXTFIELD NOMOR TELEPON
+                    const Text(
+                      "Nomor Telepon", 
+                      style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark),
+                    ),
+                    const SizedBox(height: 6),
+                    _buildTextField("Contoh: 081528821611", Icons.phone, AppColors.primary, _telpController),
+                    
+                    const SizedBox(height: 15),
+                    
+                    // 3. LABEL & TEXTFIELD CATATAN PELANGGAN
+                    const Text(
+                      "Catatan pesanan keinginan Pelanggan (Jika ada)", 
+                      style: TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark),
+                    ),
+                    const SizedBox(height: 6),
+                    _buildNotesField("Ketik catatan untuk pesanan kamu di sini...", Icons.edit_note, AppColors.primary, _catatanController),
 
                     const SizedBox(height: 40),
 
