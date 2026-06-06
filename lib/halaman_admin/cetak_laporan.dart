@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Core/Colour.dart';
 import '../Backend/api_service.dart';
 import 'halaman_laporan.dart';
+import '../Widget/notification_helper.dart';
 
 // ─── SHARED PREFS ─────────────────────────────────────────────────────────────
 
@@ -368,11 +369,10 @@ class CetakLaporanButton extends StatelessWidget {
         } catch (e) {
           // Tampilkan snackbar merah jika proses unduh gagal
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Gagal mengunduh PDF: $e'),
-                backgroundColor: Colors.red,
-              ),
+            NotificationHelper.show(
+              context,
+              message: 'Gagal mengunduh PDF.',
+              type: NotificationType.error,
             );
           }
         }

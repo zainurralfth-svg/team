@@ -9,6 +9,7 @@ import 'halaman_profil_admin.dart';
 import 'halaman_laporan.dart';
 import '../Widget/custom_admin_navbar.dart';
 import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
+import '../Widget/notification_helper.dart';
 
 class HalamanProduk extends StatefulWidget {
   const HalamanProduk({super.key});
@@ -140,7 +141,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                                     _snackbar('Produk berhasil ditambahkan ✓', AppColors.success); 
                                     _fetchMenu();
                                   } else {
-                                    _snackbar('Gagal: ${hasil['pesan']}', AppColors.error);
+                                    _snackbar('Gagal menambahkan produk.', AppColors.error);
                                   }
                                 }, child: const CustomText('Simpan', fontWeight: FontWeight.w900, fontSize: 16))),
                             ]),
@@ -258,7 +259,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                                     _snackbar('Produk diperbarui ✓', AppColors.success);
                                     _fetchMenu();
                                   } else {
-                                    _snackbar('Gagal: ${hasil['pesan']}', AppColors.error);
+                                    _snackbar('Gagal memperbarui produk.', AppColors.error);
                                   }
                                 }, child: const CustomText('Simpan', fontWeight: FontWeight.w900, fontSize: 16))),
                             ]),
@@ -295,7 +296,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                 _snackbar('Produk dihapus', AppColors.success);
                 _fetchMenu();
               } else {
-                _snackbar('Gagal: ${hasil['pesan']}', AppColors.error);
+                _snackbar('Gagal menghapus produk.', AppColors.error);
               }
             }, child: const CustomText('Hapus', fontWeight: FontWeight.bold)),
         ],
@@ -305,7 +306,13 @@ class _HalamanProdukState extends State<HalamanProduk> {
 
   void _snackbar(String msg, Color color) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: CustomText(msg, color: Colors.white), backgroundColor: color, behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))));
+    NotificationType type = NotificationType.info;
+    if (color == AppColors.success) {
+      type = NotificationType.success;
+    } else if (color == AppColors.error) {
+      type = NotificationType.error;
+    }
+    NotificationHelper.show(context, message: msg, type: type);
   }
 
   Widget _label(String text) => Padding(padding: const EdgeInsets.only(bottom: 6), child: CustomText(text, fontWeight: FontWeight.w900, fontSize: 15, color: AppColors.textDark));

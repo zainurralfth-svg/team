@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../Core/Colour.dart'; 
 import '../Backend/api_service.dart'; 
 import 'custom_text.dart';    
+import 'notification_helper.dart';
 
 class SheetTambahPesanan extends StatefulWidget {
   const SheetTambahPesanan({super.key});
@@ -285,8 +286,11 @@ class _SheetTambahPesananState extends State<SheetTambahPesanan> {
                                 if (qtySekarang < maxStok) {
                                   setState(() => _jumlahPesanan[idProduk] = qtySekarang + 1);
                                 } else {
-                                  ScaffoldMessenger.of(context).clearSnackBars();
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('⚠️ Maksimal stok sisa $maxStok'), backgroundColor: AppColors.error));
+                                  NotificationHelper.show(
+                                    context,
+                                    message: '⚠️ Maksimal stok sisa $maxStok',
+                                    type: NotificationType.warning,
+                                  );
                                 }
                               },
                               child: const Icon(Icons.add_circle_outline, color: Colors.green, size: 28),
@@ -313,7 +317,11 @@ class _SheetTambahPesananState extends State<SheetTambahPesanan> {
                 ElevatedButton.icon(
                   onPressed: () async {
                     if (_namaController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nama pemesan wajib diisi ya'), backgroundColor: Colors.red));
+                      NotificationHelper.show(
+                        context,
+                        message: 'Nama pemesan wajib diisi ya',
+                        type: NotificationType.warning,
+                      );
                       return;
                     }
 
@@ -332,7 +340,11 @@ class _SheetTambahPesananState extends State<SheetTambahPesanan> {
                     }
 
                     if (listKeranjangFix.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih minimal 1 menu dulu'), backgroundColor: Colors.red));
+                      NotificationHelper.show(
+                        context,
+                        message: 'Pilih minimal 1 menu dulu',
+                        type: NotificationType.warning,
+                      );
                       return;
                     }
 
@@ -348,12 +360,24 @@ class _SheetTambahPesananState extends State<SheetTambahPesanan> {
                       final response = await ApiService.tambahPesanan(dataPesananBaru);
                       if (response['status'] == 'sukses' || response['status'] == 'success') {
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pesanan berhasil masuk database! 🔥'), backgroundColor: Colors.green));
+                        NotificationHelper.show(
+                          context,
+                          message: 'Pesanan berhasil masuk database! 🔥',
+                          type: NotificationType.success,
+                        );
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal: ${response['pesan']}'), backgroundColor: Colors.red));
+                        NotificationHelper.show(
+                          context,
+                          message: 'Gagal menambahkan pesanan.',
+                          type: NotificationType.error,
+                        );
                       }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error Jaringan: $e'), backgroundColor: Colors.red));
+                      NotificationHelper.show(
+                        context,
+                        message: 'Gagal terhubung ke server! Cek koneksi Anda.',
+                        type: NotificationType.error,
+                      );
                     }
                   },
                   icon: const Icon(Icons.check, color: Colors.green),

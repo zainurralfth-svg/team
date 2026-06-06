@@ -6,6 +6,7 @@ import '../Backend/api_service.dart';
 import 'profil_pengguna.dart';
 import '../Widget/custom_user_navbar.dart'; 
 import '../Widget/custom_text.dart'; 
+import '../Widget/notification_helper.dart';
 
 class CekPesananPage extends StatefulWidget {
   const CekPesananPage({super.key});
@@ -93,8 +94,10 @@ class _CekPesananPageState extends State<CekPesananPage> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: CustomText('Gagal memuat pesanan: $e', color: Colors.white), backgroundColor: AppColors.error),
+        NotificationHelper.show(
+          context,
+          message: 'Gagal memuat pesanan.',
+          type: NotificationType.error,
         );
       }
     }
@@ -118,16 +121,20 @@ class _CekPesananPageState extends State<CekPesananPage> {
               
               if (response['status'] == 'sukses') {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: CustomText('Pesanan berhasil dibatalkan.', color: Colors.white), backgroundColor: AppColors.success),
+                  NotificationHelper.show(
+                    context,
+                    message: 'Pesanan berhasil dibatalkan.',
+                    type: NotificationType.success,
                   );
                 }
                 _fetchPesananUser();
               } else {
                 setState(() => _isLoading = false);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: CustomText('Gagal: ${response['pesan']}', color: Colors.white), backgroundColor: AppColors.error),
+                  NotificationHelper.show(
+                    context,
+                    message: 'Gagal membatalkan pesanan.',
+                    type: NotificationType.error,
                   );
                 }
               }
@@ -160,16 +167,20 @@ class _CekPesananPageState extends State<CekPesananPage> {
               
               if (response['status'] == 'sukses') {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: CustomText('Riwayat pesanan berhasil dihapus.', color: Colors.white), backgroundColor: AppColors.success),
+                  NotificationHelper.show(
+                    context,
+                    message: 'Riwayat pesanan berhasil dihapus.',
+                    type: NotificationType.success,
                   );
                 }
                 _fetchPesananUser(); 
               } else {
                 setState(() => _isLoading = false);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: CustomText('Gagal menghapus: ${response['pesan']}', color: Colors.white), backgroundColor: AppColors.error),
+                  NotificationHelper.show(
+                    context,
+                    message: 'Gagal menghapus riwayat pesanan.',
+                    type: NotificationType.error,
                   );
                 }
               }
@@ -218,16 +229,20 @@ class _CekPesananPageState extends State<CekPesananPage> {
               
               if (response['status'] == 'sukses') {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: CustomText('Catatan berhasil diperbarui! 🎉', color: Colors.white), backgroundColor: AppColors.success),
+                  NotificationHelper.show(
+                    context,
+                    message: 'Catatan berhasil diperbarui! 🎉',
+                    type: NotificationType.success,
                   );
                 }
                 _fetchPesananUser(); 
               } else {
                 setState(() => _isLoading = false);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: CustomText('Gagal update catatan: ${response['pesan']}', color: Colors.white), backgroundColor: AppColors.error),
+                  NotificationHelper.show(
+                    context,
+                    message: 'Gagal memperbarui catatan.',
+                    type: NotificationType.error,
                   );
                 }
               }

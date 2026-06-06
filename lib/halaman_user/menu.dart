@@ -6,6 +6,7 @@ import '../Core/Colour.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Widget/custom_user_navbar.dart'; 
+import '../Widget/notification_helper.dart';
 
 // =============================================
 // ANIMASI TRANSISI HALAMAN
@@ -430,31 +431,18 @@ class _MenuPageState extends State<MenuPage> {
                     GestureDetector(
                       onTap: isStokHabis
                           ? () {
-                              ScaffoldMessenger.of(context).clearSnackBars();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('$name sedang kehabisan stok 😔', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                                  backgroundColor: AppColors.error,
-                                  behavior: SnackBarBehavior.floating,
-                                  margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                  duration: const Duration(milliseconds: 1800),
-                                ),
+                              NotificationHelper.show(
+                                context,
+                                message: '$name sedang kehabisan stok 😔',
+                                type: NotificationType.error,
                               );
                             }
                           : isHabisDiambil
                               ? () {
-                                  // Munculin peringatan kalau stok habis karena udah masuk keranjang semua
-                                  ScaffoldMessenger.of(context).clearSnackBars();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Stok udah habis masuk keranjang anda sekarang', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                                      backgroundColor: AppColors.error,
-                                      behavior: SnackBarBehavior.floating,
-                                      margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                      duration: const Duration(milliseconds: 1800),
-                                    ),
+                                  NotificationHelper.show(
+                                    context,
+                                    message: 'Stok sudah habis masuk keranjang Anda sekarang',
+                                    type: NotificationType.error,
                                   );
                                 }
                               : () async {
@@ -465,27 +453,16 @@ class _MenuPageState extends State<MenuPage> {
                                     // Refresh data biar UI langsung update
                                     _ambilDataKeranjang(); 
                                     
-                                    ScaffoldMessenger.of(context).clearSnackBars();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('$name ditambahkan pada keranjang! 🛒', style: const TextStyle(fontFamily: 'Signika Negative', fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                                        backgroundColor: AppColors.success,
-                                        behavior: SnackBarBehavior.floating,
-                                        margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                        duration: const Duration(milliseconds: 1500),
-                                      ),
+                                    NotificationHelper.show(
+                                      context,
+                                      message: '$name ditambahkan ke keranjang! 🛒',
+                                      type: NotificationType.success,
                                     );
                                   } else {
-                                    ScaffoldMessenger.of(context).clearSnackBars();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Gagal: ${response['pesan']}', style: const TextStyle(fontFamily: 'Signika Negative')),
-                                        backgroundColor: AppColors.error,
-                                        behavior: SnackBarBehavior.floating,
-                                        margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                                        duration: const Duration(seconds: 2),
-                                      ),
+                                    NotificationHelper.show(
+                                      context,
+                                      message: 'Gagal menambahkan ke keranjang.',
+                                      type: NotificationType.error,
                                     );
                                   }
                                 },

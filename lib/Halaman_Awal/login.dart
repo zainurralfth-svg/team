@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // ==============================================================
 import '../Models/user.dart';
 import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
+import '../Widget/notification_helper.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -38,31 +39,10 @@ class _LoginPageState extends State<LoginPage> {
 
     // 1. Validasi Input Kosong
     if (username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.transparent, 
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 150, left: 20, right: 20),
-          content: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.error, // Menggunakan warna merah error baru
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: const Offset(0, 4))],
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.error_outline, color: AppColors.textWhite, size: 24), 
-                SizedBox(width: 12),
-                Expanded(
-                  child: CustomText('Username dan Password tidak boleh kosong!', color: AppColors.textWhite, fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-              ],
-            ),
-          ),
-          duration: const Duration(seconds: 3),
-        ),
+      NotificationHelper.show(
+        context,
+        message: 'Username dan Password tidak boleh kosong!',
+        type: NotificationType.error,
       );
       return;
     }
@@ -73,12 +53,10 @@ class _LoginPageState extends State<LoginPage> {
 
       // 3. Evaluasi Respon dari Model OOP
       if (hasil['status'] == 'sukses') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: CustomText(hasil['pesan']), 
-            backgroundColor: AppColors.success, // Menggunakan warna hijau sukses baru
-            behavior: SnackBarBehavior.floating,
-          ),
+        NotificationHelper.show(
+          context,
+          message: 'Selamat datang kembali, ${hasil['nama'] ?? 'Pengguna'}! 👋',
+          type: NotificationType.success,
         );
 
         // ==============================================================
@@ -118,22 +96,18 @@ class _LoginPageState extends State<LoginPage> {
         _passwordController.clear();
         
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: CustomText(hasil['pesan'] ?? 'Login Gagal'), 
-            backgroundColor: AppColors.error, 
-            behavior: SnackBarBehavior.floating,
-          ),
+        NotificationHelper.show(
+          context,
+          message: 'Username atau password salah!',
+          type: NotificationType.error,
         );
       }
     } catch (e) {
       print("Error Server: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: CustomText('Gagal terhubung ke server! Cek koneksi / XAMPP.'), 
-          backgroundColor: AppColors.error, 
-          behavior: SnackBarBehavior.floating,
-        ),
+      NotificationHelper.show(
+        context,
+        message: 'Gagal terhubung ke server! Cek koneksi Anda.',
+        type: NotificationType.error,
       );
     }
   }

@@ -4,6 +4,7 @@ import '../Backend/api_service.dart';
 import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import 'konfirmasipesanan.dart'; // Pastikan file ini sudah ada
 import '../Widget/custom_text.dart'; 
+import '../Widget/notification_helper.dart';
 
 class KeranjangPage extends StatefulWidget {
   const KeranjangPage({super.key});
@@ -70,14 +71,10 @@ class _KeranjangPageState extends State<KeranjangPage> {
     if (delta == -1 && jumlahSekarang <= 1) return;
     if (delta == 1 && jumlahSekarang >= maxStok) {
       // Kasih pop up peringatan kalau maksa neken +
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: CustomText("Mentok bro! Sisa stok cuma $maxStok 😅", color: Colors.white, fontWeight: FontWeight.bold),
-          backgroundColor: AppColors.error,
-          duration: const Duration(milliseconds: 1500),
-          behavior: SnackBarBehavior.floating,
-        ),
+      NotificationHelper.show(
+        context,
+        message: "Mentok bro! Sisa stok cuma $maxStok 😅",
+        type: NotificationType.error,
       );
       return; // Berhenti di sini, gak usah lapor database
     }
@@ -93,8 +90,10 @@ class _KeranjangPageState extends State<KeranjangPage> {
       await _fetchCartData();
     } else {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: CustomText("Gagal: ${response['pesan']}", color: Colors.white)),
+      NotificationHelper.show(
+        context,
+        message: "Gagal memperbarui jumlah item.",
+        type: NotificationType.error,
       );
     }
   }
@@ -118,13 +117,17 @@ class _KeranjangPageState extends State<KeranjangPage> {
               final res = await ApiService.hapusKeranjang(currentUserId, idProduk);
               if (res['status'] == 'sukses') {
                 _fetchCartData();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: CustomText("Item berhasil dihapus", color: Colors.white)),
+                NotificationHelper.show(
+                  context,
+                  message: "Item berhasil dihapus",
+                  type: NotificationType.success,
                 );
               } else {
                 setState(() => _isLoading = false);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: CustomText("Gagal: ${res['pesan']}", color: Colors.white)),
+                NotificationHelper.show(
+                  context,
+                  message: "Gagal menghapus item.",
+                  type: NotificationType.error,
                 );
               }
             },

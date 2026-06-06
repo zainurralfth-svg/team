@@ -3,6 +3,7 @@ import 'package:flutter/services.dart'; // <-- WAJIB IMPORT INI UNTUK FILTER INP
 import '../Core/Colour.dart'; // Palet 14 Warna Baru
 import '../Backend/API_Service.dart';
 import '../Widget/custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
+import '../Widget/notification_helper.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -40,90 +41,20 @@ class _RegisterPageState extends State<RegisterPage> {
 
     // 1. Validasi Input Kosong
     if (nama.isEmpty || username.isEmpty || phone.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height - 150,
-            left: 20,
-            right: 20,
-          ),
-          content: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.error, // Menggunakan merah error baru
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow,
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.error_outline, color: AppColors.textWhite, size: 24),
-                SizedBox(width: 12),
-                Expanded(
-                  child: CustomText(
-                    'Semua data register harus diisi!',
-                    color: AppColors.textWhite,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      NotificationHelper.show(
+        context,
+        message: 'Semua data register harus diisi!',
+        type: NotificationType.error,
       );
       return;
     }
 
     // 1b. Validasi Minimal Karakter Password
     if (password.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height - 150,
-            left: 20,
-            right: 20,
-          ),
-          content: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.error,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadow,
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.error_outline, color: AppColors.textWhite, size: 24),
-                SizedBox(width: 12),
-                Expanded(
-                  child: CustomText(
-                    'Password minimal harus 6 karakter!',
-                    color: AppColors.textWhite,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      NotificationHelper.show(
+        context,
+        message: 'Password minimal harus 6 karakter!',
+        type: NotificationType.error,
       );
       return;
     }
@@ -139,12 +70,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
       // 3. Menangani Respon dari Server
       if (hasil['status'] == 'sukses') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: CustomText(hasil['pesan']),
-            backgroundColor: AppColors.success, // Menggunakan hijau sukses baru
-            behavior: SnackBarBehavior.floating,
-          ),
+        NotificationHelper.show(
+          context,
+          message: 'Registrasi Berhasil! Silakan Login.',
+          type: NotificationType.success,
         );
 
         // Bersihkan form
@@ -159,24 +88,18 @@ class _RegisterPageState extends State<RegisterPage> {
         });
       } else {
         // Tampilkan error dari server (misal: Username sudah dipakai)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: CustomText(hasil['pesan']),
-            backgroundColor: AppColors.error, // Menggunakan merah error baru
-            behavior: SnackBarBehavior.floating,
-          ),
+        NotificationHelper.show(
+          context,
+          message: 'Registrasi Gagal! Username atau nomor telepon mungkin sudah digunakan.',
+          type: NotificationType.error,
         );
       }
     } catch (e) {
       // Penanganan error jika server mati atau IP salah
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: CustomText(
-            'Gagal terhubung ke server! Cek koneksi / XAMPP.',
-          ),
-          backgroundColor: AppColors.error, // Menggunakan merah error baru
-          behavior: SnackBarBehavior.floating,
-        ),
+      NotificationHelper.show(
+        context,
+        message: 'Gagal terhubung ke server! Cek koneksi Anda.',
+        type: NotificationType.error,
       );
     }
   }

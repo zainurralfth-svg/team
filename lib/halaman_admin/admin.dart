@@ -13,6 +13,7 @@ import '../Widget/custom_admin_navbar.dart';
 import '../Widget/order_card.dart';
 import '../Widget/sheet_tambah_pesanan.dart';
 import '../Widget/custom_text.dart';
+import '../Widget/notification_helper.dart';
 
 class HomeAdmin extends StatefulWidget {
   const HomeAdmin({super.key});
@@ -67,15 +68,11 @@ class _HomeAdminState extends State<HomeAdmin> {
         }
 
         if (!_isAdminAction && _jumlahBatalSebelumnya != -1 && hitungBatalSaatIni > _jumlahBatalSebelumnya) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: CustomText(
-                '⚠️ Notifikasi: Ada pelanggan yang membatalkan pesanan! Cek Riwayat.',
-                color: Colors.white,
-              ),
-              backgroundColor: AppColors.error,
-              duration: Duration(seconds: 5),
-            ),
+          NotificationHelper.show(
+            context,
+            message: '⚠️ Notifikasi: Ada pelanggan yang membatalkan pesanan! Cek Riwayat.',
+            type: NotificationType.warning,
+            duration: const Duration(seconds: 5),
           );
         }
         _jumlahBatalSebelumnya = hitungBatalSaatIni;
@@ -137,27 +134,26 @@ class _HomeAdminState extends State<HomeAdmin> {
             ? 'Pesanan berhasil DIBATALKAN ✓' 
             : 'Pesanan berhasil di-update ke $statusBaru ✓';
             
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: CustomText(pesanNotif, color: Colors.white),
-            backgroundColor: (statusBaru == 'DIBATALKAN') ? AppColors.error : AppColors.success,
-          ),
+        NotificationHelper.show(
+          context,
+          message: (statusBaru == 'DIBATALKAN') 
+              ? 'Pesanan berhasil DIBATALKAN ✓' 
+              : 'Pesanan berhasil di-update ke $statusBaru ✓',
+          type: (statusBaru == 'DIBATALKAN') ? NotificationType.error : NotificationType.success,
         );
         await _loadDataDashboard();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: CustomText('Gagal: ${response['pesan']}', color: Colors.white),
-            backgroundColor: AppColors.error,
-          ),
+        NotificationHelper.show(
+          context,
+          message: 'Gagal memperbarui status pesanan.',
+          type: NotificationType.error,
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: CustomText('Sistem Error: $e', color: Colors.white),
-          backgroundColor: AppColors.error,
-        ),
+      NotificationHelper.show(
+        context,
+        message: 'Gagal terhubung ke server! Cek koneksi Anda.',
+        type: NotificationType.error,
       );
     } finally {
       if (mounted) setState(() { 
