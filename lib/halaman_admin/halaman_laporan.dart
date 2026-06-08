@@ -58,6 +58,32 @@ String formatRupiah(int value) {
   return 'Rp ${result.toString().split('').reversed.join()}';
 }
 
+// ─── TANGGAL HELPER ───────────────────────────────────────────────────────────
+
+// Mengubah string "Januari 2025" → DateTime(2025, 1); null jika format tidak dikenal
+DateTime? _parseBulanTahun(String bulan) {
+  const namaBulan = [
+    '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  ];
+  final parts = bulan.trim().split(' ');
+  if (parts.length != 2) return null;
+  final monthIndex = namaBulan.indexOf(parts[0]);
+  final year = int.tryParse(parts[1]);
+  if (monthIndex <= 0 || year == null) return null;
+  return DateTime(year, monthIndex);
+}
+
+// Kembalikan true jika laporan bulan tersebut sudah lebih dari 1 tahun dari sekarang
+bool _isOlderThanSatuTahun(String bulan) {
+  final parsed = _parseBulanTahun(bulan);
+  if (parsed == null) return false;
+  final now = DateTime.now();
+  // Batas: bulan yang sama persis, 1 tahun yang lalu
+  final batas = DateTime(now.year - 1, now.month);
+  return parsed.isBefore(batas);
+}
+
 // ─── PARSER ───────────────────────────────────────────────────────────────────
 
 // Mengolah data mentah API menjadi daftar LaporanBulan yang sudah dikelompokkan dan diurutkan terbaru
@@ -152,7 +178,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     _loadData();
   }
 
-  // Fetch pesanan dari API lalu proses menjadi laporan; tangani loading, error, dan kosong
+  // Fetch pesanan dari API → proses laporan → auto-hapus yang sudah lebih dari 1 tahun
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
@@ -160,8 +186,27 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
     });
     try {
       final rawPesanan = await ApiService.getPesanan();
+      var laporan = rawPesanan.isEmpty
+          ? <LaporanBulan>[]
+          : _parseLaporan(rawPesanan);
+
+      // Auto-hapus laporan yang sudah melewati 1 tahun (berjalan diam-diam di background)
+      bool adaAutoDelete = false;
+      for (final l in laporan) {
+        if (_isOlderThanSatuTahun(l.bulan)) {
+          await hapusPesananBulan(l.bulan);
+          adaAutoDelete = true;
+        }
+      }
+
+      // Fetch ulang agar daftar terupdate setelah auto-delete
+      if (adaAutoDelete) {
+        final rawBaru = await ApiService.getPesanan();
+        laporan = rawBaru.isEmpty ? [] : _parseLaporan(rawBaru);
+      }
+
       setState(() {
-        _laporan = rawPesanan.isEmpty ? [] : _parseLaporan(rawPesanan);
+        _laporan = laporan;
         _isLoading = false;
       });
     } catch (e) {
@@ -256,6 +301,7 @@ class _HalamanLaporanState extends State<HalamanLaporan> {
           child: _LaporanCard(
             laporan: _laporan[i],
             initiallyExpanded: i == 0,
+            onHapus: _loadData,  // Dipanggil setelah laporan berhasil dihapus → refresh
           ),
         ),
       ),
@@ -353,8 +399,13 @@ class _PageLabel extends StatelessWidget {
 class _LaporanCard extends StatefulWidget {
   final LaporanBulan laporan;
   final bool initiallyExpanded;
+  final VoidCallback onHapus;  // Callback dipanggil setelah laporan berhasil dihapus
 
-  const _LaporanCard({required this.laporan, this.initiallyExpanded = false});
+  const _LaporanCard({
+    required this.laporan,
+    this.initiallyExpanded = false,
+    required this.onHapus,
+  });
 
   @override
   State<_LaporanCard> createState() => _LaporanCardState();
@@ -365,6 +416,7 @@ class _LaporanCardState extends State<_LaporanCard>
   late bool _expanded;
   late AnimationController _ctrl;
   late Animation<double> _anim;
+  bool _isDeleting = false;  // True saat proses hapus sedang berjalan
 
   @override
   void initState() {
@@ -388,6 +440,116 @@ class _LaporanCardState extends State<_LaporanCard>
   void _toggle() {
     setState(() => _expanded = !_expanded);
     _expanded ? _ctrl.forward() : _ctrl.reverse();
+  }
+
+  // Tampilkan dialog konfirmasi; jika disetujui, hapus laporan dan refresh halaman
+  Future<void> _konfirmasiHapus() async {
+    final konfirm = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        contentPadding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.delete_outline_rounded,
+                  color: AppColors.error, size: 22),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Hapus Laporan',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textBrown,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: RichText(
+          text: TextSpan(
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textBrown,
+              height: 1.6,
+            ),
+            children: [
+              const TextSpan(text: 'Yakin ingin menghapus laporan '),
+              TextSpan(
+                text: widget.laporan.bulan,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              const TextSpan(text: '?\n\n'),
+              const TextSpan(
+                  text: 'Semua data pesanan bulan ini akan dihapus '
+                      'secara permanen dan '),
+              TextSpan(
+                text: 'tidak dapat dikembalikan.',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.error,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(
+              'Batal',
+              style: TextStyle(color: AppColors.textHint),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            ),
+            icon: const Icon(Icons.delete_outline_rounded,
+                color: Colors.white, size: 16),
+            label: const Text(
+              'Ya, Hapus',
+              style: TextStyle(color: Colors.white, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (konfirm != true || !mounted) return;
+
+    setState(() => _isDeleting = true);
+    try {
+      await hapusPesananBulan(widget.laporan.bulan);
+      if (mounted) widget.onHapus();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isDeleting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menghapus laporan: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -444,6 +606,48 @@ class _LaporanCardState extends State<_LaporanCard>
                       'pendapatan': d.pendapatan,
                     }).toList(),
                   ),
+                  const SizedBox(width: 8),
+                  // Tombol hapus laporan manual (tampil spinner saat proses hapus)
+                  _isDeleting
+                      ? const SizedBox(
+                          width: 34,
+                          height: 34,
+                          child: Center(
+                            child: SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ),
+                        )
+                      : GestureDetector(
+                          onTap: _konfirmasiHapus,
+                          child: Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: AppColors.error,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.shadow,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.delete_outline_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ),
+                        ),
                 ],
               ),
             ),

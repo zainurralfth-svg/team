@@ -56,9 +56,54 @@ String formatRupiahCetak(int value) {
   return 'Rp ${result.toString().split('').reversed.join()}';
 }
 
+// ─── HAPUS PESANAN BULAN ──────────────────────────────────────────────────────
+
+// Hapus semua pesanan berstatus "selesai" milik bulan tertentu dari server.
+// Dipanggil dari tombol sampah (hapus manual) atau auto-delete setelah 1 tahun.
+Future<void> hapusPesananBulan(String bulan) async {
+  const namaBulan = [
+    '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  ];
+
+  final rawPesanan = await ApiService.getPesanan();
+
+  for (final item in rawPesanan) {
+    final String status = (
+      item['status_pesanan'] ?? item['status'] ?? ''
+    ).toString().toLowerCase().trim();
+
+    if (status != 'selesai') continue;
+
+    final String? rawTanggal =
+        item['tanggal_pesanan'] ?? item['created_at'] ?? item['tanggal'];
+    if (rawTanggal == null || rawTanggal.isEmpty) continue;
+
+    DateTime tgl;
+    try {
+      tgl = DateTime.parse(rawTanggal.split(' ')[0]);
+    } catch (_) {
+      continue;
+    }
+
+    final String kunciBulan = '${namaBulan[tgl.month]} ${tgl.year}';
+    if (kunciBulan != bulan) continue;
+
+    final dynamic id = item['id'] ?? item['id_pesanan'];
+    if (id == null) continue;
+
+    try {
+      await ApiService.deletePesanan(id.toString());
+    } catch (_) {
+      // Lanjut ke pesanan berikutnya meski satu gagal dihapus
+    }
+  }
+}
+
 // ─── PRINT BUTTON ─────────────────────────────────────────────────────────────
 
-// Tombol ikon download; saat ditekan: generate PDF → share → catat → hapus pesanan → refresh halaman
+// Tombol ikon download; saat ditekan: generate PDF → share → catat waktu download.
+// Laporan TIDAK otomatis dihapus — hapus via ikon sampah atau auto-delete 1 tahun.
 class CetakLaporanButton extends StatelessWidget {
   final String bulan;
   final int totalTransaksi;
@@ -74,47 +119,6 @@ class CetakLaporanButton extends StatelessWidget {
     required this.rataPerHari,
     required this.details,
   });
-
-  // Hapus semua pesanan berstatus "selesai" milik bulan ini dari server setelah laporan dicetak
-  Future<void> _hapusPesananBulan() async {
-    const namaBulan = [
-      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-    ];
-
-    final rawPesanan = await ApiService.getPesanan();
-
-    for (final item in rawPesanan) {
-      final String status = (
-        item['status_pesanan'] ?? item['status'] ?? ''
-      ).toString().toLowerCase().trim();
-
-      if (status != 'selesai') continue;
-
-      final String? rawTanggal =
-          item['tanggal_pesanan'] ?? item['created_at'] ?? item['tanggal'];
-      if (rawTanggal == null || rawTanggal.isEmpty) continue;
-
-      DateTime tgl;
-      try {
-        tgl = DateTime.parse(rawTanggal.split(' ')[0]);
-      } catch (_) {
-        continue;
-      }
-
-      final String kunciBulan = '${namaBulan[tgl.month]} ${tgl.year}';
-      if (kunciBulan != bulan) continue;
-
-      final dynamic id = item['id'] ?? item['id_pesanan'];
-      if (id == null) continue;
-
-      try {
-        await ApiService.deletePesanan(id.toString());
-      } catch (_) {
-        // Lanjut ke pesanan berikutnya meski satu gagal dihapus
-      }
-    }
-  }
 
   // Generate dokumen PDF A4 berisi header, ringkasan statistik, tabel detail harian, dan footer
   Future<pw.Document> _buildPdf() async {
@@ -359,7 +363,8 @@ class CetakLaporanButton extends StatelessWidget {
             filename: 'Laporan_${bulan.replaceAll(" ", "_")}.pdf',
           );
           await simpanBulanDownloaded(bulan);
-          await _hapusPesananBulan();
+          // Laporan TIDAK dihapus setelah download — hapus manual via ikon sampah
+          // atau tunggu auto-delete otomatis setelah 1 tahun
           if (context.mounted) {
             Navigator.pushReplacement(
               context,
