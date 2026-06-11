@@ -174,7 +174,7 @@ class BuktiPemesanan extends StatelessWidget {
                             child: _buildProductRow(
                               item['nama_produk'] ?? 'Produk',
                               '${item['jumlah']}x',
-                              '${item['harga']}',
+                              formatRupiah(item['harga']),
                             ),
                           );
                         }),
@@ -201,7 +201,7 @@ class BuktiPemesanan extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              totalHarga.toString(),
+                              formatRupiah(totalHarga),
                               style: const TextStyle(
                                 fontFamily: 'Signika Negative', // 👈 FONT BARU
                                 color: AppColors.primary,
