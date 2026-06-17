@@ -66,8 +66,8 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const CustomText('Konfirmasi Logout', fontWeight: FontWeight.bold),
-        content: const CustomText('Apakah Bos Admin yakin ingin keluar?'),
+        title: const CustomText('Konfirmasi Keluar', fontWeight: FontWeight.bold),
+        content: const CustomText('Apakah Kamu yakin ingin keluar?'),
         actions: [
           // Tombol Batal
           TextButton(
@@ -85,7 +85,7 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
               // Balikin ke halaman login dan kunci biar ga bisa di-klik back
               if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
             },
-            child: const CustomText('Logout', color: AppColors.error, fontWeight: FontWeight.bold),
+            child: const CustomText('Keluar', color: AppColors.error, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -154,11 +154,11 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
                         const Divider(height: 30, color: Colors.grey),
                         
                         // Baris data Username Admin
-                        _buildInfoRow(Icons.alternate_email, 'Username', _adminData['username'] ?? '-', AppColors.textDark, AppColors.primary),
+                        _buildInfoRow(Icons.alternate_email, 'Nama Pengguna Admin', _adminData['username'] ?? '-', AppColors.textDark, AppColors.primary),
                         const Divider(height: 30, color: Colors.grey),
                         
                         // Baris data Nomor Handphone Admin
-                        _buildInfoRow(Icons.phone_android, 'No. Handphone', _adminData['phone'] ?? '-', AppColors.textDark, AppColors.primary),
+                        _buildInfoRow(Icons.phone_android, 'Nomor Telepon', _adminData['phone'] ?? '-', AppColors.textDark, AppColors.primary),
                       ],
                     ),
                   ),
@@ -172,7 +172,7 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
                     child: ElevatedButton.icon(
                       onPressed: _prosesLogout, // Panggil dialog konfirmasi logout saat di-klik
                       icon: const Icon(Icons.power_settings_new, color: AppColors.textWhite),
-                      label: const CustomText('LOGOUT ADMIN', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite, letterSpacing: 1.5),
+                      label: const CustomText('KELUAR ADMIN', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite, letterSpacing: 1.5),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error, // Merah tegas penanda action keluar
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),

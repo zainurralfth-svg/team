@@ -91,7 +91,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                   children: [
                     // Garis abu-abu kecil di atas sheet (pemanis UI)
                     Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)))),
-                    const Align(alignment: Alignment.centerLeft, child: CustomText('Tambah Produk', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary)), 
+                    const Align(alignment: Alignment.centerLeft, child: CustomText('Tambah Menu', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary)), 
                     const SizedBox(height: 20),
                     
                     Expanded(
@@ -101,12 +101,12 @@ class _HalamanProdukState extends State<HalamanProduk> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // KOLOM INPUT NAMA
-                            _label('Nama Produk'),
-                            TextFormField(controller: nameCtrl, textCapitalization: TextCapitalization.characters, decoration: _inputDeco('Ketik nama produk...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            _label('Nama Menu'),
+                            TextFormField(controller: nameCtrl, textCapitalization: TextCapitalization.characters, decoration: _inputDeco('Ketik nama menu...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
                             const SizedBox(height: 14),
                             
                             // DROPDOWN PILIH KATEGORI
-                            _label('Kategori Produk'),
+                            _label('Kategori Menu'),
                             DropdownButtonFormField<String>(
                               initialValue: selectedKat,
                               decoration: _inputDeco('Pilih kategori...'),
@@ -123,17 +123,17 @@ class _HalamanProdukState extends State<HalamanProduk> {
                             const SizedBox(height: 14),
 
                             // KOLOM INPUT STOK (Cuma bisa masukin angka)
-                            _label('Stok Produk'),
+                            _label('Stok Menu'),
                             TextFormField(controller: stokCtrl, keyboardType: TextInputType.number, decoration: _inputDeco('Contoh: 20'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
                             const SizedBox(height: 14),
 
                             // KOLOM INPUT DESKRIPSI
                             _label('Deskripsi'),
-                            TextFormField(controller: descCtrl, maxLines: 3, decoration: _inputDeco('Ketik deskripsi produk...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            TextFormField(controller: descCtrl, maxLines: 3, decoration: _inputDeco('Ketik deskripsi menu...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
                             const SizedBox(height: 14),
 
                             // TOMBOL PILIH FOTO
-                            _label('Foto Produk'),
+                            _label('Foto Menu'),
                             _buildImagePicker(namaFileDipilih, () async {
                               // Buka galeri HP buat milih foto
                               final img = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -171,10 +171,10 @@ class _HalamanProdukState extends State<HalamanProduk> {
 
                                   // Kalo respon dari PHP sukses, tampilin notif sukses trus refresh datanya
                                   if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
-                                    _snackbar('Produk berhasil ditambahkan ✓', AppColors.success); 
+                                    _snackbar('Menu berhasil ditambahkan ✓', AppColors.success); 
                                     _fetchMenu();
                                   } else {
-                                    _snackbar('Gagal menambahkan produk.', AppColors.error);
+                                    _snackbar('Gagal menambahkan menu.', AppColors.error);
                                   }
                                 }, child: const CustomText('Simpan', fontWeight: FontWeight.w900, fontSize: 16))),
                             ]),
@@ -226,7 +226,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                 child: Column(
                   children: [
                     Center(child: Container(width: 40, height: 5, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)))),
-                    const Align(alignment: Alignment.centerLeft, child: CustomText('Edit Produk', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                    const Align(alignment: Alignment.centerLeft, child: CustomText('Edit Menu', fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary)),
                     const SizedBox(height: 20),
                     Expanded(
                       child: SingleChildScrollView(
@@ -235,11 +235,11 @@ class _HalamanProdukState extends State<HalamanProduk> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // (Kolom Input Sama Kayak Form Tambah di Atas)
-                            _label('Nama Produk'),
-                            TextFormField(controller: nameCtrl, textCapitalization: TextCapitalization.characters, decoration: _inputDeco('Ketik nama produk...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            _label('Nama Menu'),
+                            TextFormField(controller: nameCtrl, textCapitalization: TextCapitalization.characters, decoration: _inputDeco('Ketik nama menu...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
                             const SizedBox(height: 14),
                             
-                            _label('Kategori Produk'),
+                            _label('Kategori Menu'),
                             DropdownButtonFormField<String>(
                               initialValue: selectedKat,
                               decoration: _inputDeco('Pilih kategori...'),
@@ -254,15 +254,15 @@ class _HalamanProdukState extends State<HalamanProduk> {
                             TextFormField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: _inputDeco('Contoh: 35000'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
                             const SizedBox(height: 14),
 
-                            _label('Stok Produk'),
+                            _label('Stok Menu'),
                             TextFormField(controller: stokCtrl, keyboardType: TextInputType.number, decoration: _inputDeco('Contoh: 20'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
                             const SizedBox(height: 14),
 
                             _label('Deskripsi'),
-                            TextFormField(controller: descCtrl, maxLines: 3, decoration: _inputDeco('Ketik deskripsi produk...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
+                            TextFormField(controller: descCtrl, maxLines: 3, decoration: _inputDeco('Ketik deskripsi menu...'), validator: (v) => v!.trim().isEmpty ? 'Wajib diisi' : null),
                             const SizedBox(height: 14),
 
-                            _label('Foto Produk (Opsional)'), // Kalo edit, foto gak wajib diganti
+                            _label('Foto Menu (Opsional)'), // Kalo edit, foto gak wajib diganti
                             _buildImagePicker(namaFileDipilih, () async {
                               final img = await ImagePicker().pickImage(source: ImageSource.gallery);
                               if (img != null) setSheetState(() { fileFotoUpdate = img; namaFileDipilih = img.name; });
@@ -281,7 +281,7 @@ class _HalamanProdukState extends State<HalamanProduk> {
                                   String idProduk = item['id_produk']?.toString() ?? ''; // Butuh ID buat tau mana yang mau diupdate
 
                                   Navigator.pop(ctx);
-                                  _snackbar('Memperbarui produk...', AppColors.primary);
+                                  _snackbar('Memperbarui menu...', AppColors.primary);
 
                                   // Tembak API Edit
                                   final hasil = await ApiService.editMenu(
@@ -295,10 +295,10 @@ class _HalamanProdukState extends State<HalamanProduk> {
                                   );
 
                                   if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
-                                    _snackbar('Produk diperbarui ✓', AppColors.success);
+                                    _snackbar('Menu diperbarui ✓', AppColors.success);
                                     _fetchMenu(); // Refresh biar data baru muncul
                                   } else {
-                                    _snackbar('Gagal memperbarui produk.', AppColors.error);
+                                    _snackbar('Gagal memperbarui menu.', AppColors.error);
                                   }
                                 }, child: const CustomText('Simpan', fontWeight: FontWeight.w900, fontSize: 16))),
                             ]),
@@ -335,10 +335,10 @@ class _HalamanProdukState extends State<HalamanProduk> {
               // Tembak API Hapus
               final hasil = await ApiService.hapusMenu(idProduk);
               if (hasil['status'] == 'sukses' || hasil['status'] == 'success') {
-                _snackbar('Produk dihapus', AppColors.success);
+                _snackbar('Menu dihapus', AppColors.success);
                 _fetchMenu(); // Langsung tarik data terbaru
               } else {
-                _snackbar('Gagal menghapus produk.', AppColors.error);
+                _snackbar('Gagal menghapus Menu.', AppColors.error);
               }
             }, child: const CustomText('Hapus', fontWeight: FontWeight.bold)),
         ],
@@ -455,14 +455,14 @@ class _HalamanProdukState extends State<HalamanProduk> {
             // TOMBOL TAMBAH PRODUK GEDE
             const Padding(
               padding: EdgeInsets.fromLTRB(20, 4, 20, 8),
-              child: CustomText('Manajemen Produk', color: AppColors.primary, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 0.5), 
+              child: CustomText('Manajemen Menu', color: AppColors.primary, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 0.5), 
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ElevatedButton.icon(
                 onPressed: _bukaSheetTambah, 
                 icon: const Icon(Icons.add, color: Colors.white, size: 24),
-                label: const CustomText('Tambah Produk', color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900), 
+                label: const CustomText('Tambah Menu', color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900), 
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)), elevation: 0),
               ),
             ),

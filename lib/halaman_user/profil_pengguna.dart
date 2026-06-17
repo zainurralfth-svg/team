@@ -158,7 +158,7 @@ class _HalamanProfilState extends State<HalamanProfil> {
                         const Divider(height: 30, color: Colors.grey),
                         
                         // Baris data Nomor Handphone
-                        _buildInfoRow(Icons.phone_android, 'Nomor Handphone', _userData['phone'] ?? '-', AppColors.textBrown, AppColors.primary),
+                        _buildInfoRow(Icons.phone_android, 'Nomor Telepon', _userData['phone'] ?? '-', AppColors.textBrown, AppColors.primary),
                       ],
                     ),
                   ),

@@ -186,7 +186,7 @@ class TampilanAwal extends StatelessWidget {
                             child: const Center(
                               // Memakai CustomText buatan sendiri agar desain dan ukuran tulisan selalu seragam
                               child: CustomText(
-                                'Get Started',
+                                'Mulai',
                                 color: AppColors.textWhite,
                                 fontSize: 18,
                                 fontWeight: FontWeight

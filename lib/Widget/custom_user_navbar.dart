@@ -34,7 +34,7 @@ class CustomUserNavbar extends StatelessWidget {
           ),
           _buildBottomNavItem(
             icon: Icons.cake,
-            label: 'Produk',
+            label: 'Menu',
             index: 1,
             isSelected: currentIndex == 1,
           ),

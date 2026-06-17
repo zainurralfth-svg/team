@@ -28,7 +28,7 @@ class CustomBottomNavbar extends StatelessWidget {
           ),
           _navItem(
             Icons.cake_rounded,
-            'Produk',
+            'Menu',
             currentIndex == 1,
             () => onTap(1),
           ),
