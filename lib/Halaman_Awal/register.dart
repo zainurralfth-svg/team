@@ -56,7 +56,7 @@ class _RegisterPageState extends State<RegisterPage> {
     if (password.length < 6) {
       NotificationHelper.show(
         context,
-        message: 'Password minimal harus 6 karakter!',
+        message: 'Kata Sandi minimal harus 6 karakter!',
         type: NotificationType.error,
       );
       return; // Stop proses di sini
@@ -88,7 +88,7 @@ class _RegisterPageState extends State<RegisterPage> {
         // Tampilkan error dari server (misal: Username sudah dipakai)
         NotificationHelper.show(
           context,
-          message: 'Registrasi Gagal! Username atau nomor telepon mungkin sudah digunakan.',
+          message: 'Registrasi Gagal! Nama Pengguna atau nomor telepon mungkin sudah digunakan.',
           type: NotificationType.error,
         );
       }

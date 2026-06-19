@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
     if (username.isEmpty || password.isEmpty) {
       NotificationHelper.show(
         context,
-        message: 'Username dan Password tidak boleh kosong!',
+        message: 'Nama Pengguna/No. Telp dan Kata Sandi tidak boleh kosong!',
         type: NotificationType.error,
       );
       return; // Stop proses di sini, jangan lanjut ke bawah
@@ -99,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         NotificationHelper.show(
           context,
-          message: 'Username atau password salah!',
+          message: 'Nama Pengguna atau Kata Sandi salah!',
           type: NotificationType.error,
         );
       }
