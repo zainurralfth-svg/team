@@ -493,7 +493,7 @@ class _LaporanCardState extends State<_LaporanCard>
               ),
               const TextSpan(text: '?\n\n'),
               const TextSpan(
-                  text: 'Semua data pesanan bulan ini akan dihapus '
+                  text: 'Semua data riwayat pesanan bulan ini akan dihapus '
                       'secara permanen dan '),
               TextSpan(
                 text: 'tidak dapat dikembalikan.',

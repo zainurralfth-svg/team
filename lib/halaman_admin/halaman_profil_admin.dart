@@ -168,15 +168,15 @@ class _HalamanProfilAdminState extends State<HalamanProfilAdmin> {
                   // TOMBOL MERAH GEDE UNTUK LOGOUT ADMIN
                   SizedBox(
                     width: double.infinity,
-                    height: 55,
+                    height: 50,
                     child: ElevatedButton.icon(
-                      onPressed: _prosesLogout, // Panggil dialog konfirmasi logout saat di-klik
-                      icon: const Icon(Icons.power_settings_new, color: AppColors.textWhite),
-                      label: const CustomText('KELUAR ADMIN', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite, letterSpacing: 1.5),
+                      onPressed: _prosesLogout, // Panggil fungsi dialog logout di atas tadi
+                      icon: const Icon(Icons.logout, color: AppColors.textWhite),
+                      label: const CustomText('KELUAR ADMIN', fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textWhite),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.error, // Merah tegas penanda action keluar
+                        backgroundColor: AppColors.error, // Warna merah tegas khusus error/action bahaya
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        elevation: 5,
+                        elevation: 3,
                       ),
                     ),
                   ),

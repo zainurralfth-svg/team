@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../Core/Colour.dart'; // <-- Pastikan path AppColors lo bener di sini
-import 'custom_text.dart'; // <-- IMPORT COMPONENT CUSTOM TEXT KITA BRO!
+import '../Core/Colour.dart';
+import 'custom_text.dart';
 
 class OrderCard extends StatelessWidget {
   final String id;
@@ -22,18 +22,81 @@ class OrderCard extends StatelessWidget {
     required this.onStatusChanged,
   });
 
+  void _showKonfirmasiDialog({
+    required BuildContext context,
+    required String judul,
+    required String pesan,
+    required String labelTombolAksi,
+    required Color warnaAksi,
+    required VoidCallback onKonfirmasi,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          judul,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: Text(pesan),
+        actions: [
+          // TOMBOL BATAL
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey.shade200,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Batal',
+              style: TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          // TOMBOL AKSI (Konfirmasi / Batalkan / Selesai)
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              onKonfirmasi();
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: warnaAksi,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              labelTombolAksi,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // ==============================================================
-    // PERBAIKAN DI SINI BRO: Paksa string kosong "" jadi 'MENUNGGU'
-    // ==============================================================
     String statusRaw = status.trim().toUpperCase();
     String displayStatus = statusRaw.isEmpty ? 'MENUNGGU' : statusRaw;
 
     Color dotColor;
     switch (displayStatus) {
       case 'SELESAI': dotColor = AppColors.success; break;
-      case 'MENUNGGU': dotColor = AppColors.primary; break; // Orange utama
+      case 'MENUNGGU': dotColor = AppColors.primary; break;
       case 'PROSES': dotColor = AppColors.info; break;
       case 'DIBATALKAN': dotColor = AppColors.error; break;
       default: dotColor = AppColors.textHint;
@@ -56,16 +119,15 @@ class OrderCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Bunderan inisial nama
           Container(
             width: 40, height: 40,
             decoration: BoxDecoration(color: AppColors.bgUtama, borderRadius: BorderRadius.circular(10)),
             child: Center(
               child: CustomText(
-                nama.isNotEmpty ? nama[0].toUpperCase() : 'A', 
-                color: AppColors.textDark, 
-                fontSize: 20, 
-                fontWeight: FontWeight.bold
+                nama.isNotEmpty ? nama[0].toUpperCase() : 'A',
+                color: AppColors.textDark,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -78,8 +140,6 @@ class OrderCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     CustomText(nama, fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                    
-                    // LABEL STATUS (Sudah pakai displayStatus biar anti-kosong)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(color: AppColors.bgUtama, borderRadius: BorderRadius.circular(5)),
@@ -102,24 +162,22 @@ class OrderCard extends StatelessWidget {
                     CustomText(harga, fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary),
                     Row(
                       children: [
-                        const Icon(Icons.access_time, size: 12, color: AppColors.textHint), 
-                        const SizedBox(width: 4), 
-                        CustomText(waktu.length > 15 ? waktu.substring(0, 15) : waktu, fontSize: 10, color: AppColors.textHint, fontWeight: FontWeight.bold)
+                        const Icon(Icons.access_time, size: 12, color: AppColors.textHint),
+                        const SizedBox(width: 4),
+                        CustomText(
+                          waktu.length > 15 ? waktu.substring(0, 15) : waktu,
+                          fontSize: 10, color: AppColors.textHint, fontWeight: FontWeight.bold,
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
 
-                // ==============================================================
-                // LOGIKA TOMBOL AKSI ADMIN (Sudah disesuaikan dengan displayStatus)
-                // ==============================================================
-                
-                // JIKA STATUS MASIH MENUNGGU: Muncul tombol Konfirmasi & Dibatalkan
+                // TOMBOL STATUS MENUNGGU → Konfirmasi & Dibatalkan
                 if (displayStatus == 'MENUNGGU') ...[
                   const SizedBox(height: 15),
                   Row(
                     children: [
-                      // 1. TOMBOL KONFIRMASI (SEKARANG DI KIRI)
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -128,12 +186,18 @@ class OrderCard extends StatelessWidget {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             elevation: 0,
                           ),
-                          onPressed: () => onStatusChanged('PROSES'),
+                          onPressed: () => _showKonfirmasiDialog(
+                            context: context,
+                            judul: 'Konfirmasi Pesanan',
+                            pesan: 'Apakah kamu yakin ingin mengkonfirmasi pesanan dari $nama?',
+                            labelTombolAksi: 'Konfirmasi',
+                            warnaAksi: AppColors.success,
+                            onKonfirmasi: () => onStatusChanged('PROSES'),
+                          ),
                           child: const CustomText('Konfirmasi', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
                       const SizedBox(width: 10),
-                      // 2. TOMBOL DIBATALKAN (SEKARANG DI KANAN, Teks udah diganti)
                       Expanded(
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
@@ -142,15 +206,22 @@ class OrderCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          onPressed: () => onStatusChanged('DIBATALKAN'),
+                          onPressed: () => _showKonfirmasiDialog(
+                            context: context,
+                            judul: 'Batalkan Pesanan',
+                            pesan: 'Apakah kamu yakin ingin membatalkan pesanan dari $nama? Tindakan ini tidak dapat diurungkan.',
+                            labelTombolAksi: 'Konfirmasi',
+                            warnaAksi: AppColors.error,
+                            onKonfirmasi: () => onStatusChanged('DIBATALKAN'),
+                          ),
                           child: const CustomText('Dibatalkan', fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
                   ),
-                ] 
-                
-                // JIKA STATUS PROSES: Muncul tombol Selesaikan
+                ]
+
+                // TOMBOL STATUS PROSES → Pesanan Selesai
                 else if (displayStatus == 'PROSES') ...[
                   const SizedBox(height: 15),
                   SizedBox(
@@ -163,11 +234,18 @@ class OrderCard extends StatelessWidget {
                         elevation: 0,
                       ),
                       icon: const Icon(Icons.check_circle_outline, color: Colors.white, size: 18),
-                      onPressed: () => onStatusChanged('SELESAI'),
+                      onPressed: () => _showKonfirmasiDialog(
+                        context: context,
+                        judul: 'Selesaikan Pesanan',
+                        pesan: 'Apakah kamu yakin pesanan dari $nama sudah selesai?',
+                        labelTombolAksi: 'Selesai',
+                        warnaAksi: const Color.fromARGB(255, 81, 210, 48),
+                        onKonfirmasi: () => onStatusChanged('SELESAI'),
+                      ),
                       label: const CustomText('Pesanan Selesai', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
-                ]
+                ],
               ],
             ),
           ),
