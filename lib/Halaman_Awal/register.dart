@@ -46,7 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
     if (nama.isEmpty || username.isEmpty || phone.isEmpty || password.isEmpty) {
       NotificationHelper.show(
         context,
-        message: 'Semua data register harus diisi!',
+        message: 'Semua data daftar akun harus diisi!',
         type: NotificationType.error,
       );
       return; // Stop proses di sini, jangan kirim data ke server
@@ -70,7 +70,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (hasil['status'] == 'sukses') {
         NotificationHelper.show(
           context,
-          message: 'Registrasi Berhasil! Silakan Login.',
+          message: 'Daftar Akun Berhasil! Silakan Login.',
           type: NotificationType.success,
         );
 
@@ -181,13 +181,13 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Column(
           children: [
             const CustomText(
-              'Register',
+              'Daftar Akun Baru',
               isOleo: true, // Pakai font estetik 'Oleo Script' buat judul register
               color: AppColors.textDark,
               fontSize: 38,
               fontWeight: FontWeight.w900,
             ),
-            const CustomText('Register Untuk Membuat  Anda', color: AppColors.textDark, fontSize: 18),
+            const CustomText('Daftar Dahulu Untuk Membuat Akun Kamu', color: AppColors.textDark, fontSize: 18),
             const SizedBox(height: 30),
             
             // Kotak besar berwarna oranye-coklat tempat menampung inputan
@@ -224,7 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   elevation: 5,
                 ),
                 onPressed: _prosesRegister, // Jalankan fungsi validasi & kirim data saat diklik
-                child: const CustomText('REGISTER', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20),
+                child: const CustomText('DAFTAR', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20),
               ),
             ),
           ],

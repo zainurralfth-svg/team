@@ -239,7 +239,7 @@ class _LoginPageState extends State<LoginPage> {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Tutup snackbar dulu biar bersih
                       Navigator.pushNamed(context, '/register'); // Pindah ke halaman daftar akun baru
                     },
-                    child: const CustomText('REGISTER', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20), 
+                    child: const CustomText('DAFTAR', color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 20), 
                   ),
                 ),
               ],
