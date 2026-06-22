@@ -187,7 +187,7 @@ class _RegisterPageState extends State<RegisterPage> {
               fontSize: 38,
               fontWeight: FontWeight.w900,
             ),
-            const CustomText('Daftar Dahulu Untuk Membuat Akun Kamu', color: AppColors.textDark, fontSize: 18),
+            const CustomText('Daftar Dahulu Untuk Membuat Akun', color: AppColors.textDark, fontSize: 18),
             const SizedBox(height: 30),
             
             // Kotak besar berwarna oranye-coklat tempat menampung inputan
